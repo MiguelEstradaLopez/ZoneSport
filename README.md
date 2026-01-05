@@ -28,5 +28,5 @@ Asegúrate de tener instalado:
 
 ### 1. Clonar el repositorio
 ```bash
-git clone (https://github.com/MiguelEstradaLopez/ZoneSport.git)
+git clone https://github.com/MiguelEstradaLopez/ZoneSport.git
 cd ZoneSport
