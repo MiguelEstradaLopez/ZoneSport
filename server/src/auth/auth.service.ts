@@ -3,19 +3,29 @@ import {
     UnauthorizedException,
     BadRequestException,
     ConflictException,
+    NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { UsersService } from '../users/users.service';
+import { EmailService } from '../email/email.service';
 import { LoginDto } from './dtos/login.dto';
 import { RegisterDto } from './dtos/register.dto';
+import { ForgotPasswordDto } from './dtos/forgot-password.dto';
+import { ResetPasswordDto } from './dtos/reset-password.dto';
 import { UserRole } from '../users/user.entity';
+import { PasswordResetToken } from './entities/password-reset-token.entity';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
     constructor(
         private usersService: UsersService,
+        private emailService: EmailService,
         private jwtService: JwtService,
+        @InjectRepository(PasswordResetToken)
+        private passwordResetTokenRepository: Repository<PasswordResetToken>,
     ) { }
 
     async validateUser(email: string, password: string) {
@@ -95,5 +105,113 @@ export class AuthService {
     private isValidEmail(email: string): boolean {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
+    }
+
+    async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<{ message: string }> {
+        const { email } = forgotPasswordDto;
+
+        const user = await this.usersService.findByEmail(email);
+        if (!user) {
+            // Por seguridad, no revelamos si el email existe o no
+            return { message: 'Si el email existe en nuestro sistema, recibirás un enlace de recuperación' };
+        }
+
+        // Generar token de reset con expiración de 1 hora
+        const resetToken = this.jwtService.sign(
+            { email: user.email, sub: user.id, type: 'reset' },
+            {
+                secret: process.env.JWT_RESET_SECRET || process.env.JWT_SECRET || 'your-secret-key-here',
+                expiresIn: '1h',
+            },
+        );
+
+        // Guardar el token en la base de datos
+        const expiresAt = new Date();
+        expiresAt.setHours(expiresAt.getHours() + 1);
+
+        await this.passwordResetTokenRepository.save({
+            userId: user.id,
+            user,
+            token: resetToken,
+            expiresAt,
+        });
+
+        // Enviar email con el enlace de reset
+        const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
+        await this.emailService.sendPasswordResetEmail(user.email, user.firstName, resetLink);
+
+        return { message: 'Si el email existe en nuestro sistema, recibirás un enlace de recuperación' };
+    }
+
+    async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<{ message: string }> {
+        const { token, newPassword } = resetPasswordDto;
+
+        // Verificar que el token existe en la BD
+        const resetTokenRecord = await this.passwordResetTokenRepository.findOne({
+            where: { token },
+            relations: ['user'],
+        });
+
+        if (!resetTokenRecord) {
+            throw new BadRequestException('El enlace de recuperación no es válido');
+        }
+
+        // Verificar que el token no ha expirado
+        if (new Date() > resetTokenRecord.expiresAt) {
+            await this.passwordResetTokenRepository.remove(resetTokenRecord);
+            throw new BadRequestException('El enlace de recuperación ha expirado. Por favor, solicita uno nuevo.');
+        }
+
+        // Validar el JWT del token
+        try {
+            this.jwtService.verify(token, {
+                secret: process.env.JWT_RESET_SECRET || process.env.JWT_SECRET || 'your-secret-key-here',
+            });
+        } catch (error) {
+            throw new BadRequestException('El enlace de recuperación no es válido o ha expirado');
+        }
+
+        // Hash de la nueva contraseña
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Actualizar contraseña
+        await this.usersService.updatePassword(resetTokenRecord.user.id, hashedPassword);
+
+        // Eliminar el token usado
+        await this.passwordResetTokenRepository.remove(resetTokenRecord);
+
+        return { message: 'Tu contraseña ha sido actualizada exitosamente' };
+    }
+
+    async validateResetToken(token: string): Promise<{ email: string; firstName: string }> {
+        // Verificar que el token existe en la BD
+        const resetTokenRecord = await this.passwordResetTokenRepository.findOne({
+            where: { token },
+            relations: ['user'],
+        });
+
+        if (!resetTokenRecord) {
+            throw new BadRequestException('El enlace de recuperación no es válido');
+        }
+
+        // Verificar que el token no ha expirado
+        if (new Date() > resetTokenRecord.expiresAt) {
+            await this.passwordResetTokenRepository.remove(resetTokenRecord);
+            throw new BadRequestException('El enlace de recuperación ha expirado');
+        }
+
+        // Validar el JWT del token
+        try {
+            this.jwtService.verify(token, {
+                secret: process.env.JWT_RESET_SECRET || process.env.JWT_SECRET || 'your-secret-key-here',
+            });
+        } catch (error) {
+            throw new BadRequestException('El enlace de recuperación no es válido o ha expirado');
+        }
+
+        return {
+            email: resetTokenRecord.user.email,
+            firstName: resetTokenRecord.user.firstName,
+        };
     }
 }

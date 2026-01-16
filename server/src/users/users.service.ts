@@ -92,4 +92,10 @@ export class UsersService {
     }
     return query.take(10).getMany();
   }
+
+  async updatePassword(userId: number, hashedPassword: string): Promise<User> {
+    const user = await this.findOne(userId);
+    user.password = hashedPassword;
+    return this.usersRepository.save(user);
+  }
 }

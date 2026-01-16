@@ -97,6 +97,12 @@ export default function LoginPage() {
                             {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
                         </button>
                     </form>
+                    {/* Forgot Password Link */}
+                    <div className="text-right mt-2">
+                        <Link href="/olvide-contrasena" className="text-zs-green hover:underline text-sm">
+                            ¿Olvidaste tu contraseña?
+                        </Link>
+                    </div>
 
                     {/* Divider */}
                     <div className="my-6 flex items-center gap-4">

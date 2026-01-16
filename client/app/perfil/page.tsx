@@ -45,7 +45,7 @@ export default function PerfilPage() {
             <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
                 {/* Avatar y nombre */}
                 <div className="text-center mb-8 pb-8 border-b border-slate-700">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-zs-blue to-zs-green mx-auto mb-4 flex items-center justify-center">
+                    <div className="w-24 h-24 rounded-full bg-linear-to-br from-zs-blue to-zs-green mx-auto mb-4 flex items-center justify-center">
                         <UserCircle size={64} className="text-slate-800" />
                     </div>
                     <h2 className="text-2xl font-bold text-white">
