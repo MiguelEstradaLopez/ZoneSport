@@ -66,8 +66,8 @@ export class AuthService {
         const payload = { email: user.email, sub: user.id };
         return {
             access_token: this.jwtService.sign(payload, {
-                secret: process.env.JWT_SECRET || 'your-secret-key-here',
-                expiresIn: '24h',
+                secret: process.env.JWT_SECRET,
+                expiresIn: process.env.JWT_EXPIRATION || '24h',
             }),
             user: {
                 id: user.id,
@@ -111,8 +111,8 @@ export class AuthService {
         const payload = { email: user.email, sub: user.id };
         return {
             access_token: this.jwtService.sign(payload, {
-                secret: process.env.JWT_SECRET || 'your-secret-key-here',
-                expiresIn: '24h',
+                secret: process.env.JWT_SECRET,
+                expiresIn: process.env.JWT_EXPIRATION || '24h',
             }),
             user: {
                 id: user.id,
@@ -145,7 +145,7 @@ export class AuthService {
             const resetToken = this.jwtService.sign(
                 { email: user.email, sub: user.id, type: 'reset' },
                 {
-                    secret: process.env.JWT_RESET_SECRET || process.env.JWT_SECRET || 'your-secret-key-here',
+                    secret: process.env.JWT_RESET_SECRET || process.env.JWT_SECRET,
                     expiresIn: '1h',
                 },
             );
@@ -198,7 +198,7 @@ export class AuthService {
         // Validar el JWT del token
         try {
             this.jwtService.verify(token, {
-                secret: process.env.JWT_RESET_SECRET || process.env.JWT_SECRET || 'your-secret-key-here',
+                secret: process.env.JWT_RESET_SECRET || process.env.JWT_SECRET,
             });
         } catch (error) {
             throw new BadRequestException('El enlace de recuperación no es válido o ha expirado');
@@ -236,7 +236,7 @@ export class AuthService {
         // Validar el JWT del token
         try {
             this.jwtService.verify(token, {
-                secret: process.env.JWT_RESET_SECRET || process.env.JWT_SECRET || 'your-secret-key-here',
+                secret: process.env.JWT_RESET_SECRET || process.env.JWT_SECRET,
             });
         } catch (error) {
             throw new BadRequestException('El enlace de recuperación no es válido o ha expirado');

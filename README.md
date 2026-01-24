@@ -43,10 +43,16 @@
 git clone https://github.com/MiguelEstradaLopez/ZoneSport.git
 cd ZoneSport
 
-# 2. Iniciar base de datos
+# 2. Configurar variables de entorno
+cp .env.example .env
+# ⚠️ IMPORTANTE: Edita .env y rellena los valores reales
+# Ver: ENV_SETUP_GUIDE.md para instrucciones detalladas
+nano .env
+
+# 3. Iniciar base de datos
 docker-compose up -d
 
-# 3. Configurar Backend
+# 4. Configurar Backend
 cd server
 cp .env.example .env
 npm install
@@ -67,8 +73,24 @@ npm run dev
 
 ## 📚 Documentación
 
-- **[GUIA_DESARROLLO.md](GUIA_DESARROLLO.md)** - Guía completa de desarrollo y arquitectura
-- **[VARIABLES_ENTORNO.md](VARIABLES_ENTORNO.md)** - Configuración de variables de entorno
+### 🚀 [SETUP.md](SETUP.md)
+
+Guía completa para configurar, desarrollar y testear ZoneSport:
+
+- Setup inicial (5 minutos)
+- Estructura del proyecto
+- Comandos de desarrollo
+- Testing
+- Troubleshooting
+
+### 🔒 [SECURITY.md](SECURITY.md)
+
+Guía de seguridad y variables de entorno:
+
+- Auditoría de seguridad completada ✅
+- Configuración de `.env` paso a paso
+- Generar claves seguras
+- Checklist de seguridad
 
 ---
 
