@@ -102,6 +102,26 @@ Guía completa de la API REST con Swagger:
 - Ejemplos de uso con body reales
 - Troubleshooting y códigos de respuesta
 
+### 🗺️ [ROADMAP.md](ROADMAP.md)
+
+Plan de desarrollo y features faltantes:
+
+- Análisis de features implementadas vs. faltantes
+- Priorización de 15+ nuevas funcionalidades
+- Estimación de esfuerzo (100-150 horas)
+- Modelos de datos adicionales (Post, Invitation, Comment)
+- Plan de implementación en 4 fases
+
+### 💻 [CODE_EXAMPLES.md](CODE_EXAMPLES.md)
+
+Ejemplos de código TypeScript listos para usar:
+
+- 16 ejemplos de entidades, servicios y controladores
+- DTOs para posts, invitaciones y comentarios
+- Código para upload de imágenes con Cloudinary
+- Configuración de .env y dependencias
+- JSON de ejemplo para Swagger
+
 ---
 
 ## 🏗️ Estructura del Proyecto
