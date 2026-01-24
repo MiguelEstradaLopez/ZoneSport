@@ -17,7 +17,7 @@ import { PasswordResetToken } from './entities/password-reset-token.entity';
         PassportModule,
         JwtModule.register({
             secret: process.env.JWT_SECRET,
-            signOptions: { expiresIn: process.env.JWT_EXPIRATION || '24h' },
+            signOptions: { expiresIn: '24h' as any },
         }),
     ],
     providers: [AuthService, JwtStrategy],

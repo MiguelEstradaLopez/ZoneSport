@@ -92,6 +92,16 @@ Guía de seguridad y variables de entorno:
 - Generar claves seguras
 - Checklist de seguridad
 
+### 🔌 [API.md](API.md)
+
+Guía completa de la API REST con Swagger:
+
+- Cómo acceder a Swagger UI
+- Autenticación JWT
+- Documentación de todos los endpoints
+- Ejemplos de uso con body reales
+- Troubleshooting y códigos de respuesta
+
 ---
 
 ## 🏗️ Estructura del Proyecto

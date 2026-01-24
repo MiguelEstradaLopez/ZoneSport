@@ -44,6 +44,7 @@ npm run dev                   # Arranca en http://localhost:3000
 
 - **Frontend**: <http://localhost:3000>
 - **Backend API**: <http://localhost:3001>
+- **API Swagger UI**: <http://localhost:3001/api/docs> ← Documentación interactiva
 - **Base de Datos**: localhost:5432
 
 ---
