@@ -55,7 +55,7 @@ PORT=3001
 CORS_ORIGIN=http://localhost:3000
 
 # Email - Resend
-RESEND_API_KEY=re_E35oVQic_AWkimbwAALo8c4VMadrd5c24
+RESEND_API_KEY=tu_api_key_real_aqui
 RESEND_FROM_EMAIL=noreply@zonesport.com
 RESEND_DOMAIN=zonesport.com
 ```

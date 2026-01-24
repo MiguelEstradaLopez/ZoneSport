@@ -3,11 +3,13 @@
 ## ✅ Cambios Realizados
 
 ### 1. Instalación de Resend
+
 - **Comando**: `npm install resend`
 - **Paquete**: Agregado a `/server/package.json`
 - **Versión**: Última disponible
 
 ### 2. Actualización del Email Service
+
 - **Archivo**: `/server/src/email/email.service.ts`
 - **Cambios**:
   - ❌ Removido: `nodemailer` y configuración SMTP
@@ -17,9 +19,10 @@
   - ✅ Mejorado: Logging detallado con prefijo `[EMAIL]`
 
 ### 3. Variables de Entorno
+
 - **Archivo**: `.env`
   - `RESEND_API_KEY`: Tu clave API de Resend
-  - `RESEND_FROM_EMAIL`: Email remitente (noreply@zonesport.com)
+  - `RESEND_FROM_EMAIL`: Email remitente (<noreply@zonesport.com>)
   - `RESEND_DOMAIN`: Tu dominio verificado (zonesport.com)
 
 - **Archivo**: `.env.example` (para documentación)
@@ -27,6 +30,7 @@
   - Sin valores sensibles (seguro para compartir)
 
 ### 4. Configuración de Seguridad
+
 - ✅ `.env` protegido en `.gitignore`
 - ✅ API key almacenada en variables de entorno
 - ✅ No hardcodeada en el código
@@ -34,15 +38,18 @@
 ## 🚀 Configuración Resend
 
 ### Datos Proporcionados
+
 ```
-API Key:        re_E35oVQic_AWkimbwAALo8c4VMadrd5c24
+API Key:        (Tu clave API - Ver .env)
 Dominio:        resend._domainkey.zonesport
 Email Remite:   noreply@zonesport.com
 Estado:         ✅ Verificado y Listo
 ```
 
 ### Verificación DKIM
+
 Tu dominio tiene configurado DKIM con Resend:
+
 - Nombre: `resend._domainkey.zonesport`
 - Clave pública: Proporcionada (configurada en tu DNS)
 - Estado: Validado ✅
@@ -50,6 +57,7 @@ Tu dominio tiene configurado DKIM con Resend:
 ## 📝 Flujo de Emails
 
 ### Nuevo Usuario (Welcome Email)
+
 ```
 Usuario se registra
     ↓
@@ -63,6 +71,7 @@ Email a bandeja de entrada
 ```
 
 ### Recuperación de Contraseña
+
 ```
 Usuario hace clic en "Olvide Contraseña"
     ↓
@@ -88,6 +97,7 @@ Contraseña actualizada ✅
 ## 🔍 Logging
 
 Todos los emails ahora registran:
+
 ```
 [EMAIL] Welcome email sent to usuario@email.com
 [EMAIL] Password reset email sent to usuario@email.com

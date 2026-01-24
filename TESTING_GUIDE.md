@@ -197,7 +197,7 @@ docker-compose up -d
 
 **Solución**:
 
-1. Verificar `.env` tiene `RESEND_API_KEY=re_E35oVQic_AWkimbwAALo8c4VMadrd5c24`
+1. Verificar `.env` tiene `RESEND_API_KEY=tu_clave_api_real_aqui` (tu API key personal)
 2. Verificar en <https://resend.com> que API key sea válida
 3. Revisar Resend logs en su dashboard
 
@@ -211,7 +211,7 @@ docker-compose up -d
 
 - Dashboard: <https://resend.com>
 - API Docs: <https://resend.com/docs>
-- API Key: `re_E35oVQic_AWkimbwAALo8c4VMadrd5c24`
+- API Key: Ver tu `.env` (guardado localmente, nunca compartir)
 
 ---
 
