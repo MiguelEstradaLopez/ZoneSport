@@ -29,21 +29,40 @@ export class AuthService {
     ) { }
 
     async validateUser(email: string, password: string) {
-        const user = await this.usersService.findByEmail(email);
-        if (user && (await bcrypt.compare(password, user.password))) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { password: _password, ...result } = user;
-            return result;
+        try {
+            const user = await this.usersService.findByEmail(email);
+            console.log(`[AUTH] validateUser - User found: ${email ? 'YES' : 'NO'}`);
+
+            if (!user) {
+                console.log(`[AUTH] validateUser - User not found for email: ${email}`);
+                return null;
+            }
+
+            const isPasswordValid = await bcrypt.compare(password, user.password);
+            console.log(`[AUTH] validateUser - Password valid: ${isPasswordValid ? 'YES' : 'NO'}`);
+            console.log(`[AUTH] validateUser - Password from DB exists: ${user.password ? 'YES' : 'NO'}`);
+
+            if (isPasswordValid) {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { password: _password, ...result } = user;
+                return result;
+            }
+            return null;
+        } catch (error) {
+            console.error(`[AUTH] validateUser - Error comparing passwords:`, error);
+            return null;
         }
-        return null;
     }
 
     async login(loginDto: LoginDto) {
+        console.log(`[AUTH] login - Attempting login for: ${loginDto.email}`);
         const user = await this.validateUser(loginDto.email, loginDto.password);
         if (!user) {
+            console.log(`[AUTH] login - Validation failed for: ${loginDto.email}`);
             throw new UnauthorizedException('Email o contraseña inválida');
         }
 
+        console.log(`[AUTH] login - Validation successful for: ${loginDto.email}`);
         const payload = { email: user.email, sub: user.id };
         return {
             access_token: this.jwtService.sign(payload, {
@@ -75,6 +94,7 @@ export class AuthService {
 
         // Hash de la contraseña
         const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+        console.log(`[AUTH] register - Password hashed for: ${registerDto.email}`);
 
         // Crear el usuario como ATHLETE por defecto
         const user = await this.usersService.create({
@@ -85,6 +105,8 @@ export class AuthService {
             phone: registerDto.phone,
             role: UserRole.ATHLETE, // Todos los nuevos usuarios son ATHLETE
         });
+
+        console.log(`[AUTH] register - User created successfully: ${registerDto.email}`);
 
         const payload = { email: user.email, sub: user.id };
         return {
@@ -109,38 +131,49 @@ export class AuthService {
 
     async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<{ message: string }> {
         const { email } = forgotPasswordDto;
+        console.log(`[AUTH] forgotPassword - Processing for: ${email}`);
 
         const user = await this.usersService.findByEmail(email);
         if (!user) {
             // Por seguridad, no revelamos si el email existe o no
+            console.log(`[AUTH] forgotPassword - User not found for: ${email}`);
             return { message: 'Si el email existe en nuestro sistema, recibirás un enlace de recuperación' };
         }
 
-        // Generar token de reset con expiración de 1 hora
-        const resetToken = this.jwtService.sign(
-            { email: user.email, sub: user.id, type: 'reset' },
-            {
-                secret: process.env.JWT_RESET_SECRET || process.env.JWT_SECRET || 'your-secret-key-here',
-                expiresIn: '1h',
-            },
-        );
+        try {
+            // Generar token de reset con expiración de 1 hora
+            const resetToken = this.jwtService.sign(
+                { email: user.email, sub: user.id, type: 'reset' },
+                {
+                    secret: process.env.JWT_RESET_SECRET || process.env.JWT_SECRET || 'your-secret-key-here',
+                    expiresIn: '1h',
+                },
+            );
 
-        // Guardar el token en la base de datos
-        const expiresAt = new Date();
-        expiresAt.setHours(expiresAt.getHours() + 1);
+            // Guardar el token en la base de datos
+            const expiresAt = new Date();
+            expiresAt.setHours(expiresAt.getHours() + 1);
 
-        await this.passwordResetTokenRepository.save({
-            userId: user.id,
-            user,
-            token: resetToken,
-            expiresAt,
-        });
+            await this.passwordResetTokenRepository.save({
+                userId: user.id,
+                user,
+                token: resetToken,
+                expiresAt,
+            });
 
-        // Enviar email con el enlace de reset
-        const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
-        await this.emailService.sendPasswordResetEmail(user.email, user.firstName, resetLink);
+            console.log(`[AUTH] forgotPassword - Reset token saved for: ${email}`);
 
-        return { message: 'Si el email existe en nuestro sistema, recibirás un enlace de recuperación' };
+            // Enviar email con el enlace de reset
+            const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
+            await this.emailService.sendPasswordResetEmail(user.email, user.firstName, resetLink);
+
+            console.log(`[AUTH] forgotPassword - Email sent successfully for: ${email}`);
+            return { message: 'Si el email existe en nuestro sistema, recibirás un enlace de recuperación' };
+        } catch (error) {
+            const err = error as Error;
+            console.error(`[AUTH] forgotPassword - Error for ${email}:`, err.message);
+            throw error;
+        }
     }
 
     async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<{ message: string }> {
