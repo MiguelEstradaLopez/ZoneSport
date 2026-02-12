@@ -1,26 +1,481 @@
 @import "tailwindcss";
 
+/* ============================================
+   IMPORTAR GOOGLE FONTS
+   ============================================ */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap');
+
+/* ============================================
+   VARIABLES Y COLORES
+   ============================================ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Colores principales ZoneSport */
+  --zs-dark: #0f172a;
+  --zs-darker: #0a0f1a;
+  --zs-blue: #0d47a1;
+  --zs-blue-light: #1e88e5;
+  --zs-green: #7cb342;
+  --zs-green-light: #9ccc65;
+  --zs-text: #ffffff;
+  --zs-text-secondary: #b0b0b0;
+  --zs-border: #1e293b;
+
+  /* Fonts */
+  --font-titles: 'Poppins', sans-serif;
+  --font-body: 'JetBrains Mono', monospace;
+  --font-links: 'Outfit', sans-serif;
+
+  /* Espaciado */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  @apply antialiased;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  @apply scroll-smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  @apply bg-zs-dark text-zs-text;
+  font-family: var(--font-body);
+}
+
+/* ============================================
+   LAYOUT Y CONTENEDORES
+   ============================================ */
+
+/* Navegación superior fija */
+.navbar {
+  @apply fixed top-0 w-full z-50 backdrop-blur-md;
+  background-color: rgba(15, 23, 42, 0.95);
+  border-bottom: 1px solid var(--zs-border);
+}
+
+.navbar-container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.navbar-content {
+  @apply flex items-center justify-between h-16;
+}
+
+/* Contenedor principal */
+.page-container {
+  @apply pt-16 min-h-screen;
+}
+
+.content-wrapper {
+  @apply max-w-7xl mx-auto px-4 py-8;
+}
+
+/* Cards y contenedores de contenido */
+.card {
+  @apply bg-zs-darker rounded-xl border p-6 transition-all duration-300;
+  border-color: var(--zs-border);
+}
+
+.card:hover {
+  @apply shadow-lg;
+  border-color: var(--zs-blue-light);
+}
+
+.card-header {
+  @apply mb-4 pb-4;
+  border-bottom: 1px solid var(--zs-border);
+}
+
+.card-body {
+  @apply space-y-4;
+}
+
+.card-footer {
+  @apply mt-6 pt-4;
+  border-top: 1px solid var(--zs-border);
+}
+
+/* ============================================
+   TIPOGRAFÍA
+   ============================================ */
+
+h1, .heading-xl {
+  @apply text-title-h1 font-bold;
+  font-family: var(--font-titles);
+  color: var(--zs-blue);
+}
+
+h2, .heading-lg {
+  @apply text-title-h2 font-bold;
+  font-family: var(--font-titles);
+  color: var(--zs-blue);
+}
+
+h3, .heading-md {
+  @apply text-title-h3 font-semibold;
+  font-family: var(--font-titles);
+  color: var(--zs-blue);
+}
+
+h4, .heading-sm {
+  @apply font-semibold;
+  font-family: var(--font-titles);
+  color: var(--zs-text);
+}
+
+h5, h6 {
+  @apply font-semibold text-sm;
+  font-family: var(--font-titles);
+  color: var(--zs-text);
+}
+
+p, .body-text {
+  @apply text-base leading-relaxed;
+  font-family: var(--font-body);
+  color: var(--zs-text);
+}
+
+.text-muted {
+  color: var(--zs-text-secondary);
+  font-size: 0.875rem;
+  font-family: var(--font-body);
+}
+
+.text-small {
+  @apply text-sm;
+  color: var(--zs-text-secondary);
+  font-family: var(--font-body);
+}
+
+/* ============================================
+   ENLACES (LINKS)
+   ============================================ */
+
+a {
+  text-decoration: none;
+  transition: color 0.2s ease;
+  font-family: var(--font-links);
+}
+
+.btn-link {
+  color: var(--zs-green);
+  font-weight: 500;
+  font-family: var(--font-links);
+}
+
+.btn-link:hover {
+  color: var(--zs-green-light);
+}
+
+.btn-link-secondary {
+  color: var(--zs-blue);
+  font-weight: 500;
+  font-family: var(--font-links);
+}
+
+.btn-link-secondary:hover {
+  color: var(--zs-blue-light);
+}
+
+/* ============================================
+   BOTONES
+   ============================================ */
+
+.btn {
+  @apply font-semibold px-4 py-2 rounded-lg transition-all duration-200;
+  cursor: pointer;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn:focus-visible {
+  @apply outline-none;
+  box-shadow: 0 0 0 3px rgba(124, 179, 66, 0.3);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Botón primario (Acción principal: Verde) */
+.btn-primary {
+  background-color: var(--zs-green);
+  color: #ffffff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--zs-green-light);
+}
+
+/* Botón secundario (Acción alternativa: Azul) */
+.btn-secondary {
+  background-color: var(--zs-blue);
+  color: #ffffff;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--zs-blue-light);
+}
+
+/* Botón outline (Acción menos importante) */
+.btn-outline {
+  background-color: transparent;
+  color: var(--zs-text);
+  border: 1px solid var(--zs-border);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background-color: var(--zs-darker);
+  border-color: var(--zs-blue-light);
+}
+
+/* Botón pequeño */
+.btn-sm {
+  @apply px-3 py-1 text-sm;
+}
+
+/* ============================================
+   FORMULARIOS
+   ============================================ */
+
+.form-group {
+  @apply mb-4 flex flex-col;
+}
+
+.form-label {
+  @apply font-semibold text-sm mb-2;
+  color: var(--zs-text-secondary);
+}
+
+.form-input,
+.form-textarea,
+.form-select {
+  @apply w-full px-4 py-2 rounded-lg font-medium transition-colors;
+  background-color: var(--zs-darker);
+  border: 1px solid var(--zs-border);
+  color: var(--zs-text);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: var(--zs-text-secondary);
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--zs-blue-light);
+  box-shadow: 0 0 0 3px rgba(30, 136, 229, 0.1);
+}
+
+.form-input:disabled,
+.form-textarea:disabled,
+.form-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.form-error {
+  @apply text-red-400 text-sm mt-1;
+}
+
+.form-help {
+  @apply text-zs-text-secondary text-xs mt-1;
+}
+
+/* ============================================
+   UTILIDADES
+   ============================================ */
+
+.divider {
+  @apply my-4;
+  height: 1px;
+  background-color: var(--zs-border);
+}
+
+.badge {
+  @apply inline-block px-3 py-1 rounded-full text-sm font-semibold;
+  background-color: var(--zs-blue);
+  color: #ffffff;
+}
+
+.badge-success {
+  background-color: var(--zs-green);
+}
+
+.badge-warning {
+  background-color: #ff9800;
+}
+
+.badge-error {
+  background-color: #f44336;
+}
+
+/* ============================================
+   ALERTAS
+   ============================================ */
+
+.alert {
+  @apply p-4 rounded-lg border;
+  margin-bottom: 1.5rem;
+}
+
+.alert.flex {
+  @apply flex items-center gap-3;
+}
+
+.alert-success {
+  background-color: rgba(76, 175, 80, 0.1);
+  border-color: #4caf50;
+  color: #4caf50;
+}
+
+.alert-error {
+  background-color: rgba(244, 67, 54, 0.1);
+  border-color: #f44336;
+  color: #f44336;
+}
+
+.alert-warning {
+  background-color: rgba(255, 152, 0, 0.1);
+  border-color: #ff9800;
+  color: #ff9800;
+}
+
+/* ============================================
+   NAVEGACIÓN Y DROPDOWNS
+   ============================================ */
+
+.nav-links {
+  @apply hidden md:flex space-x-8;
+}
+
+.nav-item {
+  @apply btn-link flex items-center gap-2;
+}
+
+.nav-dropdown {
+  @apply card absolute top-14 right-0 min-w-48 p-0 z-50;
+}
+
+.menu-item {
+  @apply btn-link block w-full text-left px-4 py-2 hover:bg-zs-dark;
+}
+
+.menu-item-top {
+  @apply menu-item rounded-t;
+}
+
+.menu-item-bottom {
+  @apply menu-item rounded-b;
+}
+
+/* ============================================
+   COMPONENTES DE ITEMS
+   ============================================ */
+
+.match-item {
+  @apply p-4 bg-zs-dark rounded-lg border border-zs-border hover:border-zs-blue transition-all;
+}
+
+.match-score {
+  @apply mx-4 text-center text-2xl font-bold text-zs-green;
+}
+
+.avatar {
+  @apply w-24 h-24 rounded-full bg-gradient-to-br from-zs-blue to-zs-green mx-auto mb-4 flex items-center justify-center;
+}
+
+.avatar-sm {
+  @apply w-12 h-12 rounded-full bg-gradient-to-br from-zs-blue to-zs-green flex items-center justify-center;
+}
+
+/* ============================================
+   ICONOS Y BOTONES EN NAVBAR
+   ============================================ */
+
+.icon-button {
+  @apply p-2 text-zs-text-secondary hover:text-zs-green transition-colors;
+}
+
+.logo {
+  @apply text-2xl font-bold text-zs-blue hover:text-zs-blue-light transition-colors cursor-pointer flex-shrink-0;
+}
+
+/* ============================================
+   SPINNER / LOADERS
+   ============================================ */
+
+.spinner {
+  @apply animate-spin rounded-full h-12 w-12 border-b-2 border-zs-blue mx-auto mb-4;
+}
+
+/* ============================================
+   TABLAS
+   ============================================ */
+
+.table-row {
+  @apply border-b border-zs-border hover:bg-zs-dark/50 transition-all;
+}
+
+.table-row-leader {
+  @apply bg-zs-green/10;
+}
+
+.table-cell {
+  @apply py-4 px-4;
+}
+
+.table-header {
+  @apply border-b border-zs-border;
+}
+
+/* ============================================
+   INPUTS Y WRAPPERS
+   ============================================ */
+
+.input-wrapper {
+  @apply relative;
+}
+
+.input-icon {
+  @apply absolute left-3 top-3 text-zs-text-secondary;
+}
+
+/* ============================================
+   ITEM CARDS
+   ============================================ */
+
+.team-card {
+  @apply p-3 bg-zs-dark rounded-lg border border-zs-border;
+}
+  background-color: #f44336;
+}
+
+/* Contenedor de grid */
+.grid-container {
+  @apply grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3;
+}
+
+/* Shadow y efectos */
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
 }

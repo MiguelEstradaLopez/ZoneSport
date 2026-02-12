@@ -39,70 +39,74 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="fixed top-0 w-full bg-slate-900/90 backdrop-blur-md border-b border-slate-800 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo ZoneSport */}
+    <nav className="navbar">
+      <div className="navbar-container">
+        <div className="navbar-content">
+          {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
-            <Link href="/" className="text-2xl font-bold text-zs-blue cursor-pointer hover:opacity-80">
+            <Link href="/" className="logo">
               Zone<span className="text-zs-green">Sport</span>
             </Link>
           </div>
 
-          {/* Links de Navegación (Desktop) */}
-          <div className="hidden md:flex space-x-8">
+          {/* Navegación (Desktop) */}
+          <nav className="nav-links" aria-label="Navegación principal">
             {navItems.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="flex items-center gap-2 text-gray-300 hover:text-zs-green transition-colors font-medium"
+                className="nav-item"
               >
                 {item.icon}
                 {item.name}
               </Link>
             ))}
-          </div>
+          </nav>
 
-          {/* Perfil / Acceso */}
+          {/* Sección de Usuario */}
           <div className="flex items-center gap-4 relative">
             {user ? (
               <>
+                {/* Botón Perfil */}
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
-                  className="p-2 text-gray-300 hover:text-zs-blue transition-colors"
+                  className="icon-button"
                   title="Mi Perfil"
+                  aria-label="Abrir menú de perfil"
                 >
                   <UserCircle size={28} />
                 </button>
 
-                {/* Dropdown */}
+                {/* Dropdown Menu */}
                 {showDropdown && (
-                  <div className="absolute top-14 right-0 bg-slate-800 border border-slate-700 rounded-lg shadow-lg py-2 min-w-48">
-                    <div className="px-4 py-2 border-b border-slate-700">
-                      <p className="text-sm text-gray-300 font-semibold">{user.email}</p>
-                      <p className="text-xs text-gray-500 capitalize">{user.role}</p>
+                  <div className="nav-dropdown">
+                    <div className="card-header">
+                      <p className="text-sm text-zs-text font-semibold">{user.email}</p>
+                      <p className="text-xs text-zs-text-secondary capitalize">{user.role}</p>
                     </div>
-                    <Link
-                      href="/perfil"
-                      className="block px-4 py-2 text-gray-300 hover:bg-slate-700 hover:text-zs-blue transition-colors"
-                      onClick={() => setShowDropdown(false)}
-                    >
-                      Mi Perfil
-                    </Link>
-                    <Link
-                      href="/crear-evento"
-                      className="block px-4 py-2 text-gray-300 hover:bg-slate-700 hover:text-zs-green transition-colors"
-                      onClick={() => setShowDropdown(false)}
-                    >
-                      Crear Evento
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-red-400 hover:bg-slate-700 transition-colors flex items-center gap-2"
-                    >
-                      <LogOut size={16} />
-                      Cerrar Sesión
-                    </button>
+                    <div className="space-y-0">
+                      <Link
+                        href="/perfil"
+                        className="menu-item-top"
+                        onClick={() => setShowDropdown(false)}
+                      >
+                        Mi Perfil
+                      </Link>
+                      <Link
+                        href="/crear-evento"
+                        className="menu-item"
+                        onClick={() => setShowDropdown(false)}
+                      >
+                        Crear Evento
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="menu-item-bottom flex items-center gap-2"
+                      >
+                        <LogOut size={16} />
+                        Cerrar Sesión
+                      </button>
+                    </div>
                   </div>
                 )}
               </>
@@ -110,13 +114,13 @@ const Navbar = () => {
               <>
                 <Link
                   href="/login"
-                  className="hidden sm:block text-gray-300 hover:text-zs-blue px-4 py-2 rounded-lg font-semibold transition-all"
+                  className="btn-link hidden sm:block"
                 >
                   Iniciar Sesión
                 </Link>
                 <Link
                   href="/registrar"
-                  className="hidden sm:block bg-zs-green hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold transition-all"
+                  className="btn btn-primary hidden sm:block"
                 >
                   Registrarse
                 </Link>

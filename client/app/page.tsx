@@ -1,10 +1,24 @@
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-slate-900">
-      <h1 className="text-4xl font-bold text-zs-blue">
-        ZoneSport <span className="text-zs-green">Antioquia</span>
-      </h1>
-      <p className="text-white mt-4">El sistema está listo y conectado.</p>
+    <main className="page-container flex items-center justify-center">
+      <div className="content-wrapper text-center max-w-2xl">
+        <h1 className="mb-2">
+          Zone<span className="text-zs-green">Sport</span>
+        </h1>
+        <h2 className="text-muted mb-6">Antioquia</h2>
+        <p className="body-text text-lg leading-relaxed mb-8">
+          El sistema está listo y conectado.
+        </p>
+        
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/login" className="btn btn-secondary">
+            Iniciar Sesión
+          </a>
+          <a href="/registrar" className="btn btn-primary">
+            Registrarse
+          </a>
+        </div>
+      </div>
     </main>
   );
 }

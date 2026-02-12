@@ -101,131 +101,131 @@ export default function ResetPasswordPage() {
 
     if (validating) {
         return (
-            <main className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-                <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
+            <main className="page-container flex items-center justify-center">
+                <article className="card w-full max-w-md">
                     <div className="text-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                        <p className="text-gray-600">Validando enlace de recuperación...</p>
+                        <div className="spinner"></div>
+                        <p className="text-muted">Validando enlace de recuperación...</p>
                     </div>
-                </div>
+                </article>
             </main>
         );
     }
 
     return (
-        <main className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
-                <h1 className="text-3xl font-bold text-gray-800 mb-2 text-center">
-                    Restablecer Contraseña
-                </h1>
+        <main className="page-container flex items-center justify-center">
+            <article className="card w-full max-w-md">
+                <header className="card-header text-center">
+                    <h1>Restablecer Contraseña</h1>
+                </header>
 
-                {!tokenValid ? (
-                    <div>
-                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-                            <p className="font-semibold">Enlace Inválido o Expirado</p>
-                            <p className="text-sm">{error}</p>
-                        </div>
-                        <Link
-                            href="/olvide-contrasena"
-                            className="w-full block text-center bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition"
-                        >
-                            Solicitar Nuevo Enlace
-                        </Link>
-                    </div>
-                ) : success ? (
-                    <div>
-                        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
-                            <p className="font-semibold">✓ Contraseña Actualizada</p>
-                            <p className="text-sm">
-                                Tu contraseña ha sido actualizada exitosamente. Serás redirigido a login...
-                            </p>
-                        </div>
-                        <Link
-                            href="/login"
-                            className="w-full block text-center bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition"
-                        >
-                            Ir a Login
-                        </Link>
-                    </div>
-                ) : (
-                    <div>
-                        <p className="text-gray-600 text-center mb-6">
-                            Ingresa tu nueva contraseña para {userEmail}
-                        </p>
-
-                        {error && (
-                            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-                                <p className="font-semibold">Error</p>
-                                <p className="text-sm">{error}</p>
-                            </div>
-                        )}
-
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label htmlFor="newPassword" className="block text-gray-700 font-semibold mb-2">
-                                    Nueva Contraseña
-                                </label>
-                                <input
-                                    type="password"
-                                    id="newPassword"
-                                    value={newPassword}
-                                    onChange={handlePasswordChange}
-                                    placeholder="Mínimo 6 caracteres"
-                                    required
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                                />
-                                {newPassword && newPassword.length < 6 && (
-                                    <p className="text-red-500 text-sm mt-1">
-                                        La contraseña debe tener al menos 6 caracteres
-                                    </p>
-                                )}
-                            </div>
-
-                            <div>
-                                <label htmlFor="confirmPassword" className="block text-gray-700 font-semibold mb-2">
-                                    Confirmar Contraseña
-                                </label>
-                                <input
-                                    type="password"
-                                    id="confirmPassword"
-                                    value={confirmPassword}
-                                    onChange={handleConfirmPasswordChange}
-                                    placeholder="Confirma tu contraseña"
-                                    required
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                                />
-                                {confirmPassword && !passwordsMatch && (
-                                    <p className="text-red-500 text-sm mt-1">
-                                        Las contraseñas no coinciden
-                                    </p>
-                                )}
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={
-                                    loading ||
-                                    !newPassword ||
-                                    !confirmPassword ||
-                                    !passwordsMatch ||
-                                    newPassword.length < 6
-                                }
-                                className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400"
+                <div className="card-body">
+                    {!tokenValid ? (
+                        <>
+                            <aside className="alert alert-error">
+                                <p className="text-red-400 font-semibold">Enlace Inválido o Expirado</p>
+                                <p className="text-red-400 text-sm">{error}</p>
+                            </aside>
+                            <Link
+                                href="/olvide-contrasena"
+                                className="btn btn-secondary w-full block text-center"
                             >
-                                {loading ? 'Actualizando...' : 'Actualizar Contraseña'}
-                            </button>
-                        </form>
-
-                        <div className="mt-6 text-center text-gray-600 text-sm">
-                            <p>
-                                <Link href="/login" className="text-blue-600 font-semibold hover:underline">
-                                    Volver a Login
-                                </Link>
+                                Solicitar Nuevo Enlace
+                            </Link>
+                        </>
+                    ) : success ? (
+                        <>
+                            <aside className="alert alert-success">
+                                <p className="text-green-400 font-semibold">✓ Contraseña Actualizada</p>
+                                <p className="text-green-400 text-sm">
+                                    Tu contraseña ha sido actualizada exitosamente. Serás redirigido a login...
+                                </p>
+                            </aside>
+                            <Link
+                                href="/login"
+                                className="btn btn-secondary w-full block text-center"
+                            >
+                                Ir a Login
+                            </Link>
+                        </>
+                    ) : (
+                        <>
+                            <p className="text-muted text-center mb-6">
+                                Ingresa tu nueva contraseña para {userEmail}
                             </p>
-                        </div>
-                    </div>
-                )}
-            </div>
+
+                            {error && (
+                                <aside className="alert alert-error">
+                                    <p className="text-red-400 font-semibold">Error</p>
+                                    <p className="text-red-400 text-sm">{error}</p>
+                                </aside>
+                            )}
+
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                <div className="form-group">
+                                    <label htmlFor="newPassword" className="form-label">
+                                        Nueva Contraseña *
+                                    </label>
+                                    <input
+                                        type="password"
+                                        id="newPassword"
+                                        value={newPassword}
+                                        onChange={handlePasswordChange}
+                                        placeholder="Mínimo 6 caracteres"
+                                        required
+                                        className="form-input"
+                                    />
+                                    {newPassword && newPassword.length < 6 && (
+                                        <p className="form-error">
+                                            La contraseña debe tener al menos 6 caracteres
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div className="form-group">
+                                    <label htmlFor="confirmPassword" className="form-label">
+                                        Confirmar Contraseña *
+                                    </label>
+                                    <input
+                                        type="password"
+                                        id="confirmPassword"
+                                        value={confirmPassword}
+                                        onChange={handleConfirmPasswordChange}
+                                        placeholder="Confirma tu contraseña"
+                                        required
+                                        className="form-input"
+                                    />
+                                    {confirmPassword && !passwordsMatch && (
+                                        <p className="form-error">
+                                            Las contraseñas no coinciden
+                                        </p>
+                                    )}
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={
+                                        loading ||
+                                        !newPassword ||
+                                        !confirmPassword ||
+                                        !passwordsMatch ||
+                                        newPassword.length < 6
+                                    }
+                                    className="btn btn-secondary w-full"
+                                >
+                                    {loading ? 'Actualizando...' : 'Actualizar Contraseña'}
+                                </button>
+                            </form>
+                        </>
+                    )}
+                </div>
+
+                <footer className="card-footer text-center text-small">
+                    <Link href="/login" className="btn-link">
+                        Volver a Login
+                    </Link>
+                </footer>
+            </article>
         </main>
     );
 }

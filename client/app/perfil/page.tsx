@@ -36,142 +36,146 @@ export default function PerfilPage() {
     };
 
     return (
-        <div className="p-8 max-w-2xl mx-auto">
-            <h1 className="text-3xl font-bold text-white mb-8 flex items-center gap-3">
-                <UserCircle size={32} className="text-zs-blue" />
-                Mi Perfil
-            </h1>
+        <main className="page-container">
+            <div className="content-wrapper max-w-2xl">
+                <header className="mb-8">
+                    <h1 className="flex items-center gap-3">
+                        <UserCircle size={32} className="text-zs-blue" />
+                        Mi Perfil
+                    </h1>
+                </header>
 
-            <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
-                {/* Avatar y nombre */}
-                <div className="text-center mb-8 pb-8 border-b border-slate-700">
-                    <div className="w-24 h-24 rounded-full bg-linear-to-br from-zs-blue to-zs-green mx-auto mb-4 flex items-center justify-center">
-                        <UserCircle size={64} className="text-slate-800" />
+                <article className="card">
+                    {/* Avatar y nombre */}
+                    <div className="card-header text-center">
+                        <div className="avatar">
+                            <UserCircle size={64} className="text-zs-dark" />
+                        </div>
+                        <h2 className="heading-lg">
+                            {formData.firstName} {formData.lastName}
+                        </h2>
+                        <p className="text-zs-green font-semibold mt-2">{getRoleLabel(formData.role)}</p>
                     </div>
-                    <h2 className="text-2xl font-bold text-white">
-                        {formData.firstName} {formData.lastName}
-                    </h2>
-                    <p className="text-zs-green font-semibold mt-2">{getRoleLabel(formData.role)}</p>
-                </div>
 
-                {/* Información del usuario */}
-                <div className="space-y-6">
-                    {/* Email */}
-                    <div>
-                        <label className="flex items-center gap-2 text-gray-400 text-sm font-semibold mb-2">
-                            <Mail size={16} className="text-zs-blue" />
-                            Correo Electrónico
-                        </label>
+                    {/* Información del usuario */}
+                    <div className="card-body space-y-6">
+                        {/* Correo */}
+                        <div className="form-group">
+                            <label className="form-label flex items-center gap-2">
+                                <Mail size={16} className="text-zs-blue" />
+                                Correo Electrónico
+                            </label>
+                            {isEditing ? (
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    className="form-input"
+                                />
+                            ) : (
+                                <p>{formData.email}</p>
+                            )}
+                        </div>
+
+                        {/* Nombre */}
+                        <div className="form-group">
+                            <label className="form-label flex items-center gap-2">
+                                <UserCircle size={16} className="text-zs-green" />
+                                Nombre
+                            </label>
+                            {isEditing ? (
+                                <input
+                                    type="text"
+                                    name="firstName"
+                                    value={formData.firstName}
+                                    onChange={handleChange}
+                                    className="form-input"
+                                />
+                            ) : (
+                                <p>{formData.firstName}</p>
+                            )}
+                        </div>
+
+                        {/* Apellido */}
+                        <div className="form-group">
+                            <label className="form-label flex items-center gap-2">
+                                <UserCircle size={16} className="text-zs-green" />
+                                Apellido
+                            </label>
+                            {isEditing ? (
+                                <input
+                                    type="text"
+                                    name="lastName"
+                                    value={formData.lastName}
+                                    onChange={handleChange}
+                                    className="form-input"
+                                />
+                            ) : (
+                                <p>{formData.lastName}</p>
+                            )}
+                        </div>
+
+                        {/* Teléfono */}
+                        <div className="form-group">
+                            <label className="form-label flex items-center gap-2">
+                                <Phone size={16} className="text-zs-blue" />
+                                Teléfono
+                            </label>
+                            {isEditing ? (
+                                <input
+                                    type="tel"
+                                    name="phone"
+                                    value={formData.phone}
+                                    onChange={handleChange}
+                                    className="form-input"
+                                />
+                            ) : (
+                                <p>{formData.phone}</p>
+                            )}
+                        </div>
+
+                        {/* Rol */}
+                        <div className="form-group">
+                            <label className="form-label flex items-center gap-2">
+                                <Award size={16} className="text-zs-green" />
+                                Rol
+                            </label>
+                            <p>{getRoleLabel(formData.role)}</p>
+                        </div>
+                    </div>
+
+                    {/* Botones de acción */}
+                    <footer className="card-footer flex gap-4">
                         {isEditing ? (
-                            <input
-                                type="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                className="w-full p-3 bg-slate-900 border border-slate-600 rounded-lg text-white focus:border-zs-blue outline-none"
-                            />
+                            <>
+                                <button
+                                    onClick={handleSave}
+                                    className="btn btn-primary flex-1"
+                                >
+                                    Guardar Cambios
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setFormData({ ...user });
+                                        setIsEditing(false);
+                                    }}
+                                    className="btn btn-outline flex-1"
+                                >
+                                    Cancelar
+                                </button>
+                            </>
                         ) : (
-                            <p className="text-white">{formData.email}</p>
-                        )}
-                    </div>
-
-                    {/* Nombre */}
-                    <div>
-                        <label className="flex items-center gap-2 text-gray-400 text-sm font-semibold mb-2">
-                            <UserCircle size={16} className="text-zs-green" />
-                            Nombre
-                        </label>
-                        {isEditing ? (
-                            <input
-                                type="text"
-                                name="firstName"
-                                value={formData.firstName}
-                                onChange={handleChange}
-                                className="w-full p-3 bg-slate-900 border border-slate-600 rounded-lg text-white focus:border-zs-blue outline-none"
-                            />
-                        ) : (
-                            <p className="text-white">{formData.firstName}</p>
-                        )}
-                    </div>
-
-                    {/* Apellido */}
-                    <div>
-                        <label className="flex items-center gap-2 text-gray-400 text-sm font-semibold mb-2">
-                            <UserCircle size={16} className="text-zs-green" />
-                            Apellido
-                        </label>
-                        {isEditing ? (
-                            <input
-                                type="text"
-                                name="lastName"
-                                value={formData.lastName}
-                                onChange={handleChange}
-                                className="w-full p-3 bg-slate-900 border border-slate-600 rounded-lg text-white focus:border-zs-blue outline-none"
-                            />
-                        ) : (
-                            <p className="text-white">{formData.lastName}</p>
-                        )}
-                    </div>
-
-                    {/* Teléfono */}
-                    <div>
-                        <label className="flex items-center gap-2 text-gray-400 text-sm font-semibold mb-2">
-                            <Phone size={16} className="text-zs-blue" />
-                            Teléfono
-                        </label>
-                        {isEditing ? (
-                            <input
-                                type="tel"
-                                name="phone"
-                                value={formData.phone}
-                                onChange={handleChange}
-                                className="w-full p-3 bg-slate-900 border border-slate-600 rounded-lg text-white focus:border-zs-blue outline-none"
-                            />
-                        ) : (
-                            <p className="text-white">{formData.phone}</p>
-                        )}
-                    </div>
-
-                    {/* Rol */}
-                    <div>
-                        <label className="flex items-center gap-2 text-gray-400 text-sm font-semibold mb-2">
-                            <Award size={16} className="text-zs-green" />
-                            Rol
-                        </label>
-                        <p className="text-white">{getRoleLabel(formData.role)}</p>
-                    </div>
-                </div>
-
-                {/* Botones de acción */}
-                <div className="mt-8 pt-8 border-t border-slate-700 flex gap-4">
-                    {isEditing ? (
-                        <>
                             <button
-                                onClick={handleSave}
-                                className="flex-1 bg-zs-green hover:bg-green-500 text-white font-bold py-3 rounded-lg transition-all"
+                                onClick={() => setIsEditing(true)}
+                                className="btn btn-secondary w-full"
                             >
-                                Guardar Cambios
+                                Editar Perfil
                             </button>
-                            <button
-                                onClick={() => {
-                                    setFormData({ ...user });
-                                    setIsEditing(false);
-                                }}
-                                className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition-all"
-                            >
-                                Cancelar
-                            </button>
-                        </>
-                    ) : (
-                        <button
-                            onClick={() => setIsEditing(true)}
-                            className="w-full bg-zs-blue hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-all"
-                        >
-                            Editar Perfil
-                        </button>
-                    )}
-                </div>
+                        )}
+                    </footer>
+                </article>
             </div>
-        </div>
+        </main>
     );
 }

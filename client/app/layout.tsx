@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import "./globals.css"; // Verifica que globals.css esté en la misma carpeta app
-import Navbar from "../components/layout/Navbar"; // Sube un nivel y entra a components
+import "./globals.css";
+import Navbar from "../components/layout/Navbar";
 
 export const metadata: Metadata = {
   title: "ZoneSport - Antioquia",
@@ -14,9 +14,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className="antialiased bg-slate-900">
+      <body className="antialiased bg-zs-dark">
         <Navbar />
-        <div className="pt-16"> {/* Padding-top para que el contenido no quede debajo del navbar fijo */}
+        <div className="pt-16">
           {children}
         </div>
       </body>

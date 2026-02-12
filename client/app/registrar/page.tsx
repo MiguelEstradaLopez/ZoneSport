@@ -55,40 +55,40 @@ export default function RegistroPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900 px-4 py-8">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-zs-blue mb-2">
+    <main className="page-container flex items-center justify-center py-8">
+      <article className="card w-full max-w-md">
+        {/* Encabezado */}
+        <header className="card-header text-center">
+          <h1 className="mb-2">
             Zone<span className="text-zs-green">Sport</span>
           </h1>
-          <p className="text-gray-400">Crea tu cuenta como deportista</p>
-        </div>
+          <p className="text-muted">Crea tu cuenta como deportista</p>
+        </header>
 
-        {/* Form */}
-        <div className="bg-slate-800 rounded-lg border border-slate-700 p-8">
+        {/* Cuerpo del formulario */}
+        <div className="card-body">
           {success && (
-            <div className="mb-6 p-4 bg-green-900/20 border border-green-800 rounded-lg flex items-center gap-3">
+            <aside className="alert alert-success">
               <CheckCircle className="text-green-400" size={20} />
               <p className="text-green-400 text-sm">¡Registro exitoso! Redirigiendo...</p>
-            </div>
+            </aside>
           )}
 
           {error && (
-            <div className="mb-6 p-4 bg-red-900/20 border border-red-800 rounded-lg flex items-center gap-3">
+            <aside className="alert alert-error">
               <AlertCircle className="text-red-400" size={20} />
               <p className="text-red-400 text-sm">{error}</p>
-            </div>
+            </aside>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="block text-gray-300 text-sm font-medium mb-2">
+            {/* Correo */}
+            <div className="form-group">
+              <label htmlFor="email" className="form-label">
                 Correo Electrónico *
               </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 text-gray-500" size={20} />
+              <div className="input-wrapper">
+                <Mail className="input-icon" size={20} />
                 <input
                   id="email"
                   type="email"
@@ -96,19 +96,19 @@ export default function RegistroPage() {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="tu@email.com"
-                  className="w-full pl-10 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-zs-green"
+                  className="form-input pl-10"
                   required
                 />
               </div>
             </div>
 
-            {/* Password */}
-            <div>
-              <label htmlFor="password" className="block text-gray-300 text-sm font-medium mb-2">
+            {/* Contraseña */}
+            <div className="form-group">
+              <label htmlFor="password" className="form-label">
                 Contraseña *
               </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 text-gray-500" size={20} />
+              <div className="input-wrapper">
+                <Lock className="input-icon" size={20} />
                 <input
                   id="password"
                   type="password"
@@ -116,20 +116,20 @@ export default function RegistroPage() {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Mínimo 6 caracteres"
-                  className="w-full pl-10 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-zs-green"
+                  className="form-input pl-10"
                   required
                   minLength={6}
                 />
               </div>
             </div>
 
-            {/* First Name */}
-            <div>
-              <label htmlFor="firstName" className="block text-gray-300 text-sm font-medium mb-2">
+            {/* Nombre */}
+            <div className="form-group">
+              <label htmlFor="firstName" className="form-label">
                 Nombre
               </label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 text-gray-500" size={20} />
+              <div className="input-wrapper">
+                <User className="input-icon" size={20} />
                 <input
                   id="firstName"
                   type="text"
@@ -137,18 +137,18 @@ export default function RegistroPage() {
                   value={formData.firstName}
                   onChange={handleChange}
                   placeholder="Tu nombre"
-                  className="w-full pl-10 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-zs-green"
+                  className="form-input pl-10"
                 />
               </div>
             </div>
 
-            {/* Last Name */}
-            <div>
-              <label htmlFor="lastName" className="block text-gray-300 text-sm font-medium mb-2">
+            {/* Apellido */}
+            <div className="form-group">
+              <label htmlFor="lastName" className="form-label">
                 Apellido
               </label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 text-gray-500" size={20} />
+              <div className="input-wrapper">
+                <User className="input-icon" size={20} />
                 <input
                   id="lastName"
                   type="text"
@@ -156,18 +156,18 @@ export default function RegistroPage() {
                   value={formData.lastName}
                   onChange={handleChange}
                   placeholder="Tu apellido"
-                  className="w-full pl-10 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-zs-green"
+                  className="form-input pl-10"
                 />
               </div>
             </div>
 
-            {/* Phone */}
-            <div>
-              <label htmlFor="phone" className="block text-gray-300 text-sm font-medium mb-2">
+            {/* Teléfono */}
+            <div className="form-group">
+              <label htmlFor="phone" className="form-label">
                 Teléfono
               </label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-3 text-gray-500" size={20} />
+              <div className="input-wrapper">
+                <Phone className="input-icon" size={20} />
                 <input
                   id="phone"
                   type="tel"
@@ -175,45 +175,41 @@ export default function RegistroPage() {
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder="+57 123456789"
-                  className="w-full pl-10 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-zs-green"
+                  className="form-input pl-10"
                 />
               </div>
             </div>
 
-            {/* Submit */}
+            {/* Botón enviar */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-6 bg-zs-green hover:bg-green-600 disabled:opacity-50 text-white font-semibold py-2 rounded-lg transition-all"
+              className="btn btn-primary w-full mt-6"
             >
               {loading ? 'Registrando...' : 'Crear Cuenta'}
             </button>
           </form>
 
-          {/* Divider */}
-          <div className="my-6 flex items-center gap-4">
-            <div className="flex-1 h-px bg-slate-600"></div>
-            <span className="text-gray-500 text-sm">o</span>
-            <div className="flex-1 h-px bg-slate-600"></div>
-          </div>
+          {/* Divisor */}
+          <div className="divider mt-6" />
 
-          {/* Login Link */}
-          <p className="text-center text-gray-400">
+          {/* Ir a login */}
+          <p className="text-center text-muted">
             ¿Ya tienes cuenta?{' '}
-            <Link href="/login" className="text-zs-blue hover:underline font-semibold">
+            <Link href="/login" className="btn-link-secondary font-semibold">
               Inicia sesión
             </Link>
           </p>
         </div>
 
-        {/* Footer */}
-        <p className="text-center text-gray-500 text-sm mt-8">
+        {/* Pie de página */}
+        <footer className="card-footer text-center text-small">
           Al registrarte, aceptas nuestros{' '}
-          <Link href="#" className="text-zs-blue hover:underline">
+          <Link href="#" className="btn-link-secondary">
             términos de servicio
           </Link>
-        </p>
-      </div>
-    </div>
+        </footer>
+      </article>
+    </main>
   );
 }

@@ -29,59 +29,64 @@ export default function EventosPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[80vh]">
-                <p className="text-gray-400">Cargando eventos...</p>
-            </div>
+            <main className="page-container flex items-center justify-center">
+                <p className="text-muted">Cargando eventos...</p>
+            </main>
         );
     }
 
     if (error) {
         return (
-            <div className="p-8">
-                <p className="text-red-400">{error}</p>
-            </div>
+            <main className="page-container">
+                <div className="content-wrapper">
+                    <p className="text-red-400">{error}</p>
+                </div>
+            </main>
         );
     }
 
     return (
-        <div className="p-8">
-            <h1 className="text-3xl font-bold text-white mb-6 border-l-4 border-zs-green pl-4">
-                Eventos <span className="text-zs-blue">Deportivos</span>
-            </h1>
+        <main className="page-container">
+            <div className="content-wrapper">
+                <header className="mb-8">
+                    <h1 className="flex items-center gap-3 mb-2">
+                        Eventos <span className="text-zs-green">Deportivos</span>
+                    </h1>
+                    <div className="divider mt-4" />
+                </header>
 
-            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                {eventos.map((evento) => (
-                    <Link key={evento.id} href={`/eventos/${evento.id}`}>
-                        <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 hover:border-zs-blue hover:shadow-lg hover:shadow-zs-blue/20 transition-all cursor-pointer h-full">
-                            <div className="flex items-center justify-between mb-4">
-                                <span className="text-zs-green text-sm font-bold uppercase px-3 py-1 bg-slate-700 rounded-full">
-                                    {evento.status}
-                                </span>
-                                <span className="text-zs-blue text-xs font-semibold">{evento.sport?.name || 'Sin deporte'}</span>
-                            </div>
-                            <h2 className="text-xl font-semibold text-white mb-3">{evento.name}</h2>
-                            <p className="text-gray-400 text-sm mb-4 line-clamp-2">{evento.description || 'Sin descripción'}</p>
+                <article className="grid-container">
+                    {eventos.map((evento) => (
+                        <Link key={evento.id} href={`/eventos/${evento.id}`}>
+                            <article className="card h-full cursor-pointer">
+                                <div className="flex items-center justify-between mb-4">
+                                    <span className="badge">{evento.status}</span>
+                                    <span className="text-xs font-semibold text-zs-blue">{evento.sport?.name || 'Sin deporte'}</span>
+                                </div>
+                                <h2 className="heading-md mb-3">{evento.name}</h2>
+                                <p className="text-muted text-sm mb-4 line-clamp-2">{evento.description || 'Sin descripción'}</p>
 
-                            <div className="space-y-2 text-sm text-gray-300">
-                                <div className="flex items-center gap-2">
-                                    <Calendar size={16} className="text-zs-blue" />
-                                    <span>{new Date(evento.startDate).toLocaleDateString('es-ES')}</span>
+                                <div className="space-y-2 text-sm text-zs-text-secondary">
+                                    <div className="flex items-center gap-2">
+                                        <Calendar size={16} className="text-zs-blue" />
+                                        <time>{new Date(evento.startDate).toLocaleDateString('es-ES')}</time>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Users size={16} className="text-zs-green" />
+                                        <span>{evento.matches?.length || 0} partidos</span>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <Users size={16} className="text-zs-green" />
-                                    <span>{evento.matches?.length || 0} partidos</span>
-                                </div>
-                            </div>
-                        </div>
-                    </Link>
-                ))}
+                            </article>
+                        </Link>
+                    ))}
+                </article>
+
+                {eventos.length === 0 && (
+                    <div className="text-center py-12">
+                        <p className="text-muted">No hay eventos disponibles</p>
+                    </div>
+                )}
             </div>
-
-            {eventos.length === 0 && (
-                <div className="text-center py-12">
-                    <p className="text-gray-400">No hay eventos disponibles</p>
-                </div>
-            )}
-        </div>
+        </main>
     );
 }

@@ -1,414 +1,272 @@
-# 🏆 ZoneSport - Antioquia
+# 🏆 ZoneSport - Plataforma de Gestión de Eventos Deportivos
 
-**ZoneSport** es una plataforma integral para la gestión de torneos, rankings y eventos deportivos, diseñada con una estética moderna y minimalista. Permite a usuarios crear eventos deportivos, gestionar partidos y ver clasificaciones en tiempo real.
+**ZoneSport** es una plataforma integral y moderna para la gestión completa de torneos, rankings, partidos y eventos deportivos. Desarrollada con tecnologías actuales, permite a usuarios crear eventos, registrar resultados, seguir clasificaciones en tiempo real y conectar con otros deportistas.
 
 ---
 
 ## 🎯 Características Principales
 
-✅ **Autenticación JWT** - Registro, login y recuperación de contraseña  
-✅ **Gestión de Eventos** - Crear y administrar torneos deportivos  
-✅ **Sistema de Partidos** - Registrar resultados de encuentros  
-✅ **Clasificaciones Dinámicas** - Tablas de posiciones actualizadas automáticamente  
-✅ **Noticias y Blog** - Publicar contenido deportivo  
-✅ **Búsqueda de Usuarios** - Conectar con otros deportistas  
-✅ **Recuperación de Contraseña** - Por email con tokens seguros  
+✅ **Autenticación segura con JWT** - Registro, login y recuperación de contraseña por email  
+✅ **Gestión de eventos/torneos** - Crear, editar y administrar torneos deportivos  
+✅ **Sistema de partidos** - Registrar encuentros con resultados en tiempo real  
+✅ **Clasificaciones dinámicas** - Tablas de posiciones que se actualizan automáticamente  
+✅ **Blog y noticias** - Publicar y gestionar contenido sobre eventos  
+✅ **Búsqueda de usuarios** - Conectar con otros deportistas en la plataforma  
+✅ **Recuperación segura de contraseña** - Tokens con expiración temporal por email  
+✅ **Interfaz moderna y responsive** - Funciona en desktop, tablet y móvil  
+✅ **API REST documentada** - Swagger interactivo para pruebas de endpoints  
+✅ **Base de datos robusta** - PostgreSQL con validaciones y relaciones inteligentes  
 
 ---
 
-## 🚀 Tech Stack
+## 🚀 Tech Stack Moderno
 
-| Capa | Tecnología |
-|------|-----------|
-| **Frontend** | Next.js 16+ React 19 Tailwind CSS TypeScript |
-| **Backend** | NestJS 11 TypeORM PostgreSQL |
-| **Base Datos** | PostgreSQL 16 (Docker) |
-| **Autenticación** | JWT + Bcrypt |
-| **Email** | Nodemailer (SMTP) |
+| Componente | Tecnología | Versión |
+|-----------|-----------|---------|
+| **Frontend** | Next.js | 16.1.1 |
+| **Framework JS** | React | 19.2.3 |
+| **Estilos** | Tailwind CSS 4 | 4.0.0 |
+| **Lenguaje** | TypeScript | 5.7.3 |
+| **Backend** | NestJS | 11.0.1 |
+| **ORM** | TypeORM | 0.3.28 |
+| **Base de Datos** | PostgreSQL | 16 (Alpine) |
+| **Autenticación** | JWT + Bcrypt | Segura |
+| **Email** | Resend API | 6.8.0 |
+| **HTTP Client** | Axios | 1.13.2 |
+| **Iconos** | Lucide React | 0.562.0 |
+| **Formularios** | React Hook Form | 7.70.0 |
 
 ---
 
-## 🛠️ Instalación Rápida
+## 📊 Arquitectura General
 
-### Requisitos
+```
+┌──────────────────────────────────────────────┐
+│  CLIENTE (FRONTEND)                          │
+│  Next.js + React + TypeScript + Tailwind     │
+│  http://localhost:3000                       │
+└─────────────────────┬────────────────────────┘
+                      │
+                 API REST
+                 (Axios HTTP)
+                      │
+┌─────────────────────▼────────────────────────┐
+│  API (BACKEND)                               │
+│  NestJS + TypeORM + PostgreSQL               │
+│  http://localhost:3001                       │
+│  Docs: http://localhost:3001/api/docs        │
+└─────────────────────┬────────────────────────┘
+                      │
+┌─────────────────────▼────────────────────────┐
+│  BASE DE DATOS                               │
+│  PostgreSQL 16 (Docker)                      │
+│  localhost:5432                              │
+└──────────────────────────────────────────────┘
+```
 
-- Node.js v18+
-- Docker & Docker Compose
-- Git
+---
 
-### Pasos
+## ⚡ Inicio Rápido (5 minutos)
+
+### Requisitos Previos
+
+- **Node.js** v18 o superior
+- **npm** (incluido con Node.js)
+- **Docker** y **Docker Compose**
+- **Git**
+
+### Instalación
 
 ```bash
-# 1. Clonar repositorio
+# 1. Clonar
 git clone https://github.com/MiguelEstradaLopez/ZoneSport.git
 cd ZoneSport
 
-# 2. Configurar variables de entorno
-cp .env.example .env
-# ⚠️ IMPORTANTE: Edita .env y rellena los valores reales
-# Ver: ENV_SETUP_GUIDE.md para instrucciones detalladas
-nano .env
-
-# 3. Iniciar base de datos
+# 2. Base de datos
 docker-compose up -d
 
-# 4. Configurar Backend
-cd server
-cp .env.example .env
-npm install
-npm run start:dev
+# 3. Backend (Terminal 1)
+cd server && npm install && npm run dev
 
-# 4. Configurar Frontend (nueva terminal)
-cd client
-npm install
-npm run dev
+# 4. Frontend (Terminal 2)
+cd client && npm install && npm run dev
 ```
 
-### URLs de Acceso
-
-- **Frontend**: <http://localhost:3000>
-- **Backend API**: <http://localhost:3001>
+**URLs**: Frontend (http://localhost:3000) | Backend (http://localhost:3001) | Docs (http://localhost:3001/api/docs)
 
 ---
 
-## 📚 Documentación
+## 📚 Documentación Detallada
 
-### 🚀 [SETUP.md](SETUP.md)
+### 🔧 [SETUP.md](SETUP.md) - Guía Completa de Configuración
 
-Guía completa para configurar, desarrollar y testear ZoneSport:
-
-- Setup inicial (5 minutos)
-- Estructura del proyecto
+Incluye:
+- Instalación detallada paso a paso
+- Configuración de variables de entorno (.env)
+- Setup de base de datos (Docker vs local)
+- Medidas de seguridad implementadas
+- Generación de claves JWT
 - Comandos de desarrollo
-- Testing
-- Troubleshooting
+- Solución de problemas (Troubleshooting)
 
-### 🔒 [SECURITY.md](SECURITY.md)
+### 🖥️ [BACKEND.md](BACKEND.md) - Documentación del Backend
 
-Guía de seguridad y variables de entorno:
+Incluye:
+- Estructura de módulos NestJS completa
+- Descripción de cada entidad de base de datos
+- Referencia de API REST (todos los endpoints)
+- Explicación de autenticación JWT
+- Cómo crear nuevas rutas y controladores
+- Convenciones de código
+- Cómo ejecutar tests
 
-- Auditoría de seguridad completada ✅
-- Configuración de `.env` paso a paso
-- Generar claves seguras
-- Checklist de seguridad
+### 💻 [FRONTEND.md](FRONTEND.md) - Documentación del Frontend
 
-### 🔌 [API.md](API.md)
-
-Guía completa de la API REST con Swagger:
-
-- Cómo acceder a Swagger UI
-- Autenticación JWT
-- Documentación de todos los endpoints
-- Ejemplos de uso con body reales
-- Troubleshooting y códigos de respuesta
-
-### 🗺️ [ROADMAP.md](ROADMAP.md)
-
-Plan de desarrollo y features faltantes:
-
-- Análisis de features implementadas vs. faltantes
-- Priorización de 15+ nuevas funcionalidades
-- Estimación de esfuerzo (100-150 horas)
-- Modelos de datos adicionales (Post, Invitation, Comment)
-- Plan de implementación en 4 fases
-
-### 💻 [CODE_EXAMPLES.md](CODE_EXAMPLES.md)
-
-Ejemplos de código TypeScript listos para usar:
-
-- 16 ejemplos de entidades, servicios y controladores
-- DTOs para posts, invitaciones y comentarios
-- Código para upload de imágenes con Cloudinary
-- Configuración de .env y dependencias
-- JSON de ejemplo para Swagger
+Incluye:
+- Estructura de carpetas y componentes
+- Sistema CSS con clases semánticas
+- Paleta de colores corporativa
+- Componentes disponibles
+- Servicios HTTP para consumo de API
+- Cómo crear nuevas páginas
+- Convenciones de código
 
 ---
 
-## 🏗️ Estructura del Proyecto
+## 🏗️ Estructura del Proyecto Completa
 
 ```
 ZoneSport/
-├── server/                 # Backend NestJS
+├── server/                          # Backend NestJS
 │   ├── src/
-│   │   ├── auth/          # Autenticación JWT
-│   │   ├── users/         # Gestión de usuarios
-│   │   ├── events/        # Gestión de eventos
-│   │   ├── matches/       # Gestión de partidos
-│   │   ├── sports/        # Catálogo de deportes
-│   │   ├── news/          # Blog y noticias
-│   │   ├── email/         # Servicio de email
-│   │   └── app.module.ts
-│   ├── .env               # Variables locales (NO commitar)
-│   ├── .env.example       # Template de variables (SÍ commitar)
+│   │   ├── auth/                   # Módulo de autenticación
+│   │   ├── users/                  # Gestión de usuarios
+│   │   ├── events/                 # Gestión de eventos
+│   │   ├── matches/                # Gestión de partidos
+│   │   ├── sports/                 # Catálogo de deportes
+│   │   ├── classifications/        # Tablas de clasificación
+│   │   ├── news/                   # Blog y noticias
+│   │   ├── email/                  # Servicio de email
+│   │   ├── main.ts                 # Punto de entrada
+│   │   └── app.module.ts           # Módulo raíz
+│   ├── test/                       # Tests E2E
+│   ├── .env                        # Variables de entorno (NO commitar)
+│   ├── .env.example                # Template (SÍ commitar)
 │   └── package.json
-├── client/                 # Frontend Next.js
+│
+├── client/                          # Frontend Next.js
 │   ├── app/
-│   │   ├── page.tsx       # Home
-│   │   ├── login/
-│   │   ├── registrar/
-│   │   ├── eventos/
-│   │   ├── noticias/
-│   │   ├── clasificacion/
-│   │   ├── perfil/
-│   │   ├── olvide-contrasena/
-│   │   └── reset-password/
+│   │   ├── page.tsx               # Home
+│   │   ├── layout.tsx             # Layout global
+│   │   ├── globals.css            # Estilos globales
+│   │   ├── login/                 # Página de login
+│   │   ├── registrar/             # Registro de usuarios
+│   │   ├── eventos/               # Listado y detalle de eventos
+│   │   ├── crear-evento/          # Formulario crear evento
+│   │   ├── clasificacion/         # Tablas de posiciones
+│   │   ├── noticias/              # Blog de noticias
+│   │   ├── perfil/                # Perfil de usuario
+│   │   ├── olvide-contrasena/     # Recuperar contraseña
+│   │   └── reset-password/        # Resetear con token
 │   ├── components/
+│   │   └── layout/
+│   │       └── Navbar.tsx         # Barra de navegación
 │   ├── services/
+│   │   ├── api.ts                 # Cliente HTTP base
+│   │   ├── authService.ts         # Servicio de autenticación
+│   │   ├── eventsService.ts       # Servicio de eventos
+│   │   ├── matchesService.ts      # Servicio de partidos
+│   │   ├── sportsService.ts       # Servicio de deportes
+│   │   ├── classificationsService.ts
+│   │   ├── usersService.ts        # Servicio de usuarios
+│   │   └── newsService.ts         # Servicio de noticias
+│   ├── public/                    # Archivos estáticos
+│   ├── next.config.ts             # Configuración Next.js
+│   ├── tailwind.config.ts         # Configuración Tailwind
+│   ├── tsconfig.json              # Configuración TypeScript
 │   └── package.json
-└── docker-compose.yml     # Configuración PostgreSQL
+│
+├── docker-compose.yml               # Docker para base de datos
+├── README.md                        # Este archivo
+├── SETUP.md                         # Guía de instalación y configuración
+├── BACKEND.md                       # Documentación del backend
+└── FRONTEND.md                      # Documentación del frontend
 ```
 
 ---
 
-## 🔐 Seguridad
+## 🔐 Seguridad Implementada
 
-- ✅ Credenciales protegidas con `.env`
-- ✅ Contraseñas hasheadas con bcrypt (10 rounds)
-- ✅ Tokens JWT con expiración
-- ✅ CORS configurado dinámicamente
-- ✅ Validación de entrada en frontend y backend
-- ✅ Recuperación de contraseña por email segura
+El proyecto implementa múltiples capas de seguridad:
+
+- ✅ **Credenciales protegidas** - Todas en variables de entorno `.env`
+- ✅ **Contraseñas hasheadas** - Bcrypt con 10 rounds
+- ✅ **Tokens JWT** - Con expiración controlada
+- ✅ **CORS configurado** - Solo orígenes permitidos
+- ✅ **Validación de entrada** - DTOs en frontend y backend
+- ✅ **SQL Injection prevention** - TypeORM con queries preparadas
+- ✅ **Helmet.js** - Headers HTTP de seguridad
+- ✅ **Recuperación segura** - Tokens temporales con expiración
 
 ---
 
-## 👨‍💻 Desarrolladores
+## 🎨 Paleta de Colores
 
-Para comenzar a desarrollar, consulta [GUIA_DESARROLLO.md](GUIA_DESARROLLO.md).
+| Color | Código | Uso |
+|-------|--------|-----|
+| Azul ZoneSport | #0d47a1 | Botones, enlaces |
+| Azul Claro | #1e88e5 | Hover states |
+| Verde Lima | #7cb342 | Acciones positivas |
+| Verde Claro | #9ccc65 | Hover success |
+| Fondo Oscuro | #0f172a | Fondo principal |
+| Fondo Más Oscuro | #0a0f1a | Fondos secundarios |
+| Texto Principal | #ffffff | Texto base |
+| Texto Secundario | #b0b0b0 | Etiquetas |
+| Bordes | #1e293b | Separadores |
+
+---
+
+## 🛠️ Comandos Principales
+
+### Backend
+```bash
+npm run dev          # Modo desarrollo (watch)
+npm run build        # Compilar para producción
+npm start            # Ejecutar producción
+npm test           # Tests unitarios
+npm run test:cov    # Tests con cobertura
+npm run lint        # ESLint
+npm run format      # Prettier
+```
+
+### Frontend
+```bash
+npm run dev          # Modo desarrollo
+npm run build        # Compilar para producción
+npm start            # Ejecutar producción
+npm run lint        # ESLint
+```
+
+---
+
+## 📱 Responsive Design
+
+Optimizado para:
+- 📱 Móviles
+- 📱 Tablets
+- 💻 Laptops
+- 🖥️ 4K
 
 ---
 
 ## 📞 Soporte
 
-Para problemas o preguntas, revisar la documentación completa o crear un issue en GitHub.
-
----
-
-**Última actualización**: 23 de enero de 2026  
-**Estado**: ✅ En desarrollo activo  
-**Licencia**: MIT
-
-### 4. Instalar dependencias del Frontend
-
-```bash
-cd client
-npm install
-```
-
----
-
-## 🏃 Ejecución Local
-
-### Backend (NestJS)
-
-```bash
-cd server
-npm run start:dev
-```
-
-El servidor estará disponible en `http://localhost:3001`
-
-### Frontend (Next.js)
-
-```bash
-cd client
-npm run dev
-```
-
-La aplicación estará disponible en `http://localhost:3000`
-
----
-
-## 📋 Principales Módulos
-
-### Backend (NestJS)
-
-#### 1. **Users** - Gestión de usuarios/atletas
-
-- `POST /users` - Registrar nuevo usuario
-- `GET /users` - Obtener todos los usuarios
-- `GET /users/:id` - Obtener usuario específico
-- `PATCH /users/:id` - Actualizar usuario
-- `DELETE /users/:id` - Eliminar usuario
-
-#### 2. **Sports** - Catálogo de deportes
-
-- `POST /sports` - Crear deporte
-- `GET /sports` - Listar deportes
-- `GET /sports/:id` - Obtener deporte
-- `PATCH /sports/:id` - Actualizar deporte
-- `DELETE /sports/:id` - Eliminar deporte
-
-#### 3. **Events** - Gestión de torneos y eventos
-
-- `POST /events` - Crear evento
-- `GET /events` - Listar eventos
-- `GET /events/:id` - Obtener evento con detalles
-- `GET /events/:id/classification` - Obtener tabla de clasificación
-- `PATCH /events/:id` - Actualizar evento
-- `DELETE /events/:id` - Eliminar evento
-
-#### 4. **Matches** - Gestión de partidos
-
-- `POST /matches` - Crear partido
-- `GET /matches` - Listar partidos
-- `GET /matches/:id` - Obtener partido
-- `GET /matches/event/:eventId` - Obtener partidos de un evento
-- `POST /matches/:id/result` - Registrar resultado
-- `PATCH /matches/:id` - Actualizar partido
-- `DELETE /matches/:id` - Eliminar partido
-
-#### 5. **Classifications** - Tablas de clasificación dinámicas
-
-- `GET /classifications/event/:eventId` - Obtener tabla del evento
-- `POST /classifications/event/:eventId/team` - Agregar equipo a la tabla
-- `DELETE /classifications/:id` - Eliminar equipo de la tabla
-
-### Frontend (Next.js)
-
-#### Páginas Principales
-
-- `/` - Página de inicio
-- `/eventos` - Listado de eventos
-- `/eventos/[id]` - Detalles de evento, partidos y clasificación
-- `/clasificacion` - Tablas de clasificación por evento
-- `/noticias` - Noticias deportivas
-- `/perfil` - Perfil del usuario
-- `/registrar` - Registro de nuevos usuarios
-
-#### Componentes
-
-- **Navbar** - Navegación principal con enlaces a todas las secciones
-- Servicios HTTP para consumo de API
-
----
-
-## 🔒 Seguridad
-
-### Variables de Entorno (Backend)
-
-Archivo `.env` en `/server` (ya configurado):
-
-```
-NODE_ENV=development
-DATABASE_URL=postgresql://miki_user:7667@localhost:5432/zonesport_db
-JWT_SECRET=miki_secreto_2026_antioquia
-```
-
-### Variables de Entorno (Frontend)
-
-Archivo `.env.local` en `/client` (ya configurado):
-
-```
-NEXT_PUBLIC_API_URL=http://localhost:3001
-NODE_ENV=development
-```
-
-### Características de Seguridad Implementadas
-
-- ✅ Hashing de contraseñas con bcrypt
-- ✅ CORS habilitado para comunicación frontend-backend
-- ✅ Validación de datos con class-validator (DTOs)
-- ✅ TypeORM para protección contra SQL injection
-
----
-
-## 📊 Estructura de Base de Datos
-
-### Tablas Principales
-
-1. **users** - Atletas, organizadores, administradores
-2. **sports** - Catálogo de deportes (fútbol, tenis, etc.)
-3. **events** - Torneos y eventos
-4. **matches** - Partidos con resultados
-5. **classifications** - Tablas de clasificación dinámicas
-
-### Relaciones
-
-- User → Event (organizador)
-- Sport → Event
-- Event → Matches
-- Event → Classifications
-
----
-
-## 🎨 Guía de Estilos
-
-### Colores Corporativos
-
-- **Azul Profundo (#007ACC)**: Acciones, enlaces, elementos principales
-- **Verde Lima (#8BC34A)**: Éxito, victoria, ranking
-
-### Tipografía
-
-- **Poppins**: Fuente principal (encabezados, UI)
-- **JetBrains Mono**: Datos tabulares, resultados
-
-### Tema
-
-- Dark mode por defecto
-- Interfaz minimalista y moderna
-- Responsive en todos los dispositivos
-
----
-
-## 🧪 Testing
-
-### Backend
-
-```bash
-# Tests unitarios
-cd server
-npm run test
-
-# Tests end-to-end
-npm run test:e2e
-
-# Cobertura
-npm run test:cov
-```
-
-### Frontend
-
-```bash
-# ESLint
-cd client
-npm run lint
-```
-
----
-
-## 📈 Despliegue
-
-### Opciones de Hosting Gratuito
-
-- **Frontend**: [Vercel](https://vercel.com/) - Optimizado para Next.js
-- **Backend**: [Render](https://render.com/) - Servicio web gratuito
-- **Base de Datos**: [Render Postgres](https://render.com/) - PostgreSQL gratuito
-
----
-
-## 📝 Documentación Adicional
-
-El documento completo de especificaciones se encuentra en `ZoneSport.pdf`
-
----
-
-## 👥 Contribución
-
-Este es un proyecto educativo. Para sugerencias o mejoras, contacta al equipo de desarrollo.
+- **Documentación**: [SETUP.md](SETUP.md), [BACKEND.md](BACKEND.md), [FRONTEND.md](FRONTEND.md)
+- **API interactiva**: http://localhost:3001/api/docs
+- **Issues**: GitHub
 
 ---
 
 ## 📄 Licencia
 
-Este proyecto está bajo licencia UNLICENSED (Privada). Derechos reservados © 2026 ZoneSport Antioquia.
-
----
-
-## 🤝 Soporte
-
-Para reportar bugs o sugerir mejoras, abre un issue en el repositorio de GitHub.
-
----
-
-**Construido con ❤️ para la comunidad deportiva de Antioquia** 🏀⚽🎾
+Licencia privada. © 2026 ZoneSport
