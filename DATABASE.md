@@ -18,12 +18,14 @@ Guía completa sobre la base de datos PostgreSQL, migraciones y cómo usar TypeO
 ## 🎯 Visión General
 
 ### Tecnología
+
 - **SGBD**: PostgreSQL 16 (Alpine Docker)
 - **ORM**: TypeORM 0.3.28
 - **Driver**: pg (node-postgres)
 - **Versión Node**: v18+
 
 ### Características
+
 ✅ Esquema automático con `synchronize: true` (desarrollo)  
 ✅ Migraciones formales para producción  
 ✅ Relaciones tipadas entre entidades  
@@ -429,6 +431,7 @@ seed().catch(err => {
 ```
 
 **Ejecutar seed:**
+
 ```bash
 npm run seed
 ```
@@ -484,6 +487,7 @@ TypeOrmModule.forRoot({
 **Causa**: Tabla no existe (migración no ejecutada)
 
 **Solución**:
+
 ```bash
 npm run typeorm:run
 ```
@@ -493,6 +497,7 @@ npm run typeorm:run
 **Causa**: Intentas insertar email duplicado
 
 **Solución**:
+
 ```typescript
 // Validar antes de insertar
 const exists = await usersService.findByEmail(email);
@@ -504,6 +509,7 @@ if (exists) throw new ConflictException('Email ya existe');
 **Causa**: Código referencia columna que no existe en BD
 
 **Solución**:
+
 ```bash
 # Asegúrate de ejecutar migraciones
 npm run typeorm:run
@@ -513,11 +519,13 @@ npm run typeorm:show  # Ver estado
 ### Base de datos está lenta
 
 **Causas**:
+
 - Falta índices en columnas frecuentes
 - Conexiones sin cerrar
 - Queries mal optimizadas
 
 **Solución - agregar índices**:
+
 ```typescript
 @Entity()
 export class User {
