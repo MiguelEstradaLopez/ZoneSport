@@ -19,6 +19,7 @@
 ### Protección de .env
 
 El `.gitignore` protege automáticamente:
+
 ```gitignore
 .env
 .env.local
@@ -29,6 +30,7 @@ El `.gitignore` protege automáticamente:
 ### Variables de Entorno Requeridas
 
 #### Frontend (Next.js)
+
 ```env
 # .env.local o variables en Vercel dashboard
 NEXT_PUBLIC_API_URL=https://your-backend-api.render.com
@@ -37,6 +39,7 @@ NEXT_PUBLIC_API_URL=https://your-backend-api.render.com
 **⚠️ Nota**: `NEXT_PUBLIC_*` es visible en el navegador. Nunca incluya secretos aquí.
 
 #### Backend (NestJS)
+
 ```env
 # .env (NUNCA en .env.example con valores reales)
 DB_HOST=localhost
@@ -64,6 +67,7 @@ RESEND_DOMAIN=yourdomain.com
 ## 🔐 Generación de Secretos Seguros
 
 ### JWT Secrets
+
 ```bash
 # Generar un JWT_SECRET fuerte
 openssl rand -base64 32
@@ -73,6 +77,7 @@ openssl rand -base64 32
 ```
 
 ### Contraseñas de Base de Datos
+
 ```bash
 # Generar contraseña segura (mínimo 16 caracteres)
 openssl rand -base64 16
@@ -108,6 +113,7 @@ openssl rand -base64 16
 ## 🔍 Auditoría de Seguridad Periódica
 
 ### Verificar que no hay secretos en el repo
+
 ```bash
 # Buscar patrones de secretos
 git log --all --full-history -- '*.env'
@@ -116,6 +122,7 @@ git log -p --all -S 're_' -- '*.js' '*.ts'
 ```
 
 ### Archivos a revisar
+
 - ✅ .env.example (NUNCA con valores reales)
 - ✅ .gitignore (protege archivos sensibles)
 - ✅ vercel.json (NO contiene secretos)
@@ -144,6 +151,7 @@ git log -p --all -S 're_' -- '*.js' '*.ts'
    - Credenciales GitHub: Regenerar tokens personales
 
 2. **Limpiar historial de Git**
+
    ```bash
    # Opción 1: Reescribir historio (solo en repo local sin publicar)
    git filter-branch --tree-filter 'rm -f .env' -- --all
@@ -158,6 +166,7 @@ git log -p --all -S 're_' -- '*.js' '*.ts'
    ```
 
 3. **Auditar cambios recientes**
+
    ```bash
    git log --oneline -20  # Ver commits recientes
    git show <commit-hash>  # Revisar cambios
