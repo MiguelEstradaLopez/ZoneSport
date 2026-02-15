@@ -131,6 +131,7 @@ server/
 ### 1. **Auth Module** - Autenticación
 
 **¿Qué hace?**
+
 - Registra nuevos usuarios (crea cuenta)
 - Login (valida email + contraseña)
 - Recuperación de contraseña (envía email con link)
@@ -148,6 +149,7 @@ GET    /auth/validate-reset-token/:token  # Validar link de reset
 ```
 
 **Flujo de Registro:**
+
 ```
 1. Usuario llena formulario: email + contraseña
 2. Backend valida que email no exista
@@ -159,6 +161,7 @@ GET    /auth/validate-reset-token/:token  # Validar link de reset
 ```
 
 **Flujo de Login:**
+
 ```
 1. Usuario ingresa email + contraseña
 2. Backend busca usuario por email
@@ -172,6 +175,7 @@ GET    /auth/validate-reset-token/:token  # Validar link de reset
 ### 2. **Users Module** - Gestión de Usuarios
 
 **¿Qué hace?**
+
 - CRUD de usuarios (Create, Read, Update, Delete)
 - Búsqueda de usuarios
 - Gestión de roles (Atleta, Organizador, Admin)
@@ -209,6 +213,7 @@ DELETE /users/:id                  # Eliminar usuario
 ### 3. **Events Module** - Gestión de Eventos/Torneos
 
 **¿Qué hace?**
+
 - Crear eventos (torneos de fútbol, tenis, etc.)
 - Listar eventos
 - Ver detalles del evento
@@ -249,6 +254,7 @@ GET    /events/:id/classification  # Ver tabla de posiciones
 ### 4. **Matches Module** - Partidos
 
 **¿Qué hace?**
+
 - Crear partidos dentro de un evento
 - Registrar resultados (marcador)
 - Listar partidos de un evento
@@ -283,6 +289,7 @@ GET    /matches/event/:eventId     # Ver partidos del evento
 ```
 
 Cuando se registra un resultado (3-2), el sistema **automáticamente**:
+
 - Suma puntos en la clasificación
 - Actualiza racha de victorias/derrotas
 - Reordena la tabla de posiciones
@@ -292,6 +299,7 @@ Cuando se registra un resultado (3-2), el sistema **automáticamente**:
 ### 5. **Sports Module** - Catálogo de Deportes
 
 **¿Qué hace?**
+
 - Listar deportes disponibles (Fútbol, Tenis, Básquet, etc.)
 - Admin puede agregar nuevos deportes
 
@@ -320,6 +328,7 @@ DELETE /sports/:id                 # Eliminar (admin)
 ### 6. **Classifications Module** - Tablas de Posiciones
 
 **¿Qué hace?**
+
 - Genera tabla de posiciones automáticamente
 - Rankea equipos por victorias, puntos, diferencia
 - Se actualiza cuando hay resultados
@@ -353,6 +362,7 @@ DELETE /classifications/:id             # Eliminar de tabla
 ### 7. **News Module** - Blog de Noticias
 
 **¿Qué hace?**
+
 - Publicar noticias/artículos sobre eventos
 - Listar noticias
 - Solo admin/organizador puede publicar
@@ -372,6 +382,7 @@ DELETE /news/:id                   # Eliminar (autor/admin)
 ### 8. **Email Module** - Servicio de Correo
 
 **¿Qué hace?**
+
 - Envía email de bienvenida al registrar
 - Envía email de reset de contraseña
 - Envía notificaciones generales
@@ -385,11 +396,13 @@ Usa **Resend API** (alternativa moderna a SendGrid).
 ## 🌐 API REST
 
 ### Base URL
+
 ```
 http://localhost:3001
 ```
 
 ### Documentación Interactiva (Swagger)
+
 ```
 http://localhost:3001/api/docs
 ```
@@ -438,6 +451,7 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4
 ```
 
 Tiene 3 partes separadas por punto (`.`):
+
 1. **Header** - Algoritmo y tipo
 2. **Payload** - Datos del usuario
 3. **Signature** - Firma de seguridad
@@ -597,108 +611,400 @@ npm run lint:fix
 nest generate module newfeature
 nest generate controller newfeature
 nest generate service newfeature
+---
+
+## 🗂️ Estructura del Backend (Detallada)
+
 ```
 
-2. **Crear la entidad (Entity):**
+server/
+├── src/
+│   ├── main.ts                  → Entry point (puerto 3001)
+│   ├── app.module.ts            → Configuración principal
+│   ├── app.controller.ts        → Health check
+│   ├── app.service.ts           → Lógica base
+│   │
+│   ├── auth/
+│   │   ├── auth.controller.ts   → Endpoints: login, register, forgot-password
+│   │   ├── auth.service.ts      → JWT, bcrypt, tokens
+│   │   ├── auth.module.ts
+│   │   ├── auth.guard.ts        → Protege rutas autenticadas
+│   │   ├── decorators/
+│   │   │   ├── current-user.decorator.ts
+│   │   │   └── roles.decorator.ts
+│   │   ├── dtos/
+│   │   │   ├── login.dto.ts
+│   │   │   ├── register.dto.ts
+│   │   │   └── forgot-password.dto.ts
+│   │   ├── entities/
+│   │   │   └── password-reset-token.entity.ts
+│   │   └── strategies/
+│   │       └── jwt.strategy.ts
+│   │
+│   ├── users/
+│   │   ├── user.entity.ts       → User { id, email, password, role, ... }
+│   │   ├── users.controller.ts  → GET /users, GET /users/:id
+│   │   ├── users.service.ts     → CRUD de usuarios
+│   │   └── users.module.ts
+│   │
+│   ├── sports/
+│   │   ├── sport.entity.ts      → Sport { id, name, rules, ... }
+│   │   ├── sports.controller.ts → CRUD de deportes
+│   │   ├── sports.service.ts
+│   │   ├── sports.module.ts
+│   │   └── dtos/
+│   │
+│   ├── events/
+│   │   ├── event.entity.ts      → Event { id, name, status, organizer, sport, ... }
+│   │   ├── events.controller.ts → POST, GET, PATCH /events
+│   │   ├── events.service.ts    → Lógica de eventos
+│   │   ├── events.module.ts
+│   │   └── dtos/
+│   │
+│   ├── matches/
+│   │   ├── match.entity.ts      → Match { id, teamA, teamB, score, status, ... }
+│   │   ├── matches.controller.ts
+│   │   ├── matches.service.ts      → Actualizar scores → recalcula clasificación
+│   │   ├── matches.module.ts
+│   │   └── dtos/
+│   │
+│   ├── classifications/
+│   │   ├── classification.entity.ts  → Classification { teamName, points, wins, ... }
+│   │   ├── classifications.controller.ts  → GET /classifications
+│   │   ├── classifications.service.ts     → Cálculo automático de posiciones
+│   │   └── classifications.module.ts
+│   │
+│   ├── news/
+│   │   ├── news.entity.ts       → News { id, title, content, author, ... }
+│   │   ├── news.controller.ts   → CRUD de noticias
+│   │   ├── news.service.ts
+│   │   ├── news.module.ts
+│   │   └── dtos/
+│   │
+│   └── email/
+│       ├── email.service.ts     → Envío de emails (Resend)
+│       └── email.module.ts
+│
+├── package.json
+├── tsconfig.json
+├── tsconfig.build.json
+└── nest-cli.json
 
+```
+
+---
+
+## 📊 Modelos de Datos (Relaciones)
+
+```
+
+┌──────────────────────────────────────┐
+│ User (Usuarios)                      │
+├──────────────────────────────────────┤
+│ id (PK)                              │
+│ email (unique)                       │
+│ password (bcrypted)                  │
+│ firstName, lastName                  │
+│ phone?                               │
+│ role (ATHLETE | ORGANIZER | ADMIN)  │
+│ createdAt, updatedAt                 │
+└──────────────────────────────────────┘
+         ↓ organizedEvents
+
+┌──────────────────────────────────────┐
+│ Event (Eventos/Torneos)              │
+├──────────────────────────────────────┤
+│ id (PK)                              │
+│ name                                 │
+│ description?                         │
+│ status (SCHEDULED|IN_PROGRESS|FINISHED)
+│ startDate, endDate?                  │
+│ organizerId (FK: User)               │
+│ sportId (FK: Sport)                  │
+│ createdAt, updatedAt                 │
+└──────────────────────────────────────┘
+     ↓ matches          ↓ classifications
+
+┌──────────────────┐    ┌─────────────────────────┐
+│ Match (Partidos) │    │ Classification (Tabla)  │
+├──────────────────┤    ├─────────────────────────┤
+│ id (PK)          │    │ id (PK)                 │
+│ teamA, teamB     │    │ teamName                │
+│ scoreA?, scoreB? │    │ points (total)          │
+│ status           │    │ wins, draws, losses     │
+│ scheduledDate    │    │ goalsFor/Against        │
+│ eventId (FK)     │    │ position (ranking)      │
+└──────────────────┘    │ eventId (FK)            │
+                        └─────────────────────────┘
+
+┌──────────────────────────────────────┐
+│ Sport (Deportes)                     │
+├──────────────────────────────────────┤
+│ id (PK)                              │
+│ name (unique)                        │
+│ description?                         │
+│ classificationRules (JSON)           │
+│   - pointsForWin: 3                  │
+│   - pointsForDraw: 1                 │
+│   - pointsForLoss: 0                 │
+└──────────────────────────────────────┘
+
+┌────────────────────────────────────┐
+│ News (Noticias/Blog)               │
+├────────────────────────────────────┤
+│ id (PK)                            │
+│ title                              │
+│ content                            │
+│ summary?                           │
+│ imageUrl?                          │
+│ authorId (FK: User)                │
+│ createdAt, updatedAt               │
+└────────────────────────────────────┘
+
+┌──────────────────────────────────────┐
+│ PasswordResetToken (Tokens)          │
+├──────────────────────────────────────┤
+│ id (PK)                              │
+│ token (unique)                       │
+│ userId (FK: User)                    │
+│ expires (expiresAt)                  │
+└──────────────────────────────────────┘
+
+```
+
+---
+
+## 🔗 Endpoints Principales (API REST)
+
+### Autenticación
+```
+
+POST   /auth/register           → Crear cuenta { email, password, firstName, lastName }
+POST   /auth/login              → Login { email, password } → { accessToken }
+POST   /auth/forgot-password    → Solicitar reset { email } → envía email
+POST   /auth/reset-password     → Cambiar contraseña { token, newPassword }
+
+```
+
+### Usuarios
+```
+
+GET    /users                   → Listar usuarios
+GET    /users/:id               → Obtener usuario
+GET    /users/me                → Perfil actual
+PATCH  /users/:id               → Actualizar usuario
+DELETE /users/:id               → Eliminar usuario
+SEARCH /users/search?q=...      → Buscar usuarios
+
+```
+
+### Deportes
+```
+
+GET    /sports                  → Listar deportes
+GET    /sports/:id              → Obtener deporte
+POST   /sports                  → Crear deporte (ADMIN)
+PATCH  /sports/:id              → Actualizar deporte (ADMIN)
+DELETE /sports/:id              → Eliminar deporte (ADMIN)
+
+```
+
+### Eventos
+```
+
+GET    /events                  → Listar eventos
+GET    /events/:id              → Obtener evento + matches + clasificación
+POST   /events                  → Crear evento (ORGANIZER+)
+PATCH  /events/:id              → Actualizar evento
+DELETE /events/:id              → Eliminar evento
+
+```
+
+### Partidos
+```
+
+GET    /matches                 → Listar partidos
+GET    /matches/:id             → Obtener partido
+POST   /matches                 → Crear partido { teamA, teamB, scheduledDate, eventId }
+PATCH  /matches/:id             → Actualizar resultado { scoreA, scoreB, status }
+        → Trigger: recalcula clasificación automáticamente
+DELETE /matches/:id             → Eliminar partido
+
+```
+
+### Clasificaciones
+```
+
+GET    /classifications?eventId=... → Obtener tabla de posiciones (ordenada por puntos)
+
+```
+
+### Noticias
+```
+
+GET    /news                    → Listar noticias
+GET    /news/:id                → Obtener noticia
+POST   /news                    → Crear noticia { title, content, imageUrl? }
+PATCH  /news/:id                → Actualizar noticia
+DELETE /news/:id                → Eliminar noticia
+
+```
+
+---
+
+## 🔐 Seguridad & Roles
+
+### Roles de Usuario
 ```typescript
-// src/newfeature/newfeature.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-
-@Entity()
-export class NewFeature {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column({ type: 'varchar', length: 100 })
-  name: string;
+enum UserRole {
+  ATHLETE = 'ATHLETE',        // Usuario normal
+  ORGANIZER = 'ORGANIZER',    // Puede crear eventos
+  ADMIN = 'ADMIN',            // Acceso total (gestión)
 }
 ```
 
-3. **Crear DTOs para validación:**
+### Protección de Rutas
 
 ```typescript
-// src/newfeature/dtos/create-newfeature.dto.ts
-export class CreateNewFeatureDto {
-  name: string;
+// Guards automáticos
+@UseGuards(JwtAuthGuard)       // Requiere autenticación
+@Roles(UserRole.ADMIN)         // Requiere rol ADMIN
+```
+
+**Ejemplo:**
+
+```typescript
+@Post('/sports')
+@UseGuards(JwtAuthGuard)
+@Roles(UserRole.ADMIN)
+createSport(@Body() dto: CreateSportDto) {
+  // Solo ADMIN puede crear deportes
 }
 ```
 
-4. **Implementar el servicio:**
+---
 
-```typescript
-// src/newfeature/newfeature.service.ts
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { NewFeature } from './newfeature.entity';
+## 🔄 Flujos Importantes
 
-@Injectable()
-export class NewFeatureService {
-  constructor(
-    @InjectRepository(NewFeature)
-    private repository: Repository<NewFeature>,
-  ) {}
+### 1️⃣ Crear Evento
 
-  async findAll() {
-    return this.repository.find();
-  }
-
-  async create(data: CreateNewFeatureDto) {
-    return this.repository.save(data);
-  }
-}
+```
+Frontend POST /events
+  ↓
+EventsController valida token + rol
+  ↓
+EventsService crea en DB
+  ↓
+Retorna: { id, name, sport, status, matches: [], classifications: [] }
 ```
 
-5. **Crear el controlador:**
+### 2️⃣ Actualizar Resultado de Partido
 
-```typescript
-// src/newfeature/newfeature.controller.ts
-import { Controller, Get, Post, Body } from '@nestjs/common';
-import { NewFeatureService } from './newfeature.service';
-import { CreateNewFeatureDto } from './dtos/create-newfeature.dto';
-
-@Controller('newfeature')
-export class NewFeatureController {
-  constructor(private service: NewFeatureService) {}
-
-  @Get()
-  findAll() {
-    return this.service.findAll();
-  }
-
-  @Post()
-  create(@Body() data: CreateNewFeatureDto) {
-    return this.service.create(data);
-  }
-}
+```
+Frontend PATCH /matches/:id { scoreA: 2, scoreB: 1 }
+  ↓
+MatchesController valida
+  ↓
+MatchesService actualiza partido
+  ↓
+ClassificationsService recalcula tabla automáticamente
+  → Suma puntos (3 pts = victoria, 1 = empate, 0 = derrota)
+  → Actualiza golesFor/Against
+  → Reordena posiciones
+  ↓
+Retorna: partido actualizado + clasificación nueva
 ```
 
-6. **Registrar en el módulo:**
+### 3️⃣ Solicitar Reset de Contraseña
 
-```typescript
-// src/newfeature/newfeature.module.ts
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { NewFeatureService } from './newfeature.service';
-import { NewFeatureController } from './newfeature.controller';
-import { NewFeature } from './newfeature.entity';
-
-@Module({
-  imports: [TypeOrmModule.forFeature([NewFeature])],
-  controllers: [NewFeatureController],
-  providers: [NewFeatureService],
-})
-export class NewFeatureModule {}
+```
+Frontend POST /auth/forgot-password { email }
+  ↓
+AuthService genera token temporal (1 hora)
+  ↓
+EmailService envía email con link:
+  https://zonesport.vercel.app/reset-password/[token]
+  ↓
+Usuario recibe email, hace clic
+  ↓
+Frontend POST /auth/reset-password { token, newPassword }
+  ↓
+Backend valida token, actualiza password con bcrypt
 ```
 
-7. **Agregar a app.module.ts:**
+---
 
-```typescript
-imports: [
-  // ... otros módulos
-  NewFeatureModule,
-]
+## 🔧 Variables de Entorno Necesarias
+
+Ver [.env.example](/.env.example) en la raíz.
+
+```env
+# Database
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=miki_user
+DB_PASSWORD=7667
+DB_NAME=zonesport_db
+
+# JWT
+JWT_SECRET=your_very_long_jwt_secret_minimum_32_chars
+JWT_RESET_SECRET=your_very_long_reset_secret_minimum_32_chars
+JWT_EXPIRATION=24h
+
+# Server
+NODE_ENV=development
+PORT=3001
+
+# Frontend
+CORS_ORIGIN=http://localhost:3000
+FRONTEND_URL=http://localhost:3000
+
+# Email (Resend)
+RESEND_API_KEY=re_your_api_key
+RESEND_FROM_EMAIL=noreply@yourdomain.com
+
+# Frontend public
+NEXT_PUBLIC_API_URL=http://localhost:3001
+```
+
+---
+
+## 🧪 Testing de Endpoints
+
+### Con cURL
+
+```bash
+# Login
+curl -X POST http://localhost:3001/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"password123"}'
+
+# Obtener eventos (con token)
+curl http://localhost:3001/events \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE"
+
+# Crear evento
+curl -X POST http://localhost:3001/events \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "name": "Torneo Futbol 2026",
+    "sportId": 1,
+    "startDate": "2026-03-01T10:00:00Z"
+  }'
+```
+
+### Con Postman o Insomnia
+
+1. Importar: [Server URL]/api/docs (Swagger)
+2. Hacer requests desde UI
+3. Automáticamente incluye Bearer token
+
+### Con curl desde la terminal
+
+```bash
+# Acceder a docs Swagger
+open http://localhost:3001/api/docs
 ```
 
 ---
@@ -706,11 +1012,16 @@ imports: [
 ## 📚 Recursos Útiles
 
 - [NestJS Documentation](https://docs.nestjs.com/)
+- [NestJS Guards](https://docs.nestjs.com/guards)
+- [NestJS Interceptors](https://docs.nestjs.com/interceptors)
 - [TypeORM Documentation](https://typeorm.io/)
-- [JWT en NestJS](https://docs.nestjs.com/security/authentication)
-- [Swagger en NestJS](https://docs.nestjs.com/openapi/introduction)
+- [TypeORM Relations](https://typeorm.io/relations)
+- [JWT Authentication](https://docs.nestjs.com/security/authentication)
+- [bcryptjs Documentation](https://github.com/dcodeIO/bcrypt.js)
+- [Swagger/OpenAPI en NestJS](https://docs.nestjs.com/openapi/introduction)
 
 ---
 
-**Última actualización**: 12 de Febrero de 2026  
-**Versión**: 1.0.0
+**Última actualización**: 15 de Febrero de 2026  
+**Versión**: 2.0.0  
+**Mantenedor**: Miguel Estrada López
