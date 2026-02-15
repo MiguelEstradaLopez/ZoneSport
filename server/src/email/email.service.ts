@@ -3,15 +3,17 @@ import { Resend } from 'resend';
 
 @Injectable()
 export class EmailService {
-  private resend: Resend;
+  private resend: Resend | null = null;
 
   constructor() {
-    // Configurar Resend con API key
+    // Configurar Resend con API key (opcional en desarrollo)
     const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) {
-      throw new Error('RESEND_API_KEY is not configured in environment variables');
+    if (apiKey && !apiKey.includes('placeholder')) {
+      this.resend = new Resend(apiKey);
+      console.log('[EMAIL] Resend API configured and ready');
+    } else {
+      console.warn('[EMAIL] Resend API key not configured - emails will not be sent (OK for development)');
     }
-    this.resend = new Resend(apiKey);
   }
 
   async sendPasswordResetEmail(
@@ -19,6 +21,10 @@ export class EmailService {
     firstName: string,
     resetLink: string,
   ): Promise<void> {
+    if (!this.resend) {
+      console.log(`[EMAIL] (Mock) Password reset email would be sent to ${email} - Configure RESEND_API_KEY to enable`);
+      return;
+    }
     try {
       await this.resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL || 'noreply@zonesport.com',
@@ -52,6 +58,10 @@ export class EmailService {
   }
 
   async sendWelcomeEmail(email: string, firstName: string): Promise<void> {
+    if (!this.resend) {
+      console.log(`[EMAIL] (Mock) Welcome email would be sent to ${email} - Configure RESEND_API_KEY to enable`);
+      return;
+    }
     try {
       await this.resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL || 'noreply@zonesport.com',

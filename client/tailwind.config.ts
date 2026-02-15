@@ -8,18 +8,24 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Colores principales ZoneSport
-        'zs': {
-          'dark': '#0f172a',      // Azul oscuro - fondo principal
-          'darker': '#0a0f1a',    // Azul aún más oscuro - fondos secundarios
-          'blue': '#0d47a1',      // Azul profundo - títulos
-          'blue-light': '#1e88e5', // Azul claro - acentos y hover
-          'green': '#7cb342',     // Verde lima - enlaces principales
-          'green-light': '#9ccc65', // Verde lima claro - enlaces hover
-          'text': '#ffffff',      // Blanco - texto principal
-          'text-secondary': '#b0b0b0', // Gris claro - texto secundario
-          'border': '#1e293b',    // Gris oscuro para bordes
-        }
+        // Paleta de colores corporativa ZoneSport
+        'zonesport': {
+          'bg-dark': '#0d1b2a',        // Azul muy oscuro - fondo principal
+          'blue': '#007ACC',            // Azul profundo - botones primarios
+          'blue-hover': '#0062A3',      // Azul hover (15% más oscuro)
+          'lime': '#8BC34A',            // Verde lima - títulos y headings
+          'link': '#6B9B37',            // Verde suave - enlaces y elementos secundarios
+        },
+        // Colores antiguos mantenidos para compatibilidad
+        'zs-dark': '#0d1b2a',      // Azul oscuro actualizado
+        'zs-darker': '#0a0f1a',    // Azul aún más oscuro
+        'zs-blue': '#007ACC',      // Azul primario actualizado
+        'zs-blue-light': '#0062A3', // Azul hover actualizado
+        'zs-green': '#8BC34A',     // Verde lima actualizado
+        'zs-green-light': '#6B9B37', // Verde suave actualizado
+        'zs-text': '#ffffff',      // Blanco - texto principal
+        'zs-text-secondary': '#b0b0b0', // Gris claro - texto secundario
+        'zs-border': '#1e293b',    // Gris oscuro para bordes
       },
       fontSize: {
         'title-h1': ['2.5rem', { lineHeight: '3rem', fontWeight: '700' }],

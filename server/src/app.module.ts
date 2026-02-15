@@ -21,7 +21,7 @@ import { PasswordResetToken } from './auth/entities/password-reset-token.entity'
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '../.env',
+      envFilePath: '.env',
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',

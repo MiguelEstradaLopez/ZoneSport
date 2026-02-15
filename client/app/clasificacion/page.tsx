@@ -94,7 +94,7 @@ export default function ClasificacionPage() {
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
-                                        <tr className=\"table-header\">
+                                        <tr className="table-header">
                                             <th className="text-left py-3 px-4 text-zs-text-secondary font-semibold">#</th>
                                             <th className="text-left py-3 px-4 text-zs-text-secondary font-semibold">Equipo</th>
                                             <th className="text-center py-3 px-4 text-zs-text-secondary font-semibold">PJ</th>

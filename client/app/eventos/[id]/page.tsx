@@ -131,7 +131,7 @@ export default function EventDetailPage() {
                                 <div className="space-y-3">
                                     {clasificacion.length > 0 ? (
                                         clasificacion.map((team) => (
-                                            <div key={team.id} className="team-card\">
+                                            <div key={team.id} className="team-card">
                                                 <div className="flex items-center justify-between mb-2">
                                                     <span className="font-bold text-lg text-zs-blue">#{team.position}</span>
                                                     <span className="font-semibold text-sm">{team.teamName}</span>
