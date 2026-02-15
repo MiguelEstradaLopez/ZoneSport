@@ -1,0 +1,17 @@
+server
+server/.git
+server/.gitignore
+server/node_modules
+server/dist
+server/.env
+server/.env.local
+server/README.md
+server/docs
+
+.git
+.gitignore
+.env
+.env.local
+.DS_Store
+*.md
+!README.md

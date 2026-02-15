@@ -1,0 +1,61 @@
+services:
+  - type: web
+    name: zonesport-frontend
+    env: node
+    plan: starter
+    buildCommand: cd client && npm install && npm run build
+    startCommand: cd client && npm run start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        scope: run
+        value: ${NEXT_PUBLIC_API_URL}
+      - key: NODE_ENV
+        value: production
+
+  - type: web
+    name: zonesport-backend
+    env: node
+    plan: starter
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm run start:prod
+    envVars:
+      - key: DB_HOST
+        value: ${DB_HOST}
+      - key: DB_PORT
+        value: 5432
+      - key: DB_USERNAME
+        value: ${DB_USERNAME}
+      - key: DB_PASSWORD
+        scope: secret
+        value: ${DB_PASSWORD}
+      - key: DB_NAME
+        value: ${DB_NAME}
+      - key: JWT_SECRET
+        scope: secret
+        value: ${JWT_SECRET}
+      - key: JWT_RESET_SECRET
+        scope: secret
+        value: ${JWT_RESET_SECRET}
+      - key: CORS_ORIGIN
+        value: https://${RENDER_EXTERNAL_URL}
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+
+  - type: pserv
+    name: zonesport-database
+    env: docker
+    plan: starter
+    dockerCommand: |
+      docker run -e POSTGRES_USER=${DB_USERNAME} \
+        -e POSTGRES_PASSWORD=${DB_PASSWORD} \
+        -e POSTGRES_DB=${DB_NAME} \
+        -p 5432:5432 \
+        postgres:16-alpine
+
+databases:
+  - name: zonesport-db
+    databaseName: ${DB_NAME}
+    user: ${DB_USERNAME}
+    plan: starter
