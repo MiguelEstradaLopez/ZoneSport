@@ -5,8 +5,8 @@ Este documento contiene instrucciones para desplegar ZoneSport en Vercel y Rende
 ## 📋 Requisitos Previos
 
 - Repositorio Git en GitHub/GitLab
-- Cuenta en Vercel (https://vercel.com)
-- Cuenta en Render (https://render.com)
+- Cuenta en Vercel (<https://vercel.com>)
+- Cuenta en Render (<https://render.com>)
 - Variables de entorno configuradas
 
 ## 🚀 Deployment en Vercel (Frontend)
@@ -14,7 +14,7 @@ Este documento contiene instrucciones para desplegar ZoneSport en Vercel y Rende
 ### Opción 1: Usando Vercel Dashboard
 
 1. **Conectar Repositorio**
-   - Ir a https://vercel.com/new
+   - Ir a <https://vercel.com/new>
    - Seleccionar "Import Git Repository"
    - Conectar cuenta GitHub y seleccionar el repositorio ZoneSport
    - Hacer click en "Import"
@@ -30,9 +30,11 @@ Este documento contiene instrucciones para desplegar ZoneSport en Vercel y Rende
 3. **Variables de Entorno**
    - Click en "Environment Variables"
    - Agregar:
+
      ```
      NEXT_PUBLIC_API_URL = https://zonesport-api.render.com
      ```
+
    - O la URL de tu backend en producción
 
 4. **Deploy**
@@ -59,7 +61,7 @@ vercel --prod --env NEXT_PUBLIC_API_URL=https://tu-backend.url
 ### Para el Frontend
 
 1. **Crear Nuevo Servicio Web**
-   - Ir a https://dashboard.render.com/new/web
+   - Ir a <https://dashboard.render.com/new/web>
    - Conectar repositorio GitHub
    - Seleccionar `ZoneSport`
    - Click en "Connect"
@@ -69,19 +71,24 @@ vercel --prod --env NEXT_PUBLIC_API_URL=https://tu-backend.url
    - **Environment**: Node
    - **Region**: Frankfurt (u otra más cercana)
    - **Branch**: `main`
-   - **Build Command**: 
+   - **Build Command**:
+
      ```bash
      cd client && npm install && npm run build
      ```
+
    - **Start Command**:
+
      ```bash
      cd client && npm run start
      ```
+
    - **Plan**: Starter (gratuito) o Pro según necesidad
 
 3. **Agregar Variables de Entorno**
    - Click en "Environment"
    - Agregar:
+
      ```
      NEXT_PUBLIC_API_URL = https://zonesport-api.onrender.com
      NODE_ENV = production
@@ -93,7 +100,7 @@ vercel --prod --env NEXT_PUBLIC_API_URL=https://tu-backend.url
 ### Para el Backend
 
 1. **Crear Nuevo Servicio Web**
-   - Ir a https://dashboard.render.com/new/web
+   - Ir a <https://dashboard.render.com/new/web>
    - Conectar repositorio GitHub
    - Seleccionar `ZoneSport`
 
@@ -101,11 +108,14 @@ vercel --prod --env NEXT_PUBLIC_API_URL=https://tu-backend.url
    - **Name**: `zonesport-api`
    - **Environment**: Node
    - **Branch**: `main`
-   - **Build Command**: 
+   - **Build Command**:
+
      ```bash
      cd server && npm install && npm run build
      ```
+
    - **Start Command**:
+
      ```bash
      cd server && npm run start:prod
      ```
@@ -113,6 +123,7 @@ vercel --prod --env NEXT_PUBLIC_API_URL=https://tu-backend.url
 3. **Agregar Variables de Entorno**
    - Click en "Environment"
    - Agregar todas estas variables:
+
      ```
      DB_HOST = localhost
      DB_PORT = 5432
@@ -132,7 +143,7 @@ vercel --prod --env NEXT_PUBLIC_API_URL=https://tu-backend.url
 ### Para la Base de Datos
 
 1. **Crear PostgreSQL Database**
-   - Ir a https://dashboard.render.com/new/database
+   - Ir a <https://dashboard.render.com/new/database>
    - **Name**: `zonesport-db`
    - **Database**: PostgreSQL
    - **Version**: 16
@@ -148,11 +159,13 @@ vercel --prod --env NEXT_PUBLIC_API_URL=https://tu-backend.url
 ## 📝 Variables de Entorno Requeridas
 
 ### Frontend (.env.local)
+
 ```env
 NEXT_PUBLIC_API_URL=https://zonesport-api.onrender.com
 ```
 
 ### Backend (.env)
+
 ```env
 # Base de Datos
 DB_HOST=localhost
@@ -178,20 +191,24 @@ NODE_ENV=production
 ## 🔧 Troubleshooting
 
 ### Error: "Expected unicode escape" en Vercel
+
 - **Solución**: Verificar que no hay comillas escapadas (`\"`) en archivos `.tsx`
 - Usar búsqueda grep: `grep -r '\\\"' client/app/`
 
 ### Error: "Cannot find module" en Render
+
 - **Solución**: Asegurar que el `build` se ejecutó correctamente
 - Verificar que todas las dependencias están en `package.json`
 - Limpiar caché: Ir a Settings > Clear Build Cache
 
 ### Database Connection Error
+
 - **Solución**: Verificar credenciales en variables de entorno
 - Confirmar que PostgreSQL está accesible desde Render
 - Para Render, usar la "Internal Database URL" en lugar de "External Database URL"
 
 ### CORS Errors
+
 - **Solución**: Actualizar `CORS_ORIGIN` con la URL correcta del frontend
 - En desarrollo: `http://localhost:3000`
 - En producción: `https://tu-frontend.onrender.com`
@@ -214,18 +231,22 @@ NODE_ENV=production
 ## 🔐 Seguridad
 
 ### JWT Secrets
+
 Generar secrets seguros:
+
 ```bash
 # En terminal
 openssl rand -base64 32
 ```
 
 ### Database Passwords
+
 - Usar contraseñas fuertes (mínimo 16 caracteres)
 - No compartir en repositorio público
 - Usar variables de entorno secretas
 
 ### CORS
+
 - Definir origen específico, nunca usar `*` en producción
 - Actualizar cuando cambies dominio
 
@@ -234,7 +255,7 @@ openssl rand -base64 32
 ## 📞 Soporte
 
 Para errores específicos, revisar:
+
 - Build logs en Vercel/Render dashboard
 - Consola del navegador (F12)
 - Network tab para errores de API
-

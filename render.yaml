@@ -20,15 +20,19 @@ services:
     startCommand: cd server && npm run start:prod
     envVars:
       - key: DB_HOST
+        scope: run
         value: ${DB_HOST}
       - key: DB_PORT
-        value: 5432
+        scope: run
+        value: ${DB_PORT}
       - key: DB_USERNAME
+        scope: secret
         value: ${DB_USERNAME}
       - key: DB_PASSWORD
         scope: secret
         value: ${DB_PASSWORD}
       - key: DB_NAME
+        scope: run
         value: ${DB_NAME}
       - key: JWT_SECRET
         scope: secret
@@ -37,25 +41,17 @@ services:
         scope: secret
         value: ${JWT_RESET_SECRET}
       - key: CORS_ORIGIN
-        value: https://${RENDER_EXTERNAL_URL}
+        scope: run
+        value: ${CORS_ORIGIN}
+      - key: FRONTEND_URL
+        scope: run
+        value: ${FRONTEND_URL}
+      - key: RESEND_API_KEY
+        scope: secret
+        value: ${RESEND_API_KEY}
       - key: NODE_ENV
+        scope: run
         value: production
       - key: PORT
+        scope: run
         value: 3001
-
-  - type: pserv
-    name: zonesport-database
-    env: docker
-    plan: starter
-    dockerCommand: |
-      docker run -e POSTGRES_USER=${DB_USERNAME} \
-        -e POSTGRES_PASSWORD=${DB_PASSWORD} \
-        -e POSTGRES_DB=${DB_NAME} \
-        -p 5432:5432 \
-        postgres:16-alpine
-
-databases:
-  - name: zonesport-db
-    databaseName: ${DB_NAME}
-    user: ${DB_USERNAME}
-    plan: starter

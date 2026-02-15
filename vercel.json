@@ -1,22 +1,11 @@
 {
     "buildCommand": "cd client && npm run build",
-    "installCommand": "npm install && cd client && npm install",
+    "installCommand": "cd client && npm install",
     "testCommand": "cd client && npm run lint",
     "outputDirectory": "client/.next",
-    "public": false,
-    "rewrites": [
-        {
-            "source": "/(.*)",
-            "destination": "/client"
-        }
-    ],
-    "functions": {
-        "api/**/*": {
-            "memory": 1024,
-            "maxDuration": 60
-        }
-    },
     "env": {
-        "NEXT_PUBLIC_API_URL": "@next_public_api_url"
+        "NEXT_PUBLIC_API_URL": {
+            "required": true
+        }
     }
 }

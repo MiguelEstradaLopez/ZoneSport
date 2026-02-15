@@ -1,0 +1,69 @@
+# Environment variables - CRÍTICO: NUNCA VERSIONAR
+.env
+.env.local
+.env.*.local
+.env.production.local
+
+# Node modules
+node_modules/
+dist/
+build/
+
+# Next.js
+.next/
+out/
+.env.*.local
+
+# NestJS
+dist/
+coverage/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+.DS_Store
+
+# OS
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Docker
+.dockerignore
+
+# Build artifacts
+*.tsbuildinfo
+
+# IDE/Editor files
+*.sublime-project
+*.sublime-workspace
+.vscode/
+.idea/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Secrets y credenciales
+*.pem
+*.key
+secrets/
+.aws/
+
+# Environment specifics
+.env.test
+.env.staging
+.env.production

@@ -1,11 +1,44 @@
-.git
+# GitHub and source control
+
+.git/
 .gitignore
+
+# Environment files and secrets
+
 .env
 .env.local
+.env.*.local
+
+# Vercel deployment
+
+vercel.json
+.vercelignore
+
+# OS files
+
 .DS_Store
+Thumbs.db
+
+# Do NOT ignore markdown - may have docs
+
 *.md
 !README.md
-node_modules
-.next
-dist
-build
+!BACKEND.md
+
+# Build outputs (will be rebuilt)
+
+node_modules/
+.next/
+dist/
+build/
+coverage/
+
+# IDE
+
+.vscode/
+.idea/
+*.swp
+
+# Development
+
+docker-compose.yml

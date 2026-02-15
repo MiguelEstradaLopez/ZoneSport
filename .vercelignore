@@ -1,17 +1,31 @@
-server
-server/.git
-server/.gitignore
-server/node_modules
-server/dist
-server/.env
-server/.env.local
-server/README.md
-server/docs
+# Backend server code (not needed for frontend-only Vercel deployment)
 
-.git
-.gitignore
+server/
+
+# Environment files and secrets
+
 .env
 .env.local
+.env.*.local
+
+# Git and documentation
+
+.git/
+.gitignore
 .DS_Store
+
+# Render deployment
+
+render.yaml
+.renderignore
+
+# Development files
+
+.npmrc
+docker-compose.yml
+env
+
+# Unnecessary markdown files
+
 *.md
 !README.md
