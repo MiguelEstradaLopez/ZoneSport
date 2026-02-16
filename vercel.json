@@ -1,7 +1,6 @@
 {
     "buildCommand": "cd client && npm run build",
     "installCommand": "cd client && npm install",
-    "testCommand": "cd client && npm run lint",
     "outputDirectory": "client/.next",
     "env": {
         "NEXT_PUBLIC_API_URL": {

@@ -1,13 +1,26 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as dotenv from 'dotenv';
 
 // Cargar variables de entorno desde .env
 dotenv.config();
 
+const logger = new Logger('Bootstrap');
+
 async function bootstrap() {
+  // Log environment configuration on startup
+  logger.log('='.repeat(60));
+  logger.log('🚀 ZONESPORT BACKEND - STARTING UP');
+  logger.log('='.repeat(60));
+  logger.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  logger.log(`Port: ${process.env.PORT || 3001}`);
+  logger.log(`Database Host: ${process.env.DATABASE_HOST ? 'CONFIGURED ✓' : 'NOT SET (using localhost)'}`);
+  logger.log(`Database Name: ${process.env.DATABASE_NAME || 'zonesport_db'}`);
+  logger.log(`Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);
+  logger.log('='.repeat(60));
+
   const app = await NestFactory.create(AppModule);
 
   // Configurar CORS - Permisivo en desarrollo, restrictivo en producción
