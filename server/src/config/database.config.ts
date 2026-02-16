@@ -13,17 +13,22 @@ import { PasswordResetToken } from '../auth/entities/password-reset-token.entity
  */
 export const getDatabaseConfig = (): TypeOrmModuleOptions => ({
     type: 'postgres',
-    host: process.env.DATABASE_HOST || 'localhost',
-    port: parseInt(process.env.DATABASE_PORT || '5432', 10),
-    username: process.env.DATABASE_USER || 'postgres',
-    password: process.env.DATABASE_PASSWORD,
-    database: process.env.DATABASE_NAME || 'zonesport_db',
+    // Prefer DATABASE_URL when available (useful for Render/managed PG services)
+    ...(process.env.DATABASE_URL
+        ? { url: process.env.DATABASE_URL }
+        : {
+              host: process.env.DATABASE_HOST || 'localhost',
+              port: parseInt(process.env.DATABASE_PORT || '5432', 10),
+              username: process.env.DATABASE_USER || 'postgres',
+              password: process.env.DATABASE_PASSWORD,
+              database: process.env.DATABASE_NAME || 'zonesport_db',
+          }),
     entities: [User, Sport, Event, Match, Classification, News, PasswordResetToken],
     synchronize: process.env.NODE_ENV === 'development',
     autoLoadEntities: true,
     logging: process.env.NODE_ENV === 'development',
     // SSL para producción (Render requiere conexiones seguras)
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    ssl: process.env.NODE_ENV === 'production' || !!process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
     // Pool de conexiones para producción
     ...(process.env.NODE_ENV === 'production' && {
         extra: {

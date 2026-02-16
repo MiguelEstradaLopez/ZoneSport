@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import axios from 'axios';
+import api from '../../../../services/api';
 
 export default function ResetPasswordPage() {
     const params = useParams();
@@ -24,9 +24,7 @@ export default function ResetPasswordPage() {
     useEffect(() => {
         const validateToken = async () => {
             try {
-                const response = await axios.get(
-                    `http://localhost:3001/auth/validate-reset-token/${token}`
-                );
+                const response = await api.get(`/auth/validate-reset-token/${token}`);
                 setUserEmail(response.data.email);
                 setTokenValid(true);
             } catch (err) {
@@ -77,7 +75,7 @@ export default function ResetPasswordPage() {
         }
 
         try {
-            await axios.post('http://localhost:3001/auth/reset-password', {
+            await api.post('/auth/reset-password', {
                 token,
                 newPassword,
             });

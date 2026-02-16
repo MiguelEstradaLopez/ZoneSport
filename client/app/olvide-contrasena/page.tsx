@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
+import api from '../../services/api';
 
 export default function ForgotPasswordPage() {
     const router = useRouter();
@@ -20,7 +20,7 @@ export default function ForgotPasswordPage() {
         setLoading(true);
 
         try {
-            const response = await axios.post('http://localhost:3001/auth/forgot-password', {
+            const response = await api.post('/auth/forgot-password', {
                 email,
             });
 
