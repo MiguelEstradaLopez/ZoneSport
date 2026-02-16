@@ -4,7 +4,37 @@ Documento consolidado con configuración, seguridad, base de datos y deployment.
 
 ---
 
-## 📋 Tabla de Contenidos
+## � DEPLOYMENT STATUS & IMPORTANT FIXES (Febrero 2026)
+
+**ÚLTIMA ACTUALIZACIÓN**: 2026-02-16
+
+### ✅ Problemas Resueltos Hoy
+
+1. **Vercel Schema Validation** ✅ FIXED
+   - Problema: `env.NEXT_PUBLIC_API_URL should be string`
+   - Solución: Removido env config de vercel.json
+   - Acción requerida: Set NEXT_PUBLIC_API_URL en Vercel Dashboard
+
+2. **Render Database Connection** 🔴 REQUIRES MANUAL SETUP
+   - Problema: Backend muestra `Database Host: NOT SET (using localhost)`
+   - Causa: Environment variables no están configuradas en Render dashboard
+   - Solución: Ver **[DEPLOYMENT_CONFIG.md](./DEPLOYMENT_CONFIG.md)** para instrucciones paso-a-paso
+
+### 📋 Quick Setup Checklist
+
+- [ ] Crear PostgreSQL en Render dashboard
+- [ ] Crear Web Service en Render dashboard
+- [ ] Copiar DATABASE_HOST, PORT, USER, PASSWORD desde PostgreSQL
+- [ ] Set todas las environment variables en Render web service
+- [ ] Verify backend logs muestren `Database Host: [IP]` (no localhost)
+- [ ] Set NEXT_PUBLIC_API_URL en Vercel dashboard
+- [ ] Test frontend → backend connectivity
+
+**👉 READ: [DEPLOYMENT_CONFIG.md](./DEPLOYMENT_CONFIG.md) for complete step-by-step guide**
+
+---
+
+## �📋 Tabla de Contenidos
 
 1. [Configuración de Workspaces](#1--configuración-de-workspaces)
 2. [Variables de Entorno](#2--variables-de-entorno-y-seguridad)
