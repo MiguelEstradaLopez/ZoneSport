@@ -9,8 +9,8 @@ import { PasswordResetToken } from '../auth/entities/password-reset-token.entity
 
 // Migrations must be loaded from dist/migrations in production
 const migrationsPath = process.env.NODE_ENV === 'production'
-  ? 'dist/migrations'
-  : 'src/migrations';
+    ? 'dist/migrations'
+    : 'src/migrations';
 
 /**
  * Configuración centralizada de TypeORM
