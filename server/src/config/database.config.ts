@@ -14,6 +14,28 @@ const getMigrationsPath = (): string => {
 };
 
 /**
+ * Determina dinámicamente si SSL debe estar habilitado
+ * - FALSE si: localhost, 127.0.0.1 o desarrollo local
+ * - TRUE si: producción (Render/cloud) con credenciales externas
+ */
+const getSSLConfig = (databaseUrl?: string, nodeEnv?: string): boolean | { rejectUnauthorized: false } => {
+    // Si hay DATABASE_URL, verificar si es local
+    if (databaseUrl) {
+        const isLocalUrl = databaseUrl.includes('localhost') || databaseUrl.includes('127.0.0.1');
+        // Local: no usar SSL, Cloud: usar SSL sin validar certificados
+        return isLocalUrl ? false : { rejectUnauthorized: false };
+    }
+
+    // Si estamos en producción sin DATABASE_URL (fallback a host/port), usar SSL
+    if (nodeEnv === 'production') {
+        return { rejectUnauthorized: false };
+    }
+
+    // En desarrollo (sin DATABASE_URL), no usar SSL
+    return false;
+};
+
+/**
  * Configuración centralizada de TypeORM
  * Acepta ConfigService como parámetro para inyección de dependencias
  * Asegura que todas las credenciales sean strings válidos
@@ -57,8 +79,8 @@ export const getDatabaseConfig = (configService?: ConfigService): TypeOrmModuleO
         synchronize: nodeEnv === 'development',
         autoLoadEntities: true,
         logging: nodeEnv === 'development',
-        // SSL para producción (Render requiere conexiones seguras)
-        ssl: nodeEnv === 'production' || !!databaseUrl ? { rejectUnauthorized: false } : false,
+        // Dynamic SSL configuration based on environment and URL
+        ssl: getSSLConfig(databaseUrl, nodeEnv),
         // Pool de conexiones para producción
         ...(nodeEnv === 'production' && {
             extra: {

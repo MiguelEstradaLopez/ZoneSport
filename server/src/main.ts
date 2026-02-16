@@ -16,22 +16,27 @@ async function bootstrap() {
   logger.log('='.repeat(60));
   logger.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   logger.log(`Port: ${process.env.PORT || 3001}`);
-  
+
   // Debug database configuration (secure - no passwords shown)
   const dbUrl = process.env.DATABASE_URL;
   const dbHost = process.env.DATABASE_HOST;
   const dbPassword = process.env.DATABASE_PASSWORD;
   const dbUser = process.env.DATABASE_USER;
-  
+  const nodeEnv = process.env.NODE_ENV || 'development';
+
   if (dbUrl) {
     logger.log('Database Config: DATABASE_URL is SET ✓ (production-ready)');
+    const isLocalUrl = dbUrl.includes('localhost') || dbUrl.includes('127.0.0.1');
+    logger.log(`Database SSL: ${isLocalUrl ? 'DISABLED (localhost detected)' : 'ENABLED (remote server)'}`);
   } else {
     logger.log(`Database Host: ${dbHost ? 'CONFIGURED ✓' : 'NOT SET (using localhost)'}`);
     logger.log(`Database User: ${dbUser || 'postgres'}`);
     logger.log(`Database Password: ${dbPassword ? 'SET ✓' : '❌ NOT SET - This will cause connection errors!'}`);
     logger.log(`Database Name: ${process.env.DATABASE_NAME || 'zonesport_db'}`);
+    const sslStatus = nodeEnv === 'production' ? 'ENABLED (production mode)' : 'DISABLED (development mode)';
+    logger.log(`Database SSL: ${sslStatus}`);
   }
-  
+
   logger.log(`Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);
   logger.log('='.repeat(60));
 
