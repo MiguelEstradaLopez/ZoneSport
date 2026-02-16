@@ -71,8 +71,9 @@ export default function LoginPage() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     onBlur={() => handleBlur('email')}
-                                    placeholder="Tu correo@gmail.com"
-                                    className="w-full bg-zonesport-bg-dark border border-zonesport-blue border-opacity-30 rounded px-4 py-3 pl-10 text-white placeholder-gray-500 focus:outline-none focus:border-zonesport-blue focus:border-opacity-100 focus:ring-2 focus:ring-zonesport-blue focus:ring-opacity-20 transition-all duration-200"
+                                    placeholder="Tucorreo@gmail.com"
+                                    className="w-full bg-zonesport-bg-dark border border-zonesport-blue border-opacity-30 rounded px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-zonesport-blue focus:border-opacity-100 focus:ring-2 focus:ring-zonesport-blue focus:ring-opacity-20 transition-all duration-200"
+                                    style={{ paddingLeft: '3rem'}}
                                     required
                                 />
                             </div>
@@ -92,7 +93,8 @@ export default function LoginPage() {
                                     onChange={(e) => setPassword(e.target.value)}
                                     onBlur={() => handleBlur('password')}
                                     placeholder="••••••••"
-                                    className="w-full bg-zonesport-bg-dark border border-zonesport-blue border-opacity-30 rounded px-4 py-3 pl-10 text-white placeholder-gray-500 focus:outline-none focus:border-zonesport-blue focus:border-opacity-100 focus:ring-2 focus:ring-zonesport-blue focus:ring-opacity-20 transition-all duration-200"
+                                    className="w-full bg-zonesport-bg-dark border border-zonesport-blue border-opacity-30 rounded px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-zonesport-blue focus:border-opacity-100 focus:ring-2 focus:ring-zonesport-blue focus:ring-opacity-20 transition-all duration-200"
+                                    style={{ paddingLeft: '3rem'}}
                                     required
                                 />
                             </div>
