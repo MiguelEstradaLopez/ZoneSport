@@ -5,6 +5,7 @@
 ### 1. Configuration
 
 The `vercel.json` is already configured with:
+
 - `root: "client"` - Tells Vercel the frontend is in the client/ subfolder
 - Build and install commands optimized for monorepo
 
@@ -23,6 +24,7 @@ NEXT_PUBLIC_API_URL = https://your-backend-render.onrender.com
 Push to GitHub → Vercel auto-deploys from `main` branch
 
 **Troubleshooting**: If build still fails with "cd: client: No such file", ensure:
+
 - Fork/clone has complete directory structure (including client/)
 - Run `git status` to verify client/ exists locally
 - Rebuild in Vercel dashboard (sometimes fixes build cache issues)
@@ -76,6 +78,7 @@ Go to your PostgreSQL service → Copy the "Internal Database URL"
 Example: `postgresql://user:password@dpg-xxxxx.render.com:5432/zonesport`
 
 Break it apart and add as:
+
 ```
 DATABASE_HOST = dpg-xxxxx.render.com
 DATABASE_PORT = 5432
