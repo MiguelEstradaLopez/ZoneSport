@@ -49,12 +49,13 @@ export const getDatabaseConfig = (configService?: ConfigService): TypeOrmModuleO
         return process.env[key] || defaultValue;
     };
 
-    const databaseUrl = getEnv('DATABASE_URL');
-    const databaseHost = getEnv('DATABASE_HOST', 'localhost');
-    const databasePort = parseInt(getEnv('DATABASE_PORT', '5432'), 10);
-    const databaseUser = getEnv('DATABASE_USER', 'postgres');
-    const databasePassword = getEnv('DATABASE_PASSWORD') || '';
-    const databaseName = getEnv('DATABASE_NAME', 'zonesport_db');
+    // Prefer DB_* variables (requested), fall back to DATABASE_* for compatibility
+    const databaseUrl = getEnv('DB_URL') || getEnv('DATABASE_URL');
+    const databaseHost = getEnv('DB_HOST') || getEnv('DATABASE_HOST') || 'localhost';
+    const databasePort = parseInt(getEnv('DB_PORT') || getEnv('DATABASE_PORT') || '5432', 10);
+    const databaseUser = getEnv('DB_USERNAME') || getEnv('DATABASE_USER') || 'postgres';
+    const databasePassword = getEnv('DB_PASSWORD') || getEnv('DATABASE_PASSWORD') || '';
+    const databaseName = getEnv('DB_NAME') || getEnv('DATABASE_NAME') || 'zonesport_db';
     const nodeEnv = getEnv('NODE_ENV', 'development');
 
     // Asegurar que password siempre sea string (crítico para TypeORM)
