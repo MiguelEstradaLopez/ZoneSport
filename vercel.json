@@ -1,4 +1,0 @@
-{
-    "installCommand": "sh -lc 'if [ -f client/package.json ]; then (cd client && npm install); elif [ -f package.json ]; then npm install; else echo "No package.json found" && exit 1; fi'",
-    "buildCommand": "sh -lc 'if [ -f client/package.json ]; then (cd client && npm run build); elif [ -f package.json ]; then npm run build; else echo "No package.json found" && exit 1; fi'"
-}
