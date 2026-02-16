@@ -1,39 +1,85 @@
 # ⚠️ INFORMACIÓN CRÍTICA - ZoneSport
 
-Documento consolidado con información de seguridad, base de datos, deployment y estructura de archivos. Lee esto después de README, SETUP, FRONTEND y BACKEND.
+Documento consolidado con configuración, seguridad, base de datos y deployment. Lee esto después de README, SETUP, FRONTEND y BACKEND.
 
 ---
 
 ## 📋 Tabla de Contenidos
 
-1. [Variables de Entorno y Seguridad](#1--variables-de-entorno-y-seguridad)
-2. [Base de Datos y Migraciones](#2--base-de-datos-y-migraciones)
-3. [Deployment en Producción](#3--deployment-en-producción)
-4. [Archivos de la Raíz](#4--archivos-de-la-raíz)
+1. [Configuración de Workspaces](#1--configuración-de-workspaces)
+2. [Variables de Entorno](#2--variables-de-entorno-y-seguridad)
+3. [Base de Datos](#3--base-de-datos-y-migraciones)
+4. [Deployment en Render + Vercel](#4--deployment-en-render--vercel)
+5. [Estructura de Archivos](#5--estructura-de-archivos)
 
 ---
 
-## 1. 🔐 Variables de Entorno y Seguridad
+## 1. � Configuración de Workspaces
 
-### REGLA DE ORO
+### NPM Workspaces en Raíz
 
+El `package.json` en raíz gestiona ambos subproyectos:
+
+```json
+{
+  "name": "zonesport",
+  "workspaces": ["server", "client"],
+  "scripts": {
+    Backend: server/.env.example
+
+```env
+# Base de datos
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USER=zonesport_user
+DATABASE_PASSWORD=your_secure_password_here_min_16_chars
+DATABASE_NAME=zonesport_db
+DATABASE_URL=postgresql://...
+
+# JWT Secrets (generar con: openssl rand -base64 32)
+JWT_SECRET=your_jwt_secret_here_min_32_chars
+JWT_RESET_SECRET=your_reset_secret_here_min_32_chars
+
+# Server
+NODE_ENV=development
+PORT=3001  ← Dinámico! Render lo cambia a 10000+
+
+# CORS (para Vercel en producción)
+FRONTEND_URL=http://localhost:3000
+CORS_ORIGIN=http://localhost:3000
+
+# Email
+RESEND_API_KEY=re_xxxxxxxxxxxxx
+SENDER_EMAIL=noreply@zonesport.com
 ```
-✅ TODO lo inseguro va en .env
-❌ .env NUNCA se commitea a Git (está en .gitignore)
-✅ Solo UN .env en la raíz
-✅ Un .env.example también en la raíz (PÚBLICO)
+
+### Frontend: client/.env.example
+
+```env
+# DEBE TENER PREFIJO NEXT_PUBLIC_ para accesibilidad en navegador
+NEXT_PUBLIC_API_URL=http://localhost:3001
 ```
 
-### Secretos que NO van en el código
+### Generar Secretos Seguros
 
-```typescript
-// ❌ NUNCA hacer esto
-const DB_PASSWORD = "7667";
-const JWT_SECRET = "mi-secret-super-secreto";
+```bash
+# JWT_SECRET (32 caracteres mínimo)
+openssl rand -base64 32
 
-// ✅ SIEMPRE así
-const DB_PASSWORD = process.env.DATABASE_PASSWORD;
-const JWT_SECRET = process.env.JWT_SECRET;
+# Contraseña BD (16 caracteres mínimo)
+openssl rand -base64 16
+```
+
+### Verificación Antes de Cada Commit
+
+```bash
+# 1. Confirmar que .env no está en Git
+git status | grep ".env"
+# Resultado: (nada)
+
+# 2. Buscar secretos hardcodeados
+git diff --cached | grep -E "password=|secret=|api.key="
+# Result= process.env.JWT_SECRET;
 ```
 
 ### Estructura del .env
@@ -59,7 +105,7 @@ NODE_ENV=development
 CORS_ORIGIN=http://localhost:3000
 NEXT_PUBLIC_API_URL=http://localhost:3001
 
-# EMAIL (opcional)
+# E3AIL (opcional)
 RESEND_API_KEY=your-resend-api-key-here
 SENDER_EMAIL=noreply@zonesport.com
 ```
@@ -118,51 +164,32 @@ users
 └── createdAt, updatedAt
 
 sports
-├── id (PK)
-├── name (UNIQUE)
-├── description
-└── classificationRules (JSON)
+├── Ubicación de Migraciones
 
-events
-├── id (PK)
-├── name, description
-├── status (ENUM: SCHEDULED, IN_PROGRESS, FINISHED)
-├── startDate, endDate
-├── organizerId (FK → users)
-├── sportId (FK → sports)
-└── createdAt, updatedAt
-
-matches
-├── id (PK)
-├── teamA, teamB
-├── scoreA, scoreB
-├── status (ENUM: SCHEDULED, IN_PROGRESS, PLAYED)
-├── scheduledDate
-├── eventId (FK → events CASCADE)
-└── createdAt, updatedAt
-
-classifications (rankings)
-├── id (PK)
-├── teamName, points, wins, draws, losses, goalsFor, goalsAgainst, position
-├── eventId (FK → events CASCADE)
-├── UNIQUE(eventId, teamName)
-└── createdAt, updatedAt
-
-news
-├── id (PK)
-├── title, content, summary
-├── imageUrl
-├── authorId (FK → users CASCADE)
-└── createdAt, updatedAt
-
-password_reset_token
-├── id (PK)
-├── token (UNIQUE)
-├── userId (FK → users CASCADE)
-├── expiresAt
-└── createdAt
+```
+server/src/migrations/
+├── 1708000001000-CreateUsersTable.ts
+├── 1708000002000-CreateSportsTable.ts
+├── 1708000003000-CreateEventsTable.ts
+├── 1708000004000-CreateMatchesTable.ts
+├── 1708000005000-CreateClassificationsTable.ts
+├── 1708000006000-CreateNewsTable.ts
+└── 1708000007000-CreatePasswordResetTokenTable.ts
 ```
 
+### Configuración de Migraciones
+
+**Desarrollo** (app.module.ts):
+```typescript
+synchronize: true        // Crea tablas automáticamente
+autoLoadEntities: true
+```
+
+**Producción** (app.module.ts):
+```typescript
+synchronize: false       // ❌ NUNCA en producción
+migrations: ['dist/migrations/*.js']
+migrationsRun: true      // Ejecuta migraciones al iniciar
 ### Migraciones TypeORM
 
 Ubicación: `server/src/migrations/`
@@ -184,94 +211,158 @@ npm run typeorm:drop
 ### Cambios a la BD (desarrollo vs producción)
 
 **Desarrollo** (`app.module.ts`):
+
 ```typescript
-synchronize: true  // ✅ Crea/sincroniza tablas automáticamente
-autoLoadEntities: true
+syn4. 🚀 Deployment en Render + Vercel
+
+### A. Render Backend (NestJS + PostgreSQL)
+
+#### Paso 1: Crear Base de Datos en Render
+
+1. Ir a [render.com](https://render.com)
+2. Dashboard → Create → PostgreSQL
+3. **Database**: `zonesport`
+4. **User**: `zonesport_user`
+5. Render genera contraseña automáticamente
+6. Copiar `Internal Database URL`
+
+#### Paso 2: Crear Servicio Node.js (Backend)
+
+1. Dashboard → Create → Web Service
+2. **Connect Repository**: Seleccionar ZoneSport
+3. **Name**: `zonesport-api`
+4. **Environment**: Node
+5. **Build Command**: Copiar exacto de abajo 👇
+6. **Start Command**: Copiar exacto de abajo 👇
+7. **Root Directory**: `server/` ← IMPORTANTE
+
+#### Build Command (EXACTO)
+
+```bash
+npm run build:server
 ```
 
-**Producción**: 
-```typescript
-synchronize: false  // ❌ Nunca en producción
-migrations: ['dist/migrations/*.js']
-migrationsRun: true  // Ejecuta migraciones al iniciar
+#### Start Command (EXACTO)
+
+```bash
+cd server && npm run start:prod
 ```
 
-### Datos Iniciales (Seed)
+#### Environment Variables en Render
 
-Crear archivos de seed en `server/src/seeds/` si necesitas datos iniciales:
+| Variable | Valor | Tipo |
+|----------|-------|------|
+| `PORT` | `3001` | Public |
+| `NODE_ENV` | `production` | Public |
+| `DATABASE_URL` | De PostgreSQL arriba | Secret |
+| `JWT_SECRET` | `openssl rand -base64 32` | Secret |
+| `JWT_RESET_SECRET` | `openssl rand -base64 32` | Secret |
+| `FRONTEND_URL` | `https://zonesport.vercel.app` | Public |
+| `CORS_ORIGIN` | `https://zonesport.vercel.app` | Public |
+| `RESEND_API_KEY` | Tu API key | Secret |
+| `SENDER_EMAIL` | `noreply@yourdomain.com` | Public |
 
-```typescript
-// sports.seed.ts
-const sports = [
-  { name: 'Fútbol', description: 'Soccer' },
-  { name: 'Baloncesto', description: 'Basketball' },
-];
+#### Test Render Backend
+
+Una vez deployado:
+```bash
+curl https://zonesport-api.render.com
+# Resultado: 404 OK (backend está up)
+
+curl https://zonesport-api.render.com/api/docs
+# Resultado: Swagger UI disponible
+```
+
+---
+5. 📂 Estructura de Archivos Raíz
+
+### Configuración (NO modificar)
+
+```
+.env                 ← (NO existe, cada dev tiene su copia local)
+.env.example         ← (NO existe, ver server/ y client/)
+.gitignore           ← Protege .env automáticamente
+.npmrc               ← Config npm
+docker-compose.yml   ← PostgreSQL local
+```
+
+### Documentación (5 archivos)
+
+```
+README.md            ← 1. QUÉ es ZoneSport
+SETUP.md             ← 2. CÓMO instalar localmente
+FRONTEND.md          ← 3. CÓMO funciona React/Next.js
+BACKEND.md           ← 4. CÓMO funciona NestJS
+IMPORTANT.md         ← 5. ESTE ARCHIVO (deploy, seguridad, BD)
+```
+
+### Carpetas
+
+```
+server/              ← Backend NestJS
+  ├── src/
+  ├── .env.example   ← Template (commitear)
+  ├── .env           ← Valores locales (NO commitear)
+  └── package.json
+client/              ← Frontend Next.js
+  ├── app/
+  ├── .env.example   ← Template (commitear)
+  ├── .env.local     ← Valores locales (NO commitear)
+  └── package.json
 ```
 
 ---
 
-## 3. 🚀 Deployment en Producción
+## 🔍 Referencia Rápida
 
-### Render Backend + Base de Datos
+### Iniciar Full Stack Local
 
-1. **Crear servicio PostgreSQL en Render**
-   - Dashboard → Create → PostgreSQL
-   - Nombre: `zonesport-db`
-   - Plan: Standard (recomendado)
-   - Copiar conexión: `postgresql://...`
+```bash
+# Terminal 1: Base de datos
+npm run docker:up
 
-2. **Crear servicio Node.js (Backend) en Render**
-   - Dashboard → Create → Web Service
-   - Conectar repo GitHub (ZoneSport)
-   - Build command: `npm install && cd server && npm run build`
-   - Start command: `cd server && npm run start:prod`
-   - Environment variables:
-     ```
-     DATABASE_URL=postgresql://... (de PostgreSQL)
-     JWT_SECRET=(generar con openssl)
-     NODE_ENV=production
-     CORS_ORIGIN=https://tu-frontend.vercel.app
-     ```
+# Terminal 2: Backend (puerto 3001)
+npm run dev:server
 
-3. **Variable CORS importante**
-   - `CORS_ORIGIN` debe ser la URL de Vercel
-   - Ejemplo: `https://zonesport.vercel.app`
+# Terminal 3: Frontend (puerto 3000)
+npm run dev:client
 
-### Vercel Frontend
+# Abrir
+open http://localhost:3000
+```
 
-1. **Conectar repo en Vercel**
-   - Dashboard → Add New → Project
-   - Seleccionar ZoneSport
-   - Framework: Next.js
-   - Root directory: `./client`
+### Antes de Hacer Push a Producción
 
-2. **Environment Variables en Vercel**
-   ```
-   NEXT_PUBLIC_API_URL=https://zonesport-api.render.com
-   ```
-   (Reemplazar con tu URL de Render backend)
+```bash
+# 1. Verificar no hay secretos
+git diff --cached | grep -E "password|secret|api"
 
-3. **Deploy automático**
-   - Vercel deploya cada push a `main`
-   - URL: `https://zonesport.vercel.app` (o similar)
+# 2. Build local funciona
+npm run build:server && npm run build:client
 
-### Checklist antes de desplegar
+# 3. .env NO está in staged
+git status | grep ".env"
 
-- [ ] `.env` NO está en Git
-- [ ] `.env.example` tiene la estructura correcta
-- [ ] JWT_SECRET fue generado con `openssl`
-- [ ] DATABASE_PASSWORD tiene mínimo 16 caracteres
-- [ ] CORS_ORIGIN apunta a Vercel (sin trailing slash)
-- [ ] Backend está construyendo correctamente localmente
-- [ ] Variables de entorno están en los dashboards (Render + Vercel)
-- [ ] Migraciones están listas: `server/src/migrations/*`
+# 4. Commit y push
+git add -A
+git commit -m "..."
+git push origin main
+```
+
+### URLs de Administración
+
+| Servicio | URL | Admin |
+|----------|-----|-------|
+| GitHub Repo | github.com/MiguelEstradaLopez/ZoneSport | |
+| Render Dashboard | render.com | Backend |
+| Vercel Dashboard | vercel.com | Frontend |
+| Local Backend API | http://localhost:3001/api/docs | Swagger |
+| Local Frontend | http://localhost:3000 | |
 
 ---
 
-## 4. 📂 Archivos de la Raíz
-
-### Configuración (NO modificar generalmente)
-
+**ÚLTIMA ACTUALIZACIÓN**: 15 de febrero de 2026  
+**ORDEN DE LECTURA**: README → SETUP → FRONTEND → BACKEND → IMPORTANT
 | Archivo | Propósito | Público |
 |---------|-----------|---------|
 | `.env` | Secretos locales | ❌ NO (en .gitignore) |
@@ -355,11 +446,11 @@ openssl rand -base64 16
 
 ### URLs importantes
 
-- **Local Frontend**: http://localhost:3000
-- **Local Backend**: http://localhost:3001
-- **Vercel Dashboard**: https://vercel.com
-- **Render Dashboard**: https://render.com
-- **GitHub**: https://github.com/MiguelEstradaLopez/ZoneSport
+- **Local Frontend**: <http://localhost:3000>
+- **Local Backend**: <http://localhost:3001>
+- **Vercel Dashboard**: <https://vercel.com>
+- **Render Dashboard**: <https://render.com>
+- **GitHub**: <https://github.com/MiguelEstradaLopez/ZoneSport>
 
 ---
 
