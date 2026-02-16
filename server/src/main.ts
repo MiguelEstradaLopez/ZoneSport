@@ -16,8 +16,22 @@ async function bootstrap() {
   logger.log('='.repeat(60));
   logger.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   logger.log(`Port: ${process.env.PORT || 3001}`);
-  logger.log(`Database Host: ${process.env.DATABASE_HOST ? 'CONFIGURED ✓' : 'NOT SET (using localhost)'}`);
-  logger.log(`Database Name: ${process.env.DATABASE_NAME || 'zonesport_db'}`);
+  
+  // Debug database configuration (secure - no passwords shown)
+  const dbUrl = process.env.DATABASE_URL;
+  const dbHost = process.env.DATABASE_HOST;
+  const dbPassword = process.env.DATABASE_PASSWORD;
+  const dbUser = process.env.DATABASE_USER;
+  
+  if (dbUrl) {
+    logger.log('Database Config: DATABASE_URL is SET ✓ (production-ready)');
+  } else {
+    logger.log(`Database Host: ${dbHost ? 'CONFIGURED ✓' : 'NOT SET (using localhost)'}`);
+    logger.log(`Database User: ${dbUser || 'postgres'}`);
+    logger.log(`Database Password: ${dbPassword ? 'SET ✓' : '❌ NOT SET - This will cause connection errors!'}`);
+    logger.log(`Database Name: ${process.env.DATABASE_NAME || 'zonesport_db'}`);
+  }
+  
   logger.log(`Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);
   logger.log('='.repeat(60));
 
