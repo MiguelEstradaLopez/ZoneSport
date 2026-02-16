@@ -167,6 +167,7 @@ sports
 ├── Ubicación de Migraciones
 
 ```
+
 server/src/migrations/
 ├── 1708000001000-CreateUsersTable.ts
 ├── 1708000002000-CreateSportsTable.ts
@@ -175,6 +176,7 @@ server/src/migrations/
 ├── 1708000005000-CreateClassificationsTable.ts
 ├── 1708000006000-CreateNewsTable.ts
 └── 1708000007000-CreatePasswordResetTokenTable.ts
+
 ```
 
 ### Configuración de Migraciones
@@ -186,6 +188,7 @@ autoLoadEntities: true
 ```
 
 **Producción** (app.module.ts):
+
 ```typescript
 synchronize: false       // ❌ NUNCA en producción
 migrations: ['dist/migrations/*.js']
@@ -250,21 +253,32 @@ cd server && npm run start:prod
 
 #### Environment Variables en Render
 
+**IMPORTANTE**: Usar nombres `DATABASE_*` (no `DB_*`)
+
 | Variable | Valor | Tipo |
 |----------|-------|------|
+| `DATABASE_HOST` | De Render PostgreSQL (ej: dpg-xxxxx.render.com) | Secret |
+| `DATABASE_PORT` | `5432` | Public |
+| `DATABASE_USER` | Tu usuario BD | Secret |
+| `DATABASE_PASSWORD` | Tu contraseña BD | Secret |
+| `DATABASE_NAME` | `zonesport` | Public |
 | `PORT` | `3001` | Public |
 | `NODE_ENV` | `production` | Public |
-| `DATABASE_URL` | De PostgreSQL arriba | Secret |
 | `JWT_SECRET` | `openssl rand -base64 32` | Secret |
 | `JWT_RESET_SECRET` | `openssl rand -base64 32` | Secret |
 | `FRONTEND_URL` | `https://zonesport.vercel.app` | Public |
-| `CORS_ORIGIN` | `https://zonesport.vercel.app` | Public |
-| `RESEND_API_KEY` | Tu API key | Secret |
-| `SENDER_EMAIL` | `noreply@yourdomain.com` | Public |
+| `RESEND_API_KEY` | Tu API key de Resend | Secret |
+| `RESEND_FROM_EMAIL` | `noreply@yourdomain.com` | Public |
+| `SENDER_NAME` | `ZoneSport` | Public |
+| `PASSWORD_RESET_URL` | `https://zonesport.vercel.app/reset-password` | Public |
+| `DB_POOL_MIN` | `2` | Public |
+| `DB_POOL_MAX` | `10` | Public |
+| `DB_POOL_IDLE_TIMEOUT` | `30000` | Public |
 
 #### Test Render Backend
 
 Una vez deployado:
+
 ```bash
 curl https://zonesport-api.render.com
 # Resultado: 404 OK (backend está up)
@@ -274,7 +288,7 @@ curl https://zonesport-api.render.com/api/docs
 ```
 
 ---
-5. 📂 Estructura de Archivos Raíz
+1. 📂 Estructura de Archivos Raíz
 
 ### Configuración (NO modificar)
 
@@ -356,13 +370,14 @@ git push origin main
 | GitHub Repo | github.com/MiguelEstradaLopez/ZoneSport | |
 | Render Dashboard | render.com | Backend |
 | Vercel Dashboard | vercel.com | Frontend |
-| Local Backend API | http://localhost:3001/api/docs | Swagger |
-| Local Frontend | http://localhost:3000 | |
+| Local Backend API | <http://localhost:3001/api/docs> | Swagger |
+| Local Frontend | <http://localhost:3000> | |
 
 ---
 
 **ÚLTIMA ACTUALIZACIÓN**: 15 de febrero de 2026  
 **ORDEN DE LECTURA**: README → SETUP → FRONTEND → BACKEND → IMPORTANT
+
 | Archivo | Propósito | Público |
 |---------|-----------|---------|
 | `.env` | Secretos locales | ❌ NO (en .gitignore) |

@@ -1,42 +1,42 @@
 {
-  "name": "zonesport",
-  "version": "1.0.0",
-  "description": "Plataforma de gestión de deportes en línea con Backend en NestJS y Frontend en Next.js",
-  "private": true,
-  "workspaces": [
-    "server",
-    "client"
-  ],
-  "scripts": {
-    "install:all": "npm install",
-    "build": "npm run build --workspaces",
-    "build:server": "cd server && npm run build",
-    "build:client": "cd client && npm run build",
-    "start": "npm run start --workspaces",
-    "start:server": "cd server && npm run start:prod",
-    "start:server:dev": "cd server && npm run start:dev",
-    "start:client": "cd client && npm run start",
-    "dev": "npm run dev --workspaces",
-    "dev:server": "cd server && npm run start:dev",
-    "dev:client": "cd client && npm run dev",
-    "lint": "npm run lint --workspaces",
-    "test": "npm run test --workspaces",
-    "test:e2e": "cd server && npm run test:e2e",
-    "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down"
-  },
-  "keywords": [
-    "sports",
-    "events",
-    "tournaments",
-    "nestjs",
-    "nextjs",
-    "postgresql"
-  ],
-  "author": "Miguel Estrada López",
-  "license": "MIT",
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
-  }
+    "name": "zonesport",
+    "version": "1.0.0",
+    "description": "Plataforma de gestión de deportes en línea con Backend en NestJS y Frontend en Next.js",
+    "private": true,
+    "workspaces": [
+        "server",
+        "client"
+    ],
+    "scripts": {
+        "install:all": "npm install",
+        "build": "npm run build --workspaces",
+        "build:server": "cd server && npm run build",
+        "build:client": "cd client && npm run build",
+        "start": "npm run start --workspaces",
+        "start:server": "cd server && npm run start:prod",
+        "start:server:dev": "cd server && npm run start:dev",
+        "start:client": "cd client && npm run start",
+        "dev": "npm run dev --workspaces",
+        "dev:server": "cd server && npm run start:dev",
+        "dev:client": "cd client && npm run dev",
+        "lint": "npm run lint --workspaces",
+        "test": "npm run test --workspaces",
+        "test:e2e": "cd server && npm run test:e2e",
+        "docker:up": "docker-compose up -d",
+        "docker:down": "docker-compose down"
+    },
+    "keywords": [
+        "sports",
+        "events",
+        "tournaments",
+        "nestjs",
+        "nextjs",
+        "postgresql"
+    ],
+    "author": "Miguel Estrada López",
+    "license": "MIT",
+    "engines": {
+        "node": ">=18.0.0",
+        "npm": ">=9.0.0"
+    }
 }
