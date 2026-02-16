@@ -25,8 +25,23 @@ async function bootstrap() {
 
   // Configurar CORS - Permisivo en desarrollo, restrictivo en producción
   const isDevelopment = process.env.NODE_ENV === 'development';
+  const corsOrigin = isDevelopment
+    ? '*'
+    : (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+        const allowedOrigins = [
+          process.env.FRONTEND_URL || 'http://localhost:3000',
+          'http://localhost:3000',
+        ];
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          logger.warn(`CORS blocked origin: ${origin}`);
+          callback(new Error('Not allowed by CORS'));
+        }
+      };
+
   app.enableCors({
-    origin: isDevelopment ? '*' : process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: corsOrigin,
     credentials: false,
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

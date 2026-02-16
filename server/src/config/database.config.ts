@@ -7,6 +7,11 @@ import { Classification } from '../classifications/classification.entity';
 import { News } from '../news/news.entity';
 import { PasswordResetToken } from '../auth/entities/password-reset-token.entity';
 
+// Migrations must be loaded from dist/migrations in production
+const migrationsPath = process.env.NODE_ENV === 'production'
+  ? 'dist/migrations'
+  : 'src/migrations';
+
 /**
  * Configuración centralizada de TypeORM
  * Uso: TypeOrmModule.forRoot(getDatabaseConfig())
@@ -24,6 +29,7 @@ export const getDatabaseConfig = (): TypeOrmModuleOptions => ({
             database: process.env.DATABASE_NAME || 'zonesport_db',
         }),
     entities: [User, Sport, Event, Match, Classification, News, PasswordResetToken],
+    migrations: [`${migrationsPath}/*.js`],
     synchronize: process.env.NODE_ENV === 'development',
     autoLoadEntities: true,
     logging: process.env.NODE_ENV === 'development',
