@@ -42,10 +42,13 @@ async function bootstrap() {
 
   // Validación de credenciales de base de datos
   console.log('🔐 Credenciales de conexión detectadas:', {
-    usuario: process.env.DATABASE_USER || 'postgres',
-    host: process.env.DATABASE_HOST || 'localhost:5432',
-    baseDatos: process.env.DATABASE_NAME || 'zonesport_db',
+    usuario: process.env.DB_USERNAME || process.env.DATABASE_USER || 'postgres',
+    host: process.env.DB_HOST || process.env.DATABASE_HOST || 'localhost:5432',
+    baseDatos: process.env.DB_NAME || process.env.DATABASE_NAME || 'zonesport_db',
   });
+
+  // Log adicional solicitado por el equipo para verificar lectura de .env
+  console.log('Conectando con usuario:', process.env.DB_USERNAME || process.env.DATABASE_USER || 'postgres');
 
   const app = await NestFactory.create(AppModule);
 
