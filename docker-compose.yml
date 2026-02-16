@@ -7,9 +7,9 @@ services:
     container_name: zonesport_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${DATABASE_USER:-zonesport_user}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-zonesport_pass_123}
-      POSTGRES_DB: ${DATABASE_NAME:-zonesport}
+      POSTGRES_USER: ${DATABASE_USER:-miki_user}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-7667}
+      POSTGRES_DB: ${DATABASE_NAME:-zonesport_db}
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     ports:
       - "${DATABASE_PORT:-5432}:5432"
@@ -19,7 +19,7 @@ services:
       # Initialization script
       - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-zonesport_user}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-miki_user}"]
       interval: 10s
       timeout: 5s
       retries: 5

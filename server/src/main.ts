@@ -40,6 +40,13 @@ async function bootstrap() {
   logger.log(`Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);
   logger.log('='.repeat(60));
 
+  // Validación de credenciales de base de datos
+  console.log('🔐 Credenciales de conexión detectadas:', {
+    usuario: process.env.DATABASE_USER || 'postgres',
+    host: process.env.DATABASE_HOST || 'localhost:5432',
+    baseDatos: process.env.DATABASE_NAME || 'zonesport_db',
+  });
+
   const app = await NestFactory.create(AppModule);
 
   // Configurar CORS - Permisivo en desarrollo, restrictivo en producción
