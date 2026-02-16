@@ -6,6 +6,7 @@ services:
     plan: free
     buildCommand: npm install && npm run build:server
     startCommand: npm run start:prod --workspace=server
+    healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
@@ -16,7 +17,7 @@ services:
         value: ${DATABASE_HOST}
       - key: DATABASE_PORT
         scope: run
-        value: 5432
+        value: ${DATABASE_PORT}
       - key: DATABASE_USER
         scope: run
         value: ${DATABASE_USER}
@@ -26,6 +27,9 @@ services:
       - key: DATABASE_NAME
         scope: run
         value: ${DATABASE_NAME}
+      - key: DATABASE_URL
+        scope: secret
+        value: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}
       - key: JWT_SECRET
         scope: secret
         value: ${JWT_SECRET}
@@ -49,47 +53,10 @@ services:
         value: ${PASSWORD_RESET_URL}
       - key: DB_POOL_MIN
         scope: run
-        value: 2
+        value: "2"
       - key: DB_POOL_MAX
         scope: run
-        value: 10
+        value: "10"
       - key: DB_POOL_IDLE_TIMEOUT
         scope: run
-        value: 30000
-
-  - type: pserv
-    name: zonesport-database
-    env: postgres
-    plan: free
-    region: ohio
-    ipAllowList: []
-    databaseName: zonesport
-    databaseUser: ${DATABASE_USER}
-    databasePassword: ${DATABASE_PASSWORD}
-      - key: DB_PASSWORD
-        scope: secret
-        value: ${DB_PASSWORD}
-      - key: DB_NAME
-        scope: run
-        value: ${DB_NAME}
-      - key: JWT_SECRET
-        scope: secret
-        value: ${JWT_SECRET}
-      - key: JWT_RESET_SECRET
-        scope: secret
-        value: ${JWT_RESET_SECRET}
-      - key: CORS_ORIGIN
-        scope: run
-        value: ${CORS_ORIGIN}
-      - key: FRONTEND_URL
-        scope: run
-        value: ${FRONTEND_URL}
-      - key: RESEND_API_KEY
-        scope: secret
-        value: ${RESEND_API_KEY}
-      - key: NODE_ENV
-        scope: run
-        value: production
-      - key: PORT
-        scope: run
-        value: 3001
+        value: "30000"
