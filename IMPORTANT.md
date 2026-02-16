@@ -288,6 +288,7 @@ curl https://zonesport-api.render.com/api/docs
 ```
 
 ---
+
 1. 📂 Estructura de Archivos Raíz
 
 ### Configuración (NO modificar)

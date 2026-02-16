@@ -11,6 +11,7 @@
 ### 1. **Database Variable Mismatch** (CRÍTICO) ✅ RESUELTO
 
 **Problema Original:**
+
 ```
 Código buscaba:  process.env.DB_HOST, DB_PORT, DB_USERNAME, DB_PASSWORD, DB_NAME
 Archivos tenían: DATABASE_HOST, DATABASE_PORT, DATABASE_USER, DATABASE_PASSWORD, DATABASE_NAME
@@ -19,6 +20,7 @@ Archivos tenían: DATABASE_HOST, DATABASE_PORT, DATABASE_USER, DATABASE_PASSWORD
 **Impacto**: La conexión a PostgreSQL **FALLABA en todas las plataformas** (local, Render, Vercel).
 
 **Ubicación del Error**:
+
 - Archivo: `server/src/app.module.ts` (líneas 29-33)
 - Función: `TypeOrmModule.forRoot()`
 
@@ -28,12 +30,14 @@ Archivos tenían: DATABASE_HOST, DATABASE_PORT, DATABASE_USER, DATABASE_PASSWORD
 ✅ Refactorizar importaciones de entidades
 
 **Archivos Modificados**:
+
 ```
 server/src/app.module.ts          ← Refactorizado (22 líneas → 22 líneas)
 server/src/config/database.config.ts  ← NUEVO (40 líneas)
 ```
 
 **Verificación**:
+
 ```bash
 grep "DATABASE_HOST" server/src/config/database.config.ts
 # ✅ Resultado: host: process.env.DATABASE_HOST || 'localhost',
@@ -44,6 +48,7 @@ grep "DATABASE_HOST" server/src/config/database.config.ts
 ### 2. **CORS & Frontend URL Inconsistency** (IMPORTANTE) ✅ RESUELTO
 
 **Problema Original:**
+
 ```
 main.ts usaba:      FRONTEND_URL
 .env.example tenía: CORS_ORIGIN (redundante)
@@ -59,6 +64,7 @@ main.ts usaba:      FRONTEND_URL
 ### 3. **Missing PASSWORD_RESET_URL** (ALTO) ✅ RESUELTO
 
 **Problema Original**:
+
 ```
 server/.env.example no tenía PASSWORD_RESET_URL
 Producción necesita apuntar a Vercel, no localhost
@@ -66,8 +72,8 @@ Producción necesita apuntar a Vercel, no localhost
 
 **Solución Aplicada**:
 ✅ Agregado PASSWORD_RESET_URL a .env.example  
-✅ Valor local: http://localhost:3000/reset-password  
-✅ Valor producción: https://zonesport.vercel.app/reset-password
+✅ Valor local: <http://localhost:3000/reset-password>  
+✅ Valor producción: <https://zonesport.vercel.app/reset-password>
 
 ---
 
@@ -101,6 +107,7 @@ Producción necesita apuntar a Vercel, no localhost
 ### Archivo 1: `server/src/app.module.ts`
 
 **ANTES** (INCORRECTO):
+
 ```typescript
 TypeOrmModule.forRoot({
   type: 'postgres',
@@ -117,6 +124,7 @@ TypeOrmModule.forRoot({
 ```
 
 **AHORA** (CORRECTO):
+
 ```typescript
 import { getDatabaseConfig } from './config/database.config';
 
@@ -124,6 +132,7 @@ TypeOrmModule.forRoot(getDatabaseConfig())
 ```
 
 **Ventajas**:
+
 - ✅ Nombres de variables correctos (DATABASE_*)
 - ✅ Configuración centralizada
 - ✅ SSL automático en producción
@@ -158,6 +167,7 @@ export const getDatabaseConfig = (): TypeOrmModuleOptions => ({
 ```
 
 **Características**:
+
 - ✅ Reutilizable en cualquier módulo
 - ✅ Soporta desarrollo y producción
 - ✅ SSL opcional para Render
@@ -169,6 +179,7 @@ export const getDatabaseConfig = (): TypeOrmModuleOptions => ({
 ### Archivo 3: `server/.env.example`
 
 **Cambios**:
+
 ```diff
 - CORS_ORIGIN=http://localhost:3000  ← Eliminado (redundante)
 + PASSWORD_RESET_URL=http://localhost:3000/reset-password  ← Agregado
@@ -255,6 +266,7 @@ NEXT_PUBLIC_API_URL = https://zonesport-api.render.com
 ## 🚀 PRÓXIMOS PASOS
 
 1. **Build Local** (verificar que compila):
+
    ```bash
    npm run build:server && npm run build:client
    ```
@@ -273,6 +285,7 @@ NEXT_PUBLIC_API_URL = https://zonesport-api.render.com
    - Deploy automático en push
 
 4. **Git Push**:
+
    ```bash
    git status  # Verificar que .env NO está
    git push origin main

@@ -28,4 +28,4 @@ import { EmailModule } from './email/email.module';
     EmailModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }
