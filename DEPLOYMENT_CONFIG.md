@@ -2,7 +2,13 @@
 
 ## Vercel (Frontend)
 
-### 1. Environment Variables
+### 1. Configuration
+
+The `vercel.json` is already configured with:
+- `root: "client"` - Tells Vercel the frontend is in the client/ subfolder
+- Build and install commands optimized for monorepo
+
+### 2. Environment Variables
 
 Set in Vercel Dashboard → Settings → Environment Variables:
 
@@ -12,9 +18,14 @@ NEXT_PUBLIC_API_URL = https://your-backend-render.onrender.com
 
 **Important**: This must start with `NEXT_PUBLIC_` to be accessible in the browser.
 
-### 2. Deploy
+### 3. Deploy
 
 Push to GitHub → Vercel auto-deploys from `main` branch
+
+**Troubleshooting**: If build still fails with "cd: client: No such file", ensure:
+- Fork/clone has complete directory structure (including client/)
+- Run `git status` to verify client/ exists locally
+- Rebuild in Vercel dashboard (sometimes fixes build cache issues)
 
 ---
 
@@ -54,18 +65,28 @@ Push to GitHub → Vercel auto-deploys from `main` branch
 
 ### 3. Configure Environment Variables
 
-In **Environment** tab, add these variables:
+⚠️ **CRITICAL**: Use **Internal Database URL** (not External URL) from Render PostgreSQL
 
-**From Render PostgreSQL Dashboard** (copy from your DB service):
+In Render web service **Environment** tab, add these variables:
 
+**From Render PostgreSQL Dashboard**:
+
+Go to your PostgreSQL service → Copy the "Internal Database URL"
+
+Example: `postgresql://user:password@dpg-xxxxx.render.com:5432/zonesport`
+
+Break it apart and add as:
 ```
-DATABASE_HOST = [Internal Database URL hostname, NOT the full URL]
+DATABASE_HOST = dpg-xxxxx.render.com
 DATABASE_PORT = 5432
 DATABASE_USER = zonesport_user
-DATABASE_PASSWORD = [Your secure password from DB setup]
+DATABASE_PASSWORD = your_secure_password_from_db_setup
 DATABASE_NAME = zonesport
-DATABASE_URL = postgresql://[user]:[password]@[host]:[port]/[database]
+DATABASE_URL = postgresql://zonesport_user:password@dpg-xxxxx.render.com:5432/zonesport
 ```
+
+⚠️ **DO NOT** use the "External Database URL" - that's for connecting outside Render
+⚠️ **DO NOT** hardcode or include in git - set values individually in Render dashboard
 
 **JWT & Security** (generate these):
 
