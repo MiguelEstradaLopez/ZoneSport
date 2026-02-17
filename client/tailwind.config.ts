@@ -2,8 +2,12 @@ import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: [
+    // App router and components
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    // Fallbacks: include src/ and pages/ if the project uses them
+    "./src/**/*.{js,ts,jsx,tsx,mdx}",
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
