@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import api from '../../../../services/api';
+import api from '../../../services/api';
 
 export default function ResetPasswordPage() {
     const params = useParams();

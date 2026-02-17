@@ -38,7 +38,7 @@ async function bootstrap() {
     logger.log(`      SSL: ${sslStatus}`);
   }
 
-  logger.log(`Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);  logger.log('='.repeat(60));
+  logger.log(`Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`); logger.log('='.repeat(60));
 
   // Validación de credenciales de base de datos
   console.log('🔐 Credenciales de conexión detectadas:', {
