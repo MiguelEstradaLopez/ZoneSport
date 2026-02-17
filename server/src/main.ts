@@ -19,26 +19,26 @@ async function bootstrap() {
 
   // Debug database configuration (secure - no passwords shown)
   const dbUrl = process.env.DATABASE_URL;
-  const dbHost = process.env.DATABASE_HOST;
-  const dbPassword = process.env.DATABASE_PASSWORD;
-  const dbUser = process.env.DATABASE_USER;
+  const dbHost = process.env.DATABASE_HOST || process.env.DB_HOST;
+  const dbPassword = process.env.DATABASE_PASSWORD || process.env.DB_PASSWORD;
+  const dbUser = process.env.DATABASE_USER || process.env.DB_USERNAME;
   const nodeEnv = process.env.NODE_ENV || 'development';
 
   if (dbUrl) {
-    logger.log('Database Config: DATABASE_URL is SET ✓ (production-ready)');
+    logger.log('✅ DATABASE_URL is SET - Using Render connection string');
     const isLocalUrl = dbUrl.includes('localhost') || dbUrl.includes('127.0.0.1');
-    logger.log(`Database SSL: ${isLocalUrl ? 'DISABLED (localhost detected)' : 'ENABLED (remote server)'}`);
+    logger.log(`      SSL: ${isLocalUrl ? 'DISABLED (localhost detected)' : 'ENABLED (remote server - Render)'}`);
   } else {
-    logger.log(`Database Host: ${dbHost ? 'CONFIGURED ✓' : 'NOT SET (using localhost)'}`);
-    logger.log(`Database User: ${dbUser || 'postgres'}`);
-    logger.log(`Database Password: ${dbPassword ? 'SET ✓' : '❌ NOT SET - This will cause connection errors!'}`);
-    logger.log(`Database Name: ${process.env.DATABASE_NAME || 'zonesport_db'}`);
+    logger.log('❌ DATABASE_URL NOT SET - Falling back to individual DB_* / DATABASE_* variables');
+    logger.log(`      Host: ${dbHost ? 'CONFIGURED ✓' : 'NOT SET (using localhost)'}`);
+    logger.log(`      User: ${dbUser || 'postgres'}`);
+    logger.log(`      Password: ${dbPassword ? 'SET ✓' : '❌ NOT SET - Connection will fail!'}`);
+    logger.log(`      Database: ${process.env.DB_NAME || process.env.DATABASE_NAME || 'zonesport_db'}`);
     const sslStatus = nodeEnv === 'production' ? 'ENABLED (production mode)' : 'DISABLED (development mode)';
-    logger.log(`Database SSL: ${sslStatus}`);
+    logger.log(`      SSL: ${sslStatus}`);
   }
 
-  logger.log(`Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);
-  logger.log('='.repeat(60));
+  logger.log(`Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);  logger.log('='.repeat(60));
 
   // Validación de credenciales de base de datos
   console.log('🔐 Credenciales de conexión detectadas:', {
