@@ -95,8 +95,9 @@ export default function RegistroPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="tu@email.com"
-                  className="form-input pl-10"
+                  placeholder="Tucorreo@email.com"
+                  className="form-input"
+                  style={{ paddingLeft: '3rem'}}
                   required
                 />
               </div>
@@ -116,7 +117,8 @@ export default function RegistroPage() {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Mínimo 6 caracteres"
-                  className="form-input pl-10"
+                  className="form-input"
+                  style={{ paddingLeft: '3rem'}}
                   required
                   minLength={6}
                 />
@@ -137,7 +139,8 @@ export default function RegistroPage() {
                   value={formData.firstName}
                   onChange={handleChange}
                   placeholder="Tu nombre"
-                  className="form-input pl-10"
+                  className="form-input"
+                  style={{ paddingLeft: '3rem'}}
                 />
               </div>
             </div>
@@ -156,7 +159,8 @@ export default function RegistroPage() {
                   value={formData.lastName}
                   onChange={handleChange}
                   placeholder="Tu apellido"
-                  className="form-input pl-10"
+                  className="form-input"
+                  style={{ paddingLeft: '3rem'}}
                 />
               </div>
             </div>
@@ -175,7 +179,8 @@ export default function RegistroPage() {
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder="+57 123456789"
-                  className="form-input pl-10"
+                  className="form-input"
+                  style={{ paddingLeft: '3rem'}}
                 />
               </div>
             </div>

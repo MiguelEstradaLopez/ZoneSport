@@ -15,23 +15,27 @@ const getMigrationsPath = (): string => {
 
 /**
  * Determina dinámicamente si SSL debe estar habilitado
- * - FALSE si: localhost, 127.0.0.1 o desarrollo local
- * - TRUE si: producción (Render/cloud) con credenciales externas
+ * CRITICAL FOR RENDER:
+ * - Si DATABASE_URL existe (Render), SSL DEBE estar habilitado { rejectUnauthorized: false }
+ * - Si estamos en producción, SSL DEBE estar habilitado
+ * - Solo desactiva SSL en desarrollo local con localhost/127.0.0.1
  */
 const getSSLConfig = (databaseUrl?: string, nodeEnv?: string): boolean | { rejectUnauthorized: false } => {
-    // Si hay DATABASE_URL, verificar si es local
+    // DATABASE_URL always requires SSL (unless localhost)
     if (databaseUrl) {
         const isLocalUrl = databaseUrl.includes('localhost') || databaseUrl.includes('127.0.0.1');
-        // Local: no usar SSL, Cloud: usar SSL sin validar certificados
-        return isLocalUrl ? false : { rejectUnauthorized: false };
+        if (isLocalUrl) {
+            return false; // Local development: no SSL needed
+        }
+        return { rejectUnauthorized: false }; // Render/Cloud: SSL required
     }
 
-    // Si estamos en producción sin DATABASE_URL (fallback a host/port), usar SSL
+    // Production mode (fallback to host/port) always requires SSL
     if (nodeEnv === 'production') {
         return { rejectUnauthorized: false };
     }
 
-    // En desarrollo (sin DATABASE_URL), no usar SSL
+    // Development without DATABASE_URL: no SSL
     return false;
 };
 
@@ -49,12 +53,14 @@ export const getDatabaseConfig = (configService?: ConfigService): TypeOrmModuleO
         return process.env[key] || defaultValue;
     };
 
-    const databaseUrl = getEnv('DATABASE_URL');
-    const databaseHost = getEnv('DATABASE_HOST', 'localhost');
-    const databasePort = parseInt(getEnv('DATABASE_PORT', '5432'), 10);
-    const databaseUser = getEnv('DATABASE_USER', 'postgres');
-    const databasePassword = getEnv('DATABASE_PASSWORD') || '';
-    const databaseName = getEnv('DATABASE_NAME', 'zonesport_db');
+    // Prefer DB_* variables (requested), fall back to DATABASE_* for compatibility
+    // CRITICAL: DATABASE_URL has absolute priority (used by Render)
+    const databaseUrl = getEnv('DATABASE_URL') || getEnv('DB_URL');
+    const databaseHost = getEnv('DB_HOST') || getEnv('DATABASE_HOST') || 'localhost';
+    const databasePort = parseInt(getEnv('DB_PORT') || getEnv('DATABASE_PORT') || '5432', 10);
+    const databaseUser = getEnv('DB_USERNAME') || getEnv('DATABASE_USER') || 'postgres';
+    const databasePassword = getEnv('DB_PASSWORD') || getEnv('DATABASE_PASSWORD') || '';
+    const databaseName = getEnv('DB_NAME') || getEnv('DATABASE_NAME') || 'zonesport_db';
     const nodeEnv = getEnv('NODE_ENV', 'development');
 
     // Asegurar que password siempre sea string (crítico para TypeORM)
@@ -64,7 +70,8 @@ export const getDatabaseConfig = (configService?: ConfigService): TypeOrmModuleO
 
     return {
         type: 'postgres',
-        // Prefer DATABASE_URL when available (useful for Render/managed PG services)
+        // CRITICAL: DATABASE_URL has absolute priority (Render uses this)
+        // Falls back to individual connection parameters (DB_HOST, DB_PORT, etc.) for local dev
         ...(databaseUrl
             ? { url: databaseUrl }
             : {
@@ -79,7 +86,9 @@ export const getDatabaseConfig = (configService?: ConfigService): TypeOrmModuleO
         synchronize: nodeEnv === 'development',
         autoLoadEntities: true,
         logging: nodeEnv === 'development',
-        // Dynamic SSL configuration based on environment and URL
+        // CRITICAL: SSL is automatically configured based on environment
+        // - Production + DATABASE_URL = SSL enabled (Render requirement)
+        // - Development + localhost = SSL disabled
         ssl: getSSLConfig(databaseUrl, nodeEnv),
         // Pool de conexiones para producción
         ...(nodeEnv === 'production' && {
