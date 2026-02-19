@@ -1,4 +1,7 @@
 import { Controller, Post, Body, Get, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { UserRole } from './user.entity';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { User } from './user.entity';
@@ -57,5 +60,20 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'Usuario eliminado' })
   async remove(@Param('id') id: string): Promise<void> {
     return this.usersService.remove(id);
+  }
+
+  @Patch(':id/role')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Cambiar rol de usuario (solo ADMIN)' })
+  @ApiResponse({ status: 200, description: 'Rol actualizado' })
+  async updateRole(
+    @Param('id') id: string,
+    @Body('role') role: UserRole,
+  ): Promise<User> {
+    if (!Object.values(UserRole).includes(role)) {
+      throw new Error('Rol inválido');
+    }
+    return this.usersService.update(id, { role });
   }
 }

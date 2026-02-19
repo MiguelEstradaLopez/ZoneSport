@@ -28,13 +28,15 @@ export class AuthController {
         return this.authService.login(loginDto);
     }
 
-    @Get('profile')
+    @Get('me')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Obtener perfil del usuario autenticado' })
     @ApiResponse({ status: 200, description: 'Perfil del usuario' })
-    getProfile(@CurrentUser() user: User) {
-        return user;
+    getMe(@CurrentUser() user: User) {
+        // Nunca exponer passwordHash
+        const { passwordHash, ...safeUser } = user;
+        return safeUser;
     }
 
     @Post('forgot-password')

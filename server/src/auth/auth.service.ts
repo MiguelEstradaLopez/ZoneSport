@@ -59,11 +59,11 @@ export class AuthService {
         const user = await this.validateUser(loginDto.email, loginDto.password);
         if (!user) {
             console.log(`[AUTH] login - Validation failed for: ${loginDto.email}`);
-            throw new UnauthorizedException('Email o contraseña inválida');
+            throw new UnauthorizedException('Credenciales inválidas');
         }
 
         console.log(`[AUTH] login - Validation successful for: ${loginDto.email}`);
-        const payload = { email: user.email, sub: user.id };
+        const payload = { email: user.email, sub: user.id, role: user.role };
         return {
             access_token: this.jwtService.sign(payload, {
                 secret: process.env.JWT_SECRET,
@@ -107,7 +107,16 @@ export class AuthService {
 
         console.log(`[AUTH] register - User created successfully: ${registerDto.email}`);
 
-        const payload = { email: user.email, sub: user.id };
+        // Enviar email de bienvenida solo si RESEND_API_KEY está presente
+        if (process.env.RESEND_API_KEY) {
+            try {
+                await this.emailService.sendWelcomeEmail(user.email, user.firstName || '');
+            } catch (err) {
+                console.warn('[AUTH] No se pudo enviar email de bienvenida:', err.message);
+            }
+        }
+
+        const payload = { email: user.email, sub: user.id, role: user.role };
         return {
             access_token: this.jwtService.sign(payload, {
                 secret: process.env.JWT_SECRET,

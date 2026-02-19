@@ -8,6 +8,7 @@ export enum TournamentFormat {
     DOUBLE_ELIMINATION = 'DOUBLE_ELIMINATION',
     ROUND_ROBIN = 'ROUND_ROBIN',
     CUSTOM = 'CUSTOM',
+    CASUAL_MATCH = 'CASUAL_MATCH',
 }
 
 export enum TournamentStatus {
@@ -55,6 +56,24 @@ export class Tournament {
 
     @Column({ type: 'boolean', default: true })
     isPublic: boolean;
+
+    @Column({ type: 'varchar', nullable: true })
+    locationName?: string;
+
+    @Column({ type: 'varchar', nullable: true })
+    locationAddress?: string;
+
+    @Column({ type: 'decimal', precision: 10, scale: 8, nullable: true })
+    latitude?: number;
+
+    @Column({ type: 'decimal', precision: 11, scale: 8, nullable: true })
+    longitude?: number;
+
+    @Column({ type: 'timestamp with time zone', nullable: true })
+    registrationDeadline?: Date;
+
+    // currentTeams no se almacena, es derivado
+    currentTeams?: number;
 
     @CreateDateColumn({ type: 'timestamp with time zone' })
     createdAt: Date;
