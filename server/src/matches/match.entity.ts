@@ -1,44 +1,48 @@
+
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { Event } from '../events/event.entity';
+import { Tournament } from '../tournaments/tournament.entity';
+import { Team } from '../teams/team.entity';
 
 export enum MatchStatus {
     SCHEDULED = 'SCHEDULED',
     IN_PROGRESS = 'IN_PROGRESS',
-    PLAYED = 'PLAYED',
+    FINISHED = 'FINISHED',
+    CANCELLED = 'CANCELLED',
+    POSTPONED = 'POSTPONED',
 }
 
 @Entity('matches')
 export class Match {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
-    @Column({ type: 'varchar', length: 100 })
-    teamA: string;
+    @ManyToOne(() => Tournament)
+    tournament: Tournament;
 
-    @Column({ type: 'varchar', length: 100 })
-    teamB: string;
+    @ManyToOne(() => Team)
+    homeTeam: Team;
 
-    @Column({ type: 'int', nullable: true })
-    scoreA: number;
+    @ManyToOne(() => Team)
+    awayTeam: Team;
 
-    @Column({ type: 'int', nullable: true })
-    scoreB: number;
-
-    @Column({ type: 'enum', enum: MatchStatus, default: MatchStatus.SCHEDULED })
+    @Column({ type: 'enum', enum: MatchStatus })
     status: MatchStatus;
 
-    @Column({ type: 'timestamp' })
-    scheduledDate: Date;
+    @Column({ type: 'timestamp with time zone' })
+    scheduledAt: Date;
 
-    @ManyToOne(() => Event, (event) => event.matches, { onDelete: 'CASCADE' })
-    event: Event;
+    @Column({ type: 'timestamp with time zone', nullable: true })
+    playedAt?: Date;
 
-    @Column()
-    eventId: number;
+    @Column({ type: 'jsonb' })
+    result: any;
 
-    @CreateDateColumn()
+    @Column({ type: 'text', nullable: true })
+    notes?: string;
+
+    @CreateDateColumn({ type: 'timestamp with time zone' })
     createdAt: Date;
 
-    @UpdateDateColumn()
+    @UpdateDateColumn({ type: 'timestamp with time zone' })
     updatedAt: Date;
 }

@@ -35,22 +35,19 @@ export class UsersService {
     // 3. Crear instancia y guardar
     const newUser = this.usersRepository.create({
       ...createUserDto,
-      password: hashedPassword,
+      passwordHash: hashedPassword,
     });
 
     return this.usersRepository.save(newUser);
   }
 
   async findAll(): Promise<User[]> {
-    return this.usersRepository.find({
-      relations: ['organizedEvents'],
-    });
+    return this.usersRepository.find();
   }
 
-  async findOne(id: number): Promise<User> {
+  async findOne(id: string): Promise<User> {
     const user = await this.usersRepository.findOne({
       where: { id },
-      relations: ['organizedEvents'],
     });
     if (!user) {
       throw new NotFoundException(`Usuario con id ${id} no encontrado`);
@@ -62,7 +59,7 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { email } });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
 
     // Si se intenta cambiar el email, verificar que no esté registrado
@@ -79,12 +76,12 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     const user = await this.findOne(id);
     await this.usersRepository.remove(user);
   }
 
-  async searchByEmail(email: string, excludeId?: number): Promise<User[]> {
+  async searchByEmail(email: string, excludeId?: string): Promise<User[]> {
     const query = this.usersRepository.createQueryBuilder('user');
     query.where('user.email ILIKE :email', { email: `%${email}%` });
     if (excludeId) {
@@ -93,9 +90,9 @@ export class UsersService {
     return query.take(10).getMany();
   }
 
-  async updatePassword(userId: number, hashedPassword: string): Promise<User> {
+  async updatePassword(userId: string, hashedPassword: string): Promise<User> {
     const user = await this.findOne(userId);
-    user.password = hashedPassword;
+    user.passwordHash = hashedPassword;
     return this.usersRepository.save(user);
   }
 }

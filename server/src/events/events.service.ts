@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Event, EventStatus } from './event.entity';
+// import { Event, EventStatus } from './event.entity';
 import { CreateEventDto } from './dtos/create-event.dto';
 import { User } from '../users/user.entity';
 
+/*
 @Injectable()
 export class EventsService {
     constructor(
@@ -71,3 +72,4 @@ export class EventsService {
         return this.eventsRepository.save(event);
     }
 }
+*/

@@ -6,8 +6,8 @@ export class ClassificationsController {
     constructor(private readonly classificationsService: ClassificationsService) { }
 
     @Get('event/:eventId')
-    findByEvent(@Param('eventId') eventId: string) {
-        return this.classificationsService.findByEvent(+eventId);
+    findByTournament(@Param('eventId') eventId: string) {
+        return this.classificationsService.findByTournament(eventId);
     }
 
     @Post('event/:eventId/team')
@@ -15,11 +15,11 @@ export class ClassificationsController {
         @Param('eventId') eventId: string,
         @Body() body: { teamName: string },
     ) {
-        return this.classificationsService.create(+eventId, body.teamName);
+        return this.classificationsService.create(eventId, body.teamName);
     }
 
     @Delete(':id')
     remove(@Param('id') id: string) {
-        return this.classificationsService.remove(+id);
+        return this.classificationsService.remove(id);
     }
 }

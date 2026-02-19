@@ -1,45 +1,40 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, Unique } from 'typeorm';
-import { Event } from '../events/event.entity';
+
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, UpdateDateColumn } from 'typeorm';
+import { Tournament } from '../tournaments/tournament.entity';
+import { Team } from '../teams/team.entity';
 
 @Entity('classifications')
-@Unique(['eventId', 'teamName'])
 export class Classification {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
-    @Column({ type: 'varchar', length: 100 })
-    teamName: string;
+    @ManyToOne(() => Tournament)
+    tournament: Tournament;
 
-    @Column({ type: 'int', default: 0 })
-    points: number;
+    @ManyToOne(() => Team)
+    team: Team;
 
-    @Column({ type: 'int', default: 0 })
-    wins: number;
-
-    @Column({ type: 'int', default: 0 })
-    draws: number;
-
-    @Column({ type: 'int', default: 0 })
-    losses: number;
-
-    @Column({ type: 'int', default: 0 })
-    goalsFor: number;
-
-    @Column({ type: 'int', default: 0 })
-    goalsAgainst: number;
-
-    @Column({ type: 'int', default: 0 })
+    @Column({ type: 'int' })
     position: number;
 
-    @ManyToOne(() => Event, (event) => event.classifications, { onDelete: 'CASCADE' })
-    event: Event;
+    @Column({ type: 'int' })
+    points: number;
 
-    @Column()
-    eventId: number;
+    @Column({ type: 'int' })
+    played: number;
 
-    @CreateDateColumn()
-    createdAt: Date;
+    @Column({ type: 'int' })
+    wins: number;
 
-    @UpdateDateColumn()
+    @Column({ type: 'int' })
+    draws: number;
+
+    @Column({ type: 'int' })
+    losses: number;
+
+    @Column({ type: 'jsonb', nullable: true })
+    customStats?: any;
+
+    @UpdateDateColumn({ type: 'timestamp with time zone' })
     updatedAt: Date;
 }

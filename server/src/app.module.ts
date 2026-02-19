@@ -1,11 +1,14 @@
+import { ActivityTypesModule } from './activity-types/activity-types.module';
+import { TournamentsModule } from './tournaments/tournaments.module';
+import { TeamsModule } from './teams/teams.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { getDatabaseConfig } from './config/database.config';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { SportsModule } from './sports/sports.module';
-import { EventsModule } from './events/events.module';
+// import { SportsModule } from './sports/sports.module';
+// import { EventsModule } from './events/events.module';
 import { MatchesModule } from './matches/matches.module';
 import { ClassificationsModule } from './classifications/classifications.module';
 import { NewsModule } from './news/news.module';
@@ -23,12 +26,15 @@ import { EmailModule } from './email/email.module';
     }),
     AuthModule,
     UsersModule,
-    SportsModule,
-    EventsModule,
+    // SportsModule,
+    // EventsModule,
     MatchesModule,
     ClassificationsModule,
     NewsModule,
     EmailModule,
+    ActivityTypesModule,
+    TournamentsModule,
+    TeamsModule,
   ],
 })
 export class AppModule { }

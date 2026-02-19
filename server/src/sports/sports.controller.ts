@@ -1,7 +1,8 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { SportsService } from './sports.service';
+// import { SportsService } from './sports.service';
 import { CreateSportDto } from './dtos/create-sport.dto';
 
+/*
 @Controller('sports')
 export class SportsController {
     constructor(private readonly sportsService: SportsService) { }
@@ -31,3 +32,4 @@ export class SportsController {
         return this.sportsService.remove(+id);
     }
 }
+*/

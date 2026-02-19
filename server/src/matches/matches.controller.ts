@@ -19,26 +19,26 @@ export class MatchesController {
 
     @Get(':id')
     findOne(@Param('id') id: string) {
-        return this.matchesService.findOne(+id);
+        return this.matchesService.findOne(id);
     }
 
     @Get('event/:eventId')
-    findByEvent(@Param('eventId') eventId: string) {
-        return this.matchesService.findByEvent(+eventId);
+    findByTournament(@Param('eventId') eventId: string) {
+        return this.matchesService.findByTournament(eventId);
     }
 
     @Patch(':id')
     update(@Param('id') id: string, @Body() createMatchDto: CreateMatchDto) {
-        return this.matchesService.update(+id, createMatchDto);
+        return this.matchesService.update(id, createMatchDto);
     }
 
     @Post(':id/result')
     recordResult(@Param('id') id: string, @Body() recordResultDto: RecordResultDto) {
-        return this.matchesService.recordResult(+id, recordResultDto);
+        return this.matchesService.recordResult(id, recordResultDto);
     }
 
     @Delete(':id')
     remove(@Param('id') id: string) {
-        return this.matchesService.remove(+id);
+        return this.matchesService.remove(id);
     }
 }

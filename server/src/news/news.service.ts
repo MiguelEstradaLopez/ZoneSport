@@ -28,7 +28,7 @@ export class NewsService {
         });
     }
 
-    async findOne(id: number): Promise<News> {
+    async findOne(id: string): Promise<News> {
         const news = await this.newsRepository.findOne({
             where: { id },
             relations: ['author'],
@@ -39,7 +39,7 @@ export class NewsService {
         return news;
     }
 
-    async update(id: number, createNewsDto: CreateNewsDto, user: User): Promise<News> {
+    async update(id: string, createNewsDto: CreateNewsDto, user: User): Promise<News> {
         const news = await this.findOne(id);
 
         // Verificar que el usuario es el autor
@@ -51,7 +51,7 @@ export class NewsService {
         return this.newsRepository.save(news);
     }
 
-    async remove(id: number, user: User): Promise<void> {
+    async remove(id: string, user: User): Promise<void> {
         const news = await this.findOne(id);
 
         // Verificar que el usuario es el autor

@@ -3,8 +3,8 @@ import { User } from '../users/user.entity';
 
 @Entity('news')
 export class News {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
     @Column({ type: 'varchar', length: 200 })
     title: string;
@@ -22,11 +22,11 @@ export class News {
     author: User;
 
     @Column()
-    authorId: number;
+    authorId: string;
 
-    @CreateDateColumn()
+    @CreateDateColumn({ type: 'timestamp with time zone' })
     createdAt: Date;
 
-    @UpdateDateColumn()
+    @UpdateDateColumn({ type: 'timestamp with time zone' })
     updatedAt: Date;
 }

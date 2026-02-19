@@ -39,7 +39,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Obtener usuario por ID' })
   @ApiResponse({ status: 200, description: 'Datos del usuario' })
   async findOne(@Param('id') id: string): Promise<User> {
-    return this.usersService.findOne(+id);
+    return this.usersService.findOne(id);
   }
 
   @Patch(':id')
@@ -49,13 +49,13 @@ export class UsersController {
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<User> {
-    return this.usersService.update(+id, updateUserDto);
+    return this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar usuario' })
   @ApiResponse({ status: 200, description: 'Usuario eliminado' })
   async remove(@Param('id') id: string): Promise<void> {
-    return this.usersService.remove(+id);
+    return this.usersService.remove(id);
   }
 }

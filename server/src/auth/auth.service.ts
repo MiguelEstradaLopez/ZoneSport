@@ -38,13 +38,13 @@ export class AuthService {
                 return null;
             }
 
-            const isPasswordValid = await bcrypt.compare(password, user.password);
+            const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
             console.log(`[AUTH] validateUser - Password valid: ${isPasswordValid ? 'YES' : 'NO'}`);
-            console.log(`[AUTH] validateUser - Password from DB exists: ${user.password ? 'YES' : 'NO'}`);
+            console.log(`[AUTH] validateUser - PasswordHash from DB exists: ${user.passwordHash ? 'YES' : 'NO'}`);
 
             if (isPasswordValid) {
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                const { password: _password, ...result } = user;
+                const { passwordHash: _passwordHash, ...result } = user;
                 return result;
             }
             return null;

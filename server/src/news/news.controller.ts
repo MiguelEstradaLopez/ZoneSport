@@ -22,7 +22,7 @@ export class NewsController {
 
     @Get(':id')
     findOne(@Param('id') id: string) {
-        return this.newsService.findOne(+id);
+        return this.newsService.findOne(id);
     }
 
     @Patch(':id')
@@ -32,12 +32,12 @@ export class NewsController {
         @Body() createNewsDto: CreateNewsDto,
         @CurrentUser() user: User,
     ) {
-        return this.newsService.update(+id, createNewsDto, user);
+        return this.newsService.update(id, createNewsDto, user);
     }
 
     @Delete(':id')
     @UseGuards(JwtAuthGuard)
     remove(@Param('id') id: string, @CurrentUser() user: User) {
-        return this.newsService.remove(+id, user);
+        return this.newsService.remove(id, user);
     }
 }

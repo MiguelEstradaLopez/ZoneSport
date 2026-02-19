@@ -9,7 +9,7 @@ export class CreateMatchDto {
     teamB: string;
 
     @IsDateString()
-    scheduledDate: string;
+    scheduledAt: string;
 
     @IsNumber()
     eventId: number;

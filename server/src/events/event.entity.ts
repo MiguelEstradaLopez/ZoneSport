@@ -4,6 +4,7 @@ import { Sport } from '../sports/sport.entity';
 import { Match } from '../matches/match.entity';
 import { Classification } from '../classifications/classification.entity';
 
+/*
 export enum EventStatus {
     SCHEDULED = 'SCHEDULED',
     IN_PROGRESS = 'IN_PROGRESS',
@@ -54,3 +55,4 @@ export class Event {
     @UpdateDateColumn()
     updatedAt: Date;
 }
+*/

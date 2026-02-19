@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
-import { Event } from '../events/event.entity';
+
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 export enum UserRole {
   ATHLETE = 'ATHLETE',
@@ -9,21 +9,20 @@ export enum UserRole {
 
 @Entity('users')
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ unique: true })
   email: string;
 
   @Column()
-  password: string;
+  passwordHash: string;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
-  firstName: string;
+  firstName?: string;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
-  lastName: string;
-
+  lastName?: string;
 
   @Column({
     type: 'enum',
@@ -32,12 +31,9 @@ export class User {
   })
   role: UserRole;
 
-  @OneToMany(() => Event, (event) => event.organizer)
-  organizedEvents: Event[];
-
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamp with time zone' })
   updatedAt: Date;
 }

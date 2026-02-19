@@ -1,8 +1,12 @@
+import { ActivityType } from '../activity-types/activity-type.entity';
+import { Tournament } from '../tournaments/tournament.entity';
+import { Team } from '../teams/team.entity';
+import { TeamMember } from '../teams/team-member.entity';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { User } from '../users/user.entity';
-import { Sport } from '../sports/sport.entity';
-import { Event } from '../events/event.entity';
+// import { Sport } from '../sports/sport.entity';
+// import { Event } from '../events/event.entity';
 import { Match } from '../matches/match.entity';
 import { Classification } from '../classifications/classification.entity';
 import { News } from '../news/news.entity';
@@ -81,7 +85,17 @@ export const getDatabaseConfig = (configService?: ConfigService): TypeOrmModuleO
                 password: safePassword, // Garantizado como string
                 database: databaseName,
             }),
-        entities: [User, Sport, Event, Match, Classification, News, PasswordResetToken],
+        entities: [
+            User,
+            ActivityType,
+            Tournament,
+            Team,
+            TeamMember,
+            Match,
+            Classification,
+            News,
+            PasswordResetToken,
+        ],
         migrations: [`${migrationsPath}/*.js`],
         synchronize: nodeEnv === 'development',
         autoLoadEntities: true,
