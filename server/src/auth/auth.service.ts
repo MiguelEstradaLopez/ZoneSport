@@ -102,7 +102,6 @@ export class AuthService {
             password: hashedPassword,
             firstName: registerDto.firstName,
             lastName: registerDto.lastName,
-            phone: registerDto.phone,
             role: UserRole.ATHLETE, // Todos los nuevos usuarios son ATHLETE
         });
 

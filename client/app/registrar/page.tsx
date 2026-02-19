@@ -4,17 +4,19 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authService } from '@/services/authService';
-import { Mail, Lock, User, Phone, AlertCircle, CheckCircle } from 'lucide-react';
+import { Mail, Lock, User, AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function RegistroPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
     firstName: '',
     lastName: '',
-    phone: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    
   });
+  const [showPasswordRules, setShowPasswordRules] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -27,22 +29,39 @@ export default function RegistroPage() {
     }));
   };
 
+  const passwordValid =
+    /[a-z]/.test(formData.password) &&
+    /[A-Z]/.test(formData.password) &&
+    /\d/.test(formData.password) &&
+    /\s/.test(formData.password) &&
+    formData.password.length >= 8;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess(false);
     setLoading(true);
 
+    if (formData.password !== formData.confirmPassword) {
+      setError('Las contraseñas no coinciden');
+      setLoading(false);
+      return;
+    }
+    if (!passwordValid) {
+      setError('La contraseña no cumple con los requisitos de seguridad');
+      setLoading(false);
+      return;
+    }
+
     try {
-      if (!formData.email || !formData.password) {
-        throw new Error('Email y contraseña son requeridos');
-      }
-
-      await authService.register(formData);
+      await authService.register({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+      });
       setSuccess(true);
-      setFormData({ email: '', password: '', firstName: '', lastName: '', phone: '' });
-
-      // Redirigir al home después de 2 segundos
+      setFormData({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '', });
       setTimeout(() => {
         router.push('/');
       }, 2000);
@@ -81,50 +100,8 @@ export default function RegistroPage() {
             </aside>
           )}
 
+
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Correo */}
-            <div className="form-group">
-              <label htmlFor="email" className="form-label">
-                Correo Electrónico *
-              </label>
-              <div className="input-wrapper">
-                <Mail className="input-icon" size={20} />
-                <input
-                  id="email"
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Tucorreo@email.com"
-                  className="form-input"
-                  style={{ paddingLeft: '3rem'}}
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Contraseña */}
-            <div className="form-group">
-              <label htmlFor="password" className="form-label">
-                Contraseña *
-              </label>
-              <div className="input-wrapper">
-                <Lock className="input-icon" size={20} />
-                <input
-                  id="password"
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Mínimo 6 caracteres"
-                  className="form-input"
-                  style={{ paddingLeft: '3rem'}}
-                  required
-                  minLength={6}
-                />
-              </div>
-            </div>
-
             {/* Nombre */}
             <div className="form-group">
               <label htmlFor="firstName" className="form-label">
@@ -140,7 +117,7 @@ export default function RegistroPage() {
                   onChange={handleChange}
                   placeholder="Tu nombre"
                   className="form-input"
-                  style={{ paddingLeft: '3rem'}}
+                  style={{ paddingLeft: '3rem' }}
                 />
               </div>
             </div>
@@ -160,30 +137,90 @@ export default function RegistroPage() {
                   onChange={handleChange}
                   placeholder="Tu apellido"
                   className="form-input"
-                  style={{ paddingLeft: '3rem'}}
+                  style={{ paddingLeft: '3rem' }}
                 />
               </div>
             </div>
 
-            {/* Teléfono */}
+            {/* Correo */}
             <div className="form-group">
-              <label htmlFor="phone" className="form-label">
-                Teléfono
+              <label htmlFor="email" className="form-label">
+                Correo Electrónico *
               </label>
               <div className="input-wrapper">
-                <Phone className="input-icon" size={20} />
+                <Mail className="input-icon" size={20} />
                 <input
-                  id="phone"
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
+                  id="email"
+                  type="email"
+                  name="email"
+                  value={formData.email}
                   onChange={handleChange}
-                  placeholder="+57 123456789"
+                  placeholder="Tucorreo@email.com"
                   className="form-input"
-                  style={{ paddingLeft: '3rem'}}
+                  style={{ paddingLeft: '3rem' }}
+                  required
                 />
               </div>
             </div>
+
+            {/* Contraseña */}
+            <div className="form-group">
+              <label htmlFor="password" className="form-label">
+                Contraseña *
+              </label>
+              <div className="input-wrapper">
+                <Lock className="input-icon" size={20} />
+                <input
+                  id="password"
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Mínimo 8 caracteres, mayúsculas, minúsculas, números y espacios"
+                  className="form-input"
+                  style={{ paddingLeft: '3rem' }}
+                  required
+                  minLength={8}
+                  onFocus={() => setShowPasswordRules(true)}
+                  onBlur={() => setShowPasswordRules(false)}
+                />
+              </div>
+              {showPasswordRules && (
+                <ul className="text-xs text-muted mt-2 list-disc ml-6">
+                  <li className={formData.password.length >= 8 ? 'text-green-500' : ''}>Mínimo 8 caracteres</li>
+                  <li className={/[A-Z]/.test(formData.password) ? 'text-green-500' : ''}>Al menos una mayúscula</li>
+                  <li className={/[a-z]/.test(formData.password) ? 'text-green-500' : ''}>Al menos una minúscula</li>
+                  <li className={/\d/.test(formData.password) ? 'text-green-500' : ''}>Al menos un número</li>
+                  <li className={/\s/.test(formData.password) ? 'text-green-500' : ''}>Al menos un espacio</li>
+                </ul>
+              )}
+            </div>
+
+            {/* Confirmar contraseña */}
+            <div className="form-group">
+              <label htmlFor="confirmPassword" className="form-label">
+                Confirmar Contraseña *
+              </label>
+              <div className="input-wrapper">
+                <Lock className="input-icon" size={20} />
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Repite tu contraseña"
+                  className="form-input"
+                  style={{ paddingLeft: '3rem' }}
+                  required
+                  minLength={8}
+                />
+              </div>
+              {formData.confirmPassword && formData.password !== formData.confirmPassword && (
+                <p className="form-error text-xs text-red-500 mt-1">Las contraseñas no coinciden</p>
+              )}
+            </div>
+
 
             {/* Botón enviar */}
             <button

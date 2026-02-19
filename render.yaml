@@ -4,8 +4,9 @@ services:
     env: node
     region: ohio
     plan: free
-    buildCommand: npm install && npm run build:server
-    startCommand: npm run start:prod --workspace=server
+    # Use the server folder for build and start to avoid ambiguous workspace commands
+    buildCommand: cd server && npm install && npm run build
+    startCommand: cd server && npm run start:prod
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
