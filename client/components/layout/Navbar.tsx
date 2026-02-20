@@ -4,19 +4,12 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Home, Newspaper, Calendar, Trophy, UserCircle, LogOut } from 'lucide-react';
-import { authService } from '@/services/authService';
 
-interface User {
-  id: number;
-  email: string;
-  firstName?: string;
-  lastName?: string;
-  role: string;
-}
+import { type AuthUser, authService } from '@/services/authService';
 
 const Navbar = () => {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {

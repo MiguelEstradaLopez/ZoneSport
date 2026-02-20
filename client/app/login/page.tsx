@@ -27,7 +27,7 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            await authService.login({ email, password });
+            await authService.login(email, password);
             router.push('/');
         } catch (err) {
             const error = err as { response?: { data?: { message?: string } } };
@@ -73,7 +73,7 @@ export default function LoginPage() {
                                     onBlur={() => handleBlur('email')}
                                     placeholder="Tucorreo@gmail.com"
                                     className="w-full bg-zonesport-bg-dark border border-zonesport-blue border-opacity-30 rounded px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-zonesport-blue focus:border-opacity-100 focus:ring-2 focus:ring-zonesport-blue focus:ring-opacity-20 transition-all duration-200"
-                                    style={{ paddingLeft: '3rem'}}
+                                    style={{ paddingLeft: '3rem' }}
                                     required
                                 />
                             </div>
@@ -94,7 +94,7 @@ export default function LoginPage() {
                                     onBlur={() => handleBlur('password')}
                                     placeholder="••••••••"
                                     className="w-full bg-zonesport-bg-dark border border-zonesport-blue border-opacity-30 rounded px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-zonesport-blue focus:border-opacity-100 focus:ring-2 focus:ring-zonesport-blue focus:ring-opacity-20 transition-all duration-200"
-                                    style={{ paddingLeft: '3rem'}}
+                                    style={{ paddingLeft: '3rem' }}
                                     required
                                 />
                             </div>

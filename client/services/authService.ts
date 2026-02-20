@@ -1,70 +1,77 @@
-import api from './api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-export interface AuthResponse {
+export type AuthUser = {
+    id: string;
+    email: string;
+    firstName: string | null;
+    lastName: string | null;
+    role: 'ATHLETE' | 'ORGANIZER' | 'ADMIN';
+};
+
+export type LoginResponse = {
     access_token: string;
-    user: {
-        id: number;
-        email: string;
-        firstName?: string;
-        lastName?: string;
-        role: string;
-    };
-}
-
-export interface LoginData {
-    email: string;
-    password: string;
-}
-
-export interface RegisterData {
-    email: string;
-    password: string;
-    firstName?: string;
-    lastName?: string;
-}
+    user: AuthUser;
+};
 
 export const authService = {
-    login: async (data: LoginData): Promise<AuthResponse> => {
-        const response = await api.post('/auth/login', data);
-        if (response.data.access_token) {
-            localStorage.setItem('token', response.data.access_token);
-            localStorage.setItem('user', JSON.stringify(response.data.user));
+    async login(email: string, password: string): Promise<LoginResponse> {
+        const response = await fetch(`${API_URL}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message?.[0] || error.message || 'Error al iniciar sesión');
         }
-        return response.data;
+        return response.json();
     },
 
-    register: async (data: RegisterData): Promise<AuthResponse> => {
-        const response = await api.post('/auth/register', data);
-        if (response.data.access_token) {
-            localStorage.setItem('token', response.data.access_token);
-            localStorage.setItem('user', JSON.stringify(response.data.user));
+    async register(data: {
+        email: string;
+        password: string;
+        firstName?: string;
+        lastName?: string;
+    }): Promise<LoginResponse> {
+        const response = await fetch(`${API_URL}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message?.[0] || error.message || 'Error al registrarse');
         }
-        return response.data;
+        return response.json();
     },
 
-    logout: () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+    async getMe(token: string): Promise<AuthUser> {
+        const response = await fetch(`${API_URL}/auth/me`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) throw new Error('Sesión inválida');
+        return response.json();
     },
 
-    getToken: (): string | null => {
-        if (typeof window === 'undefined') return null;
-        return localStorage.getItem('token');
-    },
-
-    getUser: () => {
+    getUser(): AuthUser | null {
         if (typeof window === 'undefined') return null;
         const user = localStorage.getItem('user');
         return user ? JSON.parse(user) : null;
     },
 
-    isAuthenticated: (): boolean => {
-        if (typeof window === 'undefined') return false;
-        return !!localStorage.getItem('token');
+    getToken(): string | null {
+        if (typeof window === 'undefined') return null;
+        return localStorage.getItem('access_token');
     },
 
-    getProfile: async () => {
-        const response = await api.get('/auth/profile');
-        return response.data;
+    isAuthenticated(): boolean {
+        if (typeof window === 'undefined') return false;
+        return !!localStorage.getItem('access_token');
+    },
+
+    logout(): void {
+        if (typeof window === 'undefined') return;
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('user');
     },
 };
