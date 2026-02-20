@@ -14,7 +14,7 @@ export default function RegistroPage() {
     email: '',
     password: '',
     confirmPassword: '',
-    
+
   });
   const [showPasswordRules, setShowPasswordRules] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -62,9 +62,7 @@ export default function RegistroPage() {
       });
       setSuccess(true);
       setFormData({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '', });
-      setTimeout(() => {
-        router.push('/');
-      }, 2000);
+      router.push('/');
     } catch (err) {
       const error = err as { response?: { data?: { message?: string } } };
       setError(error.response?.data?.message || 'Error al registrar');

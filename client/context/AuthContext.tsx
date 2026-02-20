@@ -1,3 +1,4 @@
+"use client";
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 
@@ -27,16 +28,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     useEffect(() => {
         const storedToken = authService.getToken();
-        if (storedToken) {
+        const storedUser = authService.getUser();
+        if (storedToken && storedUser) {
             authService.getMe(storedToken)
                 .then((userData) => {
                     setUser(userData);
                     setToken(storedToken);
+                    // Refrescar localStorage y cookie por si el usuario cambió
+                    localStorage.setItem('access_token', storedToken);
+                    localStorage.setItem('user', JSON.stringify(userData));
+                    document.cookie = `access_token=${storedToken}; path=/; max-age=86400`;
                 })
                 .catch(() => {
                     setUser(null);
                     setToken(null);
                     authService.logout();
+                    localStorage.removeItem('access_token');
+                    localStorage.removeItem('user');
+                    document.cookie = 'access_token=; path=/; max-age=0';
                 })
                 .finally(() => setIsLoading(false));
         } else {
@@ -50,6 +59,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             const { access_token, user } = await authService.login(email, password);
             setToken(access_token);
             setUser(user);
+            localStorage.setItem('access_token', access_token);
+            localStorage.setItem('user', JSON.stringify(user));
+            document.cookie = `access_token=${access_token}; path=/; max-age=86400`;
         } finally {
             setIsLoading(false);
         }
@@ -61,6 +73,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             const { access_token, user } = await authService.register(data);
             setToken(access_token);
             setUser(user);
+            localStorage.setItem('access_token', access_token);
+            localStorage.setItem('user', JSON.stringify(user));
+            document.cookie = `access_token=${access_token}; path=/; max-age=86400`;
         } finally {
             setIsLoading(false);
         }
@@ -70,6 +85,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         authService.logout();
         setToken(null);
         setUser(null);
+        document.cookie = 'access_token=; path=/; max-age=0';
     };
 
     return (
