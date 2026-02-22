@@ -59,6 +59,10 @@ export default function HomeContent() {
                             <div>Cargando torneos...</div>
                         ) : error ? (
                             <div className="text-red-500">{error}</div>
+                        ) : tournaments.length === 0 ? (
+                            <p className="text-gray-400 text-sm">
+                                No hay torneos disponibles por el momento.
+                            </p>
                         ) : (
                             <ul className="space-y-2">
                                 {tournaments.map((t) => (
@@ -96,6 +100,10 @@ export default function HomeContent() {
                         <div>Cargando torneos...</div>
                     ) : error ? (
                         <div className="text-red-500">{error}</div>
+                    ) : tournaments.length === 0 ? (
+                        <p className="text-gray-400 text-sm">
+                            No hay torneos disponibles por el momento.
+                        </p>
                     ) : (
                         <ul className="space-y-2">
                             {tournaments.map((t) => (

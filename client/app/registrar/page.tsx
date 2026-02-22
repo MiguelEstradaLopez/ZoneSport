@@ -3,18 +3,18 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { authService } from '@/services/authService';
 import { Mail, Lock, User, AlertCircle, CheckCircle } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 export default function RegistroPage() {
   const router = useRouter();
+  const { register } = useAuth();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
-
   });
   const [showPasswordRules, setShowPasswordRules] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -23,17 +23,13 @@ export default function RegistroPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const passwordValid =
     /[a-z]/.test(formData.password) &&
     /[A-Z]/.test(formData.password) &&
     /\d/.test(formData.password) &&
-    /\s/.test(formData.password) &&
     formData.password.length >= 8;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,18 +50,23 @@ export default function RegistroPage() {
     }
 
     try {
-      await authService.register({
+      await register({
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
       });
       setSuccess(true);
-      setFormData({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '', });
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+      });
       router.push('/');
-    } catch (err) {
-      const error = err as { response?: { data?: { message?: string } } };
-      setError(error.response?.data?.message || 'Error al registrar');
+    } catch (err: any) {
+      setError(err.message || 'Error al registrar');
     } finally {
       setLoading(false);
     }
@@ -74,7 +75,6 @@ export default function RegistroPage() {
   return (
     <main className="page-container flex items-center justify-center py-8">
       <article className="card w-full max-w-md">
-        {/* Encabezado */}
         <header className="card-header text-center">
           <h1 className="mb-2">
             Zone<span className="text-zs-green">Sport</span>
@@ -82,7 +82,6 @@ export default function RegistroPage() {
           <p className="text-muted">Crea tu cuenta como deportista</p>
         </header>
 
-        {/* Cuerpo del formulario */}
         <div className="card-body">
           {success && (
             <aside className="alert alert-success">
@@ -98,9 +97,7 @@ export default function RegistroPage() {
             </aside>
           )}
 
-
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Nombre */}
             <div className="form-group">
               <label htmlFor="firstName" className="form-label">
                 Nombre
@@ -120,7 +117,6 @@ export default function RegistroPage() {
               </div>
             </div>
 
-            {/* Apellido */}
             <div className="form-group">
               <label htmlFor="lastName" className="form-label">
                 Apellido
@@ -140,7 +136,6 @@ export default function RegistroPage() {
               </div>
             </div>
 
-            {/* Correo */}
             <div className="form-group">
               <label htmlFor="email" className="form-label">
                 Correo Electrónico *
@@ -153,7 +148,7 @@ export default function RegistroPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="Tucorreo@email.com"
+                  placeholder="tucorreo@email.com"
                   className="form-input"
                   style={{ paddingLeft: '3rem' }}
                   required
@@ -161,7 +156,6 @@ export default function RegistroPage() {
               </div>
             </div>
 
-            {/* Contraseña */}
             <div className="form-group">
               <label htmlFor="password" className="form-label">
                 Contraseña *
@@ -174,7 +168,7 @@ export default function RegistroPage() {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="Mínimo 8 caracteres, mayúsculas, minúsculas, números y espacios"
+                  placeholder="Mínimo 8 caracteres"
                   className="form-input"
                   style={{ paddingLeft: '3rem' }}
                   required
@@ -185,16 +179,22 @@ export default function RegistroPage() {
               </div>
               {showPasswordRules && (
                 <ul className="text-xs text-muted mt-2 list-disc ml-6">
-                  <li className={formData.password.length >= 8 ? 'text-green-500' : ''}>Mínimo 8 caracteres</li>
-                  <li className={/[A-Z]/.test(formData.password) ? 'text-green-500' : ''}>Al menos una mayúscula</li>
-                  <li className={/[a-z]/.test(formData.password) ? 'text-green-500' : ''}>Al menos una minúscula</li>
-                  <li className={/\d/.test(formData.password) ? 'text-green-500' : ''}>Al menos un número</li>
-                  <li className={/\s/.test(formData.password) ? 'text-green-500' : ''}>Al menos un espacio</li>
+                  <li className={formData.password.length >= 8 ? 'text-green-500' : ''}>
+                    Mínimo 8 caracteres
+                  </li>
+                  <li className={/[A-Z]/.test(formData.password) ? 'text-green-500' : ''}>
+                    Al menos una mayúscula
+                  </li>
+                  <li className={/[a-z]/.test(formData.password) ? 'text-green-500' : ''}>
+                    Al menos una minúscula
+                  </li>
+                  <li className={/\d/.test(formData.password) ? 'text-green-500' : ''}>
+                    Al menos un número
+                  </li>
                 </ul>
               )}
             </div>
 
-            {/* Confirmar contraseña */}
             <div className="form-group">
               <label htmlFor="confirmPassword" className="form-label">
                 Confirmar Contraseña *
@@ -215,12 +215,10 @@ export default function RegistroPage() {
                 />
               </div>
               {formData.confirmPassword && formData.password !== formData.confirmPassword && (
-                <p className="form-error text-xs text-red-500 mt-1">Las contraseñas no coinciden</p>
+                <p className="text-xs text-red-500 mt-1">Las contraseñas no coinciden</p>
               )}
             </div>
 
-
-            {/* Botón enviar */}
             <button
               type="submit"
               disabled={loading}
@@ -230,10 +228,8 @@ export default function RegistroPage() {
             </button>
           </form>
 
-          {/* Divisor */}
           <div className="divider mt-6" />
 
-          {/* Ir a login */}
           <p className="text-center text-muted">
             ¿Ya tienes cuenta?{' '}
             <Link href="/login" className="btn-link-secondary font-semibold">
@@ -242,7 +238,6 @@ export default function RegistroPage() {
           </p>
         </div>
 
-        {/* Pie de página */}
         <footer className="card-footer text-center text-small">
           Al registrarte, aceptas nuestros{' '}
           <Link href="#" className="btn-link-secondary">

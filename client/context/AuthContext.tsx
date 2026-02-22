@@ -29,9 +29,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     useEffect(() => {
         const storedToken = authService.getToken();
         const storedUser = authService.getUser();
+        console.log('[AUTH INIT] storedToken:', storedToken ? 'EXISTS' : 'NULL');
+        console.log('[AUTH INIT] storedUser:', storedUser ? 'EXISTS' : 'NULL');
         if (storedToken && storedUser) {
             authService.getMe(storedToken)
                 .then((userData) => {
+                    console.log('[AUTH INIT] getMe success');
                     setUser(userData);
                     setToken(storedToken);
                     // Refrescar localStorage y cookie por si el usuario cambió
@@ -39,13 +42,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                     localStorage.setItem('user', JSON.stringify(userData));
                     document.cookie = `access_token=${storedToken}; path=/; max-age=86400`;
                 })
-                .catch(() => {
-                    setUser(null);
-                    setToken(null);
-                    authService.logout();
-                    localStorage.removeItem('access_token');
-                    localStorage.removeItem('user');
-                    document.cookie = 'access_token=; path=/; max-age=0';
+                .catch((error) => {
+                    console.log('[AUTH INIT] getMe failed, error:', error);
+                    // Si getMe falla pero tenemos datos en localStorage,
+                    // restaurar sesión desde localStorage sin validar
+                    // (el backend validará en la próxima petición protegida)
+                    if (storedUser) {
+                        setUser(storedUser);
+                        setToken(storedToken);
+                    } else {
+                        setUser(null);
+                        setToken(null);
+                        authService.logout();
+                    }
                 })
                 .finally(() => setIsLoading(false));
         } else {
