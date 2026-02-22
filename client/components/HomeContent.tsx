@@ -6,6 +6,12 @@ type Tournament = {
     id: string;
     name: string;
     description?: string;
+    activityType?: string;
+    format?: string;
+    status?: string;
+    startDate?: string;
+    teamsCount?: number;
+    maxTeams?: number;
 };
 
 export default function HomeContent() {
@@ -60,18 +66,39 @@ export default function HomeContent() {
                         ) : error ? (
                             <div className="text-red-500">{error}</div>
                         ) : tournaments.length === 0 ? (
-                            <p className="text-gray-400 text-sm">
-                                No hay torneos disponibles por el momento.
-                            </p>
+                            <div>
+                                <p className="text-gray-400 text-sm mb-4">
+                                    No hay torneos disponibles por el momento.
+                                </p>
+                                {(user?.role === "ORGANIZER" || user?.role === "ADMIN") && (
+                                    <a href="/torneos/crear" className="btn btn-primary">
+                                        Crear el primer torneo
+                                    </a>
+                                )}
+                            </div>
                         ) : (
-                            <ul className="space-y-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {tournaments.map((t) => (
-                                    <li key={t.id} className="border rounded p-3 bg-white/5">
-                                        <span className="font-bold">{t.name}</span>
-                                        {t.description && <span className="ml-2 text-sm text-gray-400">{t.description}</span>}
-                                    </li>
+                                    <div key={t.id} className="bg-zinc-900 border-l-4 border-lime-400 rounded-lg shadow p-4 flex flex-col items-start">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className="font-bold text-lg text-white">{t.name}</span>
+                                            {t.activityType && <span className="badge bg-lime-400 text-black ml-2">{t.activityType}</span>}
+                                        </div>
+                                        {t.description && <div className="text-gray-400 text-sm mb-2">{t.description}</div>}
+                                        <div className="flex flex-wrap gap-2 mb-2">
+                                            {t.format && <span className="badge bg-zinc-800 text-lime-400">Formato: {t.format}</span>}
+                                            {t.status && <span className="badge bg-zinc-800 text-lime-400">Estado: {t.status}</span>}
+                                            {t.startDate && <span className="badge bg-zinc-800 text-lime-400">Inicio: {new Date(t.startDate).toLocaleDateString()}</span>}
+                                        </div>
+                                        <div className="mb-2 text-white text-sm">
+                                            Equipos: {t.teamsCount ?? 0} / {t.maxTeams ?? '—'}
+                                        </div>
+                                        <a href={`/torneos/${t.id}`} className="btn btn-secondary mt-auto">
+                                            Ver detalles
+                                        </a>
+                                    </div>
                                 ))}
-                            </ul>
+                            </div>
                         )}
                     </section>
                 </div>
@@ -101,18 +128,39 @@ export default function HomeContent() {
                     ) : error ? (
                         <div className="text-red-500">{error}</div>
                     ) : tournaments.length === 0 ? (
-                        <p className="text-gray-400 text-sm">
-                            No hay torneos disponibles por el momento.
-                        </p>
+                        <div>
+                            <p className="text-gray-400 text-sm mb-4">
+                                No hay torneos disponibles por el momento.
+                            </p>
+                            {(user?.role === "ORGANIZER" || user?.role === "ADMIN") && (
+                                <a href="/torneos/crear" className="btn btn-primary">
+                                    Crear el primer torneo
+                                </a>
+                            )}
+                        </div>
                     ) : (
-                        <ul className="space-y-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {tournaments.map((t) => (
-                                <li key={t.id} className="border rounded p-3 bg-white/5">
-                                    <span className="font-bold">{t.name}</span>
-                                    {t.description && <span className="ml-2 text-sm text-gray-400">{t.description}</span>}
-                                </li>
+                                <div key={t.id} className="bg-zinc-900 border-l-4 border-lime-400 rounded-lg shadow p-4 flex flex-col items-start">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <span className="font-bold text-lg text-white">{t.name}</span>
+                                        {t.activityType && <span className="badge bg-lime-400 text-black ml-2">{t.activityType}</span>}
+                                    </div>
+                                    {t.description && <div className="text-gray-400 text-sm mb-2">{t.description}</div>}
+                                    <div className="flex flex-wrap gap-2 mb-2">
+                                        {t.format && <span className="badge bg-zinc-800 text-lime-400">Formato: {t.format}</span>}
+                                        {t.status && <span className="badge bg-zinc-800 text-lime-400">Estado: {t.status}</span>}
+                                        {t.startDate && <span className="badge bg-zinc-800 text-lime-400">Inicio: {new Date(t.startDate).toLocaleDateString()}</span>}
+                                    </div>
+                                    <div className="mb-2 text-white text-sm">
+                                        Equipos: {t.teamsCount ?? 0} / {t.maxTeams ?? '—'}
+                                    </div>
+                                    <a href={`/torneos/${t.id}`} className="btn btn-secondary mt-auto">
+                                        Ver detalles
+                                    </a>
+                                </div>
                             ))}
-                        </ul>
+                        </div>
                     )}
                 </section>
             </div>
