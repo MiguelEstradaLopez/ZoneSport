@@ -1,92 +1,118 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Event, eventsService } from '@/services/eventsService';
+import { useAuth } from '@/context/AuthContext';
+import { tournamentsService } from '@/services/tournamentsService';
 import Link from 'next/link';
-import { Calendar, MapPin, Users } from 'lucide-react';
+
+type Tournament = {
+  id: string;
+  name: string;
+  format?: string;
+  status?: string;
+  startDate?: string;
+  maxTeams?: number;
+  locationName?: string;
+};
 
 export default function EventosPage() {
-    const [eventos, setEventos] = useState<Event[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string>('');
+  const { user } = useAuth();
+  const [torneos, setTorneos] = useState<Tournament[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>('');
 
-    useEffect(() => {
-        const fetchEventos = async () => {
-            try {
-                setLoading(true);
-                const data = await eventsService.getAll();
-                setEventos(data);
-            } catch (err) {
-                setError('Error al cargar los eventos');
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
+  useEffect(() => {
+    const fetchTorneos = async () => {
+      try {
+        setLoading(true);
+        const data = await tournamentsService.getAll();
+        setTorneos(data);
+      } catch (err) {
+        setError('Error al cargar los torneos');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTorneos();
+  }, []);
 
-        fetchEventos();
-    }, []);
-
-    if (loading) {
-        return (
-            <main className="page-container flex items-center justify-center">
-                <p className="text-muted">Cargando eventos...</p>
-            </main>
-        );
-    }
-
-    if (error) {
-        return (
-            <main className="page-container">
-                <div className="content-wrapper">
-                    <p className="text-red-400">{error}</p>
-                </div>
-            </main>
-        );
-    }
-
+  if (loading) {
     return (
-        <main className="page-container">
-            <div className="content-wrapper">
-                <header className="mb-8">
-                    <h1 className="flex items-center gap-3 mb-2">
-                        Eventos <span className="text-zs-green">Deportivos</span>
-                    </h1>
-                    <div className="divider mt-4" />
-                </header>
-
-                <article className="grid-container">
-                    {eventos.map((evento) => (
-                        <Link key={evento.id} href={`/eventos/${evento.id}`}>
-                            <article className="card h-full cursor-pointer">
-                                <div className="flex items-center justify-between mb-4">
-                                    <span className="badge">{evento.status}</span>
-                                    <span className="text-xs font-semibold text-zs-blue">{evento.sport?.name || 'Sin deporte'}</span>
-                                </div>
-                                <h2 className="heading-md mb-3">{evento.name}</h2>
-                                <p className="text-muted text-sm mb-4 line-clamp-2">{evento.description || 'Sin descripción'}</p>
-
-                                <div className="space-y-2 text-sm text-zs-text-secondary">
-                                    <div className="flex items-center gap-2">
-                                        <Calendar size={16} className="text-zs-blue" />
-                                        <time>{new Date(evento.startDate).toLocaleDateString('es-ES')}</time>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Users size={16} className="text-zs-green" />
-                                        <span>{evento.matches?.length || 0} partidos</span>
-                                    </div>
-                                </div>
-                            </article>
-                        </Link>
-                    ))}
-                </article>
-
-                {eventos.length === 0 && (
-                    <div className="text-center py-12">
-                        <p className="text-muted">No hay eventos disponibles</p>
-                    </div>
-                )}
-            </div>
-        </main>
+      <main className="page-container flex items-center justify-center">
+        <p className="text-muted">Cargando eventos deportivos...</p>
+      </main>
     );
+  }
+
+  if (error) {
+    return (
+      <main className="page-container">
+        <div className="content-wrapper">
+          <p className="text-red-400">{error}</p>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="page-container">
+      <div className="content-wrapper">
+        <header className="mb-8 flex items-center justify-between">
+          <h1 className="flex items-center gap-3 mb-2">
+            Eventos <span className="text-zs-green">Deportivos</span>
+          </h1>
+          {(user?.role === 'ORGANIZER' || user?.role === 'ADMIN') && (
+            <Link href="/crear-evento" className="btn btn-primary">
+              Crear Evento
+            </Link>
+          )}
+        </header>
+
+        {torneos.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted mb-4">No hay eventos disponibles por el momento.</p>
+            {(user?.role === 'ORGANIZER' || user?.role === 'ADMIN') && (
+              <Link href="/crear-evento" className="btn btn-primary">
+                Crear el primer evento
+              </Link>
+            )}
+          </div>
+        ) : (
+          <article className="grid-container">
+            {torneos.map((torneo) => (
+              <div key={torneo.id} className="card h-full flex flex-col">
+                <h2 className="heading-md mb-2">{torneo.name}</h2>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {torneo.format && (
+                    <span className="badge bg-zinc-800 text-lime-400">
+                      {torneo.format}
+                    </span>
+                  )}
+                  {torneo.status && (
+                    <span className="badge bg-zinc-800 text-lime-400">
+                      {torneo.status}
+                    </span>
+                  )}
+                  {torneo.startDate && (
+                    <span className="badge bg-zinc-800 text-lime-400">
+                      {new Date(torneo.startDate).toLocaleDateString('es-ES')}
+                    </span>
+                  )}
+                </div>
+                {torneo.locationName && (
+                  <p className="text-muted text-sm mb-4">{torneo.locationName}</p>
+                )}
+                <div className="mt-auto">
+                  <Link href={`/eventos/${torneo.id}`} className="btn btn-secondary w-full text-center">
+                    Ver detalles
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </article>
+        )}
+      </div>
+    </main>
+  );
 }
