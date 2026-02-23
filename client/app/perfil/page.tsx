@@ -9,7 +9,6 @@ export default function PerfilPage() {
         email: 'atleta@zonesport.com',
         firstName: 'Juan',
         lastName: 'Pérez',
-        phone: '+57 300 1234567',
         role: 'ATHLETE',
     });
 
@@ -26,14 +25,7 @@ export default function PerfilPage() {
         setIsEditing(false);
     };
 
-    const getRoleLabel = (role: string) => {
-        const roleMap: Record<string, string> = {
-            ATHLETE: 'Atleta',
-            ORGANIZER: 'Organizador',
-            ADMIN: 'Administrador',
-        };
-        return roleMap[role] || role;
-    };
+    // El rol se mantiene internamente, pero no se muestra ni edita
 
     return (
         <main className="page-container">
@@ -54,7 +46,7 @@ export default function PerfilPage() {
                         <h2 className="heading-lg">
                             {formData.firstName} {formData.lastName}
                         </h2>
-                        <p className="text-zs-green font-semibold mt-2">{getRoleLabel(formData.role)}</p>
+                        {/* El rol no se muestra */}
                     </div>
 
                     {/* Información del usuario */}
@@ -116,33 +108,7 @@ export default function PerfilPage() {
                             )}
                         </div>
 
-                        {/* Teléfono */}
-                        <div className="form-group">
-                            <label className="form-label flex items-center gap-2">
-                                <Phone size={16} className="text-zs-blue" />
-                                Teléfono
-                            </label>
-                            {isEditing ? (
-                                <input
-                                    type="tel"
-                                    name="phone"
-                                    value={formData.phone}
-                                    onChange={handleChange}
-                                    className="form-input"
-                                />
-                            ) : (
-                                <p>{formData.phone}</p>
-                            )}
-                        </div>
-
-                        {/* Rol */}
-                        <div className="form-group">
-                            <label className="form-label flex items-center gap-2">
-                                <Award size={16} className="text-zs-green" />
-                                Rol
-                            </label>
-                            <p>{getRoleLabel(formData.role)}</p>
-                        </div>
+                        {/* Teléfono y rol eliminados de la UI */}
                     </div>
 
                     {/* Botones de acción */}
