@@ -34,9 +34,7 @@ export default function NoticiasPage() {
         return;
       }
       try {
-        const apiKey = process.env.NEXT_PUBLIC_NEWSAPI_KEY;
-        const url = `https://newsapi.org/v2/top-headlines?category=sports&language=es&pageSize=20&apiKey=${apiKey}`;
-        const res = await fetch(url);
+        const res = await fetch('/api/noticias');
         if (!res.ok) throw new Error("Error al obtener noticias");
         const data = await res.json();
         if (!data.articles) throw new Error("No hay artículos disponibles");
