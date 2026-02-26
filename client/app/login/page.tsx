@@ -27,7 +27,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(email, password);
-      router.push('/');
+      router.push('/perfil');
     } catch (err: any) {
       setError(err.message || 'Error al iniciar sesión');
     } finally {
@@ -112,11 +112,10 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={!isFormValid || loading}
-              className={`w-full py-3 px-4 rounded font-semibold text-white flex items-center justify-center gap-2 transition-all duration-200 ${
-                isFormValid && !loading
+              className={`w-full py-3 px-4 rounded font-semibold text-white flex items-center justify-center gap-2 transition-all duration-200 ${isFormValid && !loading
                   ? 'bg-zonesport-blue hover:bg-zonesport-blue-hover shadow-lg'
                   : 'bg-zonesport-blue opacity-50 cursor-not-allowed'
-              }`}
+                }`}
             >
               {loading && <Loader className="animate-spin" size={20} />}
               {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}

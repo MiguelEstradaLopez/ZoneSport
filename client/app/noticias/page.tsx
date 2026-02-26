@@ -1,3 +1,4 @@
+"use client";
 export default function NoticiasPage() {
   const noticias = [
     { id: 1, titulo: "Gran Torneo de Fútbol Antioquia", fecha: "15 Ene 2026", categoria: "Fútbol" },
@@ -13,7 +14,7 @@ export default function NoticiasPage() {
           </h1>
           <div className="divider mt-4" />
         </header>
-        
+
         <article className="grid gap-4">
           {noticias.map((nota) => (
             <div key={nota.id} className="card">

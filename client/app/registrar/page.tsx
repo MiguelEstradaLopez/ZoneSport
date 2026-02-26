@@ -64,7 +64,7 @@ export default function RegistroPage() {
         password: '',
         confirmPassword: '',
       });
-      router.push('/');
+      router.push('/perfil');
     } catch (err: any) {
       setError(err.message || 'Error al registrar');
     } finally {
