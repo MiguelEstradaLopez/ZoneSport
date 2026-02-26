@@ -29,7 +29,11 @@ export default function LoginPage() {
       await login(email, password);
       router.push('/perfil');
     } catch (err: any) {
-      setError(err.message || 'Error al iniciar sesión');
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        'Error desconocido';
+      setError(Array.isArray(message) ? message.join(', ') : message);
     } finally {
       setLoading(false);
     }
@@ -113,8 +117,8 @@ export default function LoginPage() {
               type="submit"
               disabled={!isFormValid || loading}
               className={`w-full py-3 px-4 rounded font-semibold text-white flex items-center justify-center gap-2 transition-all duration-200 ${isFormValid && !loading
-                  ? 'bg-zonesport-blue hover:bg-zonesport-blue-hover shadow-lg'
-                  : 'bg-zonesport-blue opacity-50 cursor-not-allowed'
+                ? 'bg-zonesport-blue hover:bg-zonesport-blue-hover shadow-lg'
+                : 'bg-zonesport-blue opacity-50 cursor-not-allowed'
                 }`}
             >
               {loading && <Loader className="animate-spin" size={20} />}

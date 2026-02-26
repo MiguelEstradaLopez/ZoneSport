@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { UserCircle, Mail, LogOut, Upload } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -16,6 +16,13 @@ export default function PerfilPage() {
         email: user?.email || 'atleta@zonesport.com',
     });
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [profilePicture, setProfilePicture] = useState<string | null>(null);
+
+    // Cargar foto de perfil desde localStorage al iniciar
+    useEffect(() => {
+        const stored = localStorage.getItem('profile_picture');
+        if (stored) setProfilePicture(stored);
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -51,9 +58,17 @@ export default function PerfilPage() {
                     {/* Avatar y nombre */}
                     <div className="card-header text-center">
                         <div className="avatar mx-auto mb-2">
-                            <UserCircle size={64} className="text-zs-dark" />
+                            {profilePicture ? (
+                                <img
+                                    src={profilePicture}
+                                    alt="Foto de perfil"
+                                    className="w-24 h-24 rounded-full object-cover border border-zs-dark"
+                                />
+                            ) : (
+                                <UserCircle size={96} className="text-zs-dark" />
+                            )}
                         </div>
-                        {/* Subir foto de perfil (solo UI) */}
+                        {/* Subir foto de perfil funcional */}
                         <div className="mb-4 flex flex-col items-center gap-2">
                             <label className="btn btn-sm btn-outline flex items-center gap-2 cursor-pointer">
                                 <Upload size={16} />
@@ -62,9 +77,18 @@ export default function PerfilPage() {
                                     type="file"
                                     accept="image/*"
                                     className="hidden"
-                                    onChange={e => {
+                                    onChange={async e => {
                                         if (e.target.files && e.target.files[0]) {
-                                            setSelectedFile(e.target.files[0]);
+                                            const file = e.target.files[0];
+                                            setSelectedFile(file);
+                                            // Preview
+                                            const reader = new FileReader();
+                                            reader.onload = function (ev) {
+                                                const base64 = ev.target?.result as string;
+                                                setProfilePicture(base64);
+                                                localStorage.setItem('profile_picture', base64);
+                                            };
+                                            reader.readAsDataURL(file);
                                         }
                                     }}
                                 />
