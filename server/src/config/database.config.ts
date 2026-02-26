@@ -97,7 +97,7 @@ export const getDatabaseConfig = (configService?: ConfigService): TypeOrmModuleO
             PasswordResetToken,
         ],
         migrations: [`${migrationsPath}/*.js`],
-        synchronize: nodeEnv === 'development',
+        synchronize: true,
         autoLoadEntities: true,
         logging: nodeEnv === 'development',
         // CRITICAL: SSL is automatically configured based on environment
