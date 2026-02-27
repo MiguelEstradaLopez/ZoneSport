@@ -28,7 +28,7 @@ export class AuthService {
     private passwordResetTokenRepository: Repository<PasswordResetToken>,
     @InjectRepository(EmailVerification)
     private emailVerificationRepository: Repository<EmailVerification>,
-  ) {}
+  ) { }
 
   async validateUser(email: string, password: string) {
     const user = await this.usersService.findByEmail(email);
@@ -83,11 +83,7 @@ export class AuthService {
       lastName: registerDto.lastName,
       role: UserRole.ATHLETE,
     });
-    try {
-      await this.emailService.sendWelcomeEmail(user.email, user.firstName || '');
-    } catch {
-      // Email falla silenciosamente
-    }
+    this.emailService.sendWelcomeEmail(user.email, user.firstName || '').catch(() => { });
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
     await this.emailVerificationRepository.save({
@@ -96,11 +92,7 @@ export class AuthService {
       expiresAt,
       user,
     });
-    try {
-      await this.emailService.sendVerificationEmail(user.email, user.firstName || '', code);
-    } catch {
-      // Email falla silenciosamente
-    }
+    this.emailService.sendVerificationEmail(user.email, user.firstName || '', code).catch(() => { });
     const payload = { email: user.email, sub: user.id, role: user.role };
     return {
       access_token: this.jwtService.sign(payload, {

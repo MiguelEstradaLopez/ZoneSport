@@ -66,11 +66,7 @@ export default function RegistroPage() {
       });
       router.push('/perfil');
     } catch (err: any) {
-      const message =
-        err?.response?.data?.message ||
-        err?.message ||
-        'Error desconocido';
-      setError(Array.isArray(message) ? message.join(', ') : message);
+      setError(err.message || 'Error desconocido');
     } finally {
       setLoading(false);
     }

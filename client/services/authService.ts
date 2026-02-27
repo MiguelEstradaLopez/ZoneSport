@@ -21,8 +21,9 @@ export const authService = {
             body: JSON.stringify({ email, password }),
         });
         if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message?.[0] || error.message || 'Error al iniciar sesión');
+            const errorData = await response.json().catch(() => ({}));
+            const message = errorData.message || errorData.error || `Error ${response.status}`;
+            throw new Error(Array.isArray(message) ? message.join(', ') : message);
         }
         return response.json();
     },
@@ -39,8 +40,9 @@ export const authService = {
             body: JSON.stringify(data),
         });
         if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message?.[0] || error.message || 'Error al registrarse');
+            const errorData = await response.json().catch(() => ({}));
+            const message = errorData.message || errorData.error || `Error ${response.status}`;
+            throw new Error(Array.isArray(message) ? message.join(', ') : message);
         }
         return response.json();
     },
