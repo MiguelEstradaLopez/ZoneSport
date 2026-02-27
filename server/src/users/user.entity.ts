@@ -36,6 +36,9 @@ export class User {
   })
   role: UserRole;
 
+  @Column({ default: false })
+  isVerified: boolean;
+
   @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;
 

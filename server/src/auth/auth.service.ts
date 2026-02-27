@@ -11,6 +11,7 @@ import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
 import { EmailService } from '../email/email.service';
 import { PasswordResetToken } from './entities/password-reset-token.entity';
+import { EmailVerification } from './entities/email-verification.entity';
 import { LoginDto } from './dtos/login.dto';
 import { RegisterDto } from './dtos/register.dto';
 import { ForgotPasswordDto } from './dtos/forgot-password.dto';
@@ -25,6 +26,8 @@ export class AuthService {
     private jwtService: JwtService,
     @InjectRepository(PasswordResetToken)
     private passwordResetTokenRepository: Repository<PasswordResetToken>,
+    @InjectRepository(EmailVerification)
+    private emailVerificationRepository: Repository<EmailVerification>,
   ) {}
 
   async validateUser(email: string, password: string) {
@@ -44,6 +47,11 @@ export class AuthService {
     const user = await this.validateUser(loginDto.email, loginDto.password);
     if (!user) {
       throw new UnauthorizedException('Credenciales inválidas');
+    }
+    try {
+      await this.emailService.sendLoginNotification(user.email, user.firstName || '');
+    } catch {
+      // Email falla silenciosamente
     }
     const payload = { email: user.email, sub: user.id, role: user.role };
     return {
@@ -75,12 +83,23 @@ export class AuthService {
       lastName: registerDto.lastName,
       role: UserRole.ATHLETE,
     });
-    if (process.env.RESEND_API_KEY) {
-      try {
-        await this.emailService.sendWelcomeEmail(user.email, user.firstName || '');
-      } catch {
-        // Email es opcional, no fallar si no funciona
-      }
+    try {
+      await this.emailService.sendWelcomeEmail(user.email, user.firstName || '');
+    } catch {
+      // Email falla silenciosamente
+    }
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+    await this.emailVerificationRepository.save({
+      email: user.email,
+      code,
+      expiresAt,
+      user,
+    });
+    try {
+      await this.emailService.sendVerificationEmail(user.email, user.firstName || '', code);
+    } catch {
+      // Email falla silenciosamente
     }
     const payload = { email: user.email, sub: user.id, role: user.role };
     return {
@@ -96,6 +115,20 @@ export class AuthService {
         role: user.role,
       },
     };
+  }
+
+  async verifyEmailCode(email: string, code: string) {
+    const verification = await this.emailVerificationRepository.findOne({
+      where: { email, code },
+      relations: ['user'],
+    });
+    if (!verification || new Date() > verification.expiresAt) {
+      throw new BadRequestException('Código inválido o expirado');
+    }
+    verification.user.isVerified = true;
+    await this.usersService.save(verification.user);
+    await this.emailVerificationRepository.remove(verification);
+    return { message: 'Correo verificado exitosamente' };
   }
 
   private isValidEmail(email: string): boolean {
@@ -176,34 +209,14 @@ export class AuthService {
     return { message: 'Tu contraseña ha sido actualizada exitosamente' };
   }
 
-  async validateResetToken(
-    token: string,
-  ): Promise<{ email: string; firstName: string }> {
-    const resetTokenRecord = await this.passwordResetTokenRepository.findOne({
-      where: { token },
-      relations: ['user'],
-    });
-    if (!resetTokenRecord) {
-      throw new BadRequestException('El enlace de recuperación no es válido');
-    }
-    if (new Date() > resetTokenRecord.expiresAt) {
-      await this.passwordResetTokenRepository.remove(resetTokenRecord);
-      throw new BadRequestException(
-        'El enlace de recuperación ha expirado',
-      );
-    }
+  async validateResetToken(token: string): Promise<{ valid: boolean }> {
     try {
       this.jwtService.verify(token, {
         secret: process.env.JWT_RESET_SECRET || process.env.JWT_SECRET,
       });
+      return { valid: true };
     } catch {
-      throw new BadRequestException(
-        'El enlace de recuperación no es válido o ha expirado',
-      );
+      return { valid: false };
     }
-    return {
-      email: resetTokenRecord.user.email,
-      firstName: resetTokenRecord.user.firstName,
-    };
   }
 }

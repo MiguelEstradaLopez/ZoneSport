@@ -101,4 +101,8 @@ export class UsersService {
     user.passwordHash = hashedPassword;
     await this.usersRepository.save(user);
   }
+
+  async save(user: User): Promise<User> {
+    return this.usersRepository.save(user);
+  }
 }

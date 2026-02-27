@@ -8,12 +8,13 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { UsersModule } from '../users/users.module';
 import { EmailModule } from '../email/email.module';
 import { PasswordResetToken } from './entities/password-reset-token.entity';
+import { EmailVerification } from './entities/email-verification.entity';
 
 @Module({
     imports: [
         UsersModule,
         EmailModule,
-        TypeOrmModule.forFeature([PasswordResetToken]),
+        TypeOrmModule.forFeature([PasswordResetToken, EmailVerification]),
         PassportModule,
         JwtModule.register({
             secret: process.env.JWT_SECRET,

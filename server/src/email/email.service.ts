@@ -1,98 +1,121 @@
 import { Injectable } from '@nestjs/common';
-import { Resend } from 'resend';
+import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class EmailService {
-  private resend: Resend | null = null;
+  private transporter: nodemailer.Transporter;
 
   constructor() {
-    // Configurar Resend con API key (opcional en desarrollo)
-    const apiKey = process.env.RESEND_API_KEY;
-    if (apiKey && !apiKey.includes('placeholder')) {
-      this.resend = new Resend(apiKey);
-      console.log('[EMAIL] Resend API configured and ready');
-    } else {
-      console.warn('[EMAIL] Resend API key not configured - emails will not be sent (OK for development)');
+    this.transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD,
+      },
+    });
+  }
+
+  async sendWelcomeEmail(email: string, firstName: string): Promise<void> {
+    try {
+      await this.transporter.sendMail({
+        from: process.env.GMAIL_USER,
+        to: email,
+        subject: `¡Bienvenido a ZoneSport, ${firstName}!`,
+        html: `
+          <div style="background:#18181b;color:#fff;font-family:sans-serif;padding:24px;border-radius:8px">
+            <h2>¡Bienvenido a ZoneSport, ${firstName}!</h2>
+            <p>Tu cuenta ha sido creada exitosamente.</p>
+            <ul style="margin:16px 0;padding-left:20px">
+              <li>Participar en eventos deportivos</li>
+              <li>Crear tus propios eventos</li>
+              <li>Conectar con otros deportistas</li>
+              <li>Seguir las noticias de tu deporte favorito</li>
+            </ul>
+            <p>
+              <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/login" style="background:#22c55e;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold">Acceder a ZoneSport</a>
+            </p>
+            <hr style="border:none;border-top:1px solid #333;margin:24px 0">
+            <p style="font-size:12px;color:#888">ZoneSport - Plataforma de Gestión de Deportes</p>
+          </div>
+        `,
+      });
+    } catch (error) {
+      const err = error as Error;
+      throw new Error(`Failed to send welcome email: ${err.message}`);
     }
   }
 
-  async sendPasswordResetEmail(
-    email: string,
-    firstName: string,
-    resetLink: string,
-  ): Promise<void> {
-    if (!this.resend) {
-      console.log(`[EMAIL] (Mock) Password reset email would be sent to ${email} - Configure RESEND_API_KEY to enable`);
-      return;
-    }
+  async sendLoginNotification(email: string, firstName: string): Promise<void> {
     try {
-      await this.resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL || 'noreply@zonesport.com',
+      await this.transporter.sendMail({
+        from: process.env.GMAIL_USER,
         to: email,
-        subject: 'Recupera tu contraseña en ZoneSport',
+        subject: 'Nuevo inicio de sesión en ZoneSport',
         html: `
-                    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-                        <h2>Hola ${firstName},</h2>
-                        <p>Recibimos una solicitud para restablecer tu contraseña en ZoneSport.</p>
-                        <p>Haz clic en el siguiente enlace para crear una nueva contraseña:</p>
-                        <p>
-                            <a href="${resetLink}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                                Restablecer Contraseña
-                            </a>
-                        </p>
-                        <p>O copia este enlace en tu navegador: ${resetLink}</p>
-                        <p style="color: #666; font-size: 12px; margin-top: 20px;">
-                            Este enlace expirará en 1 hora. Si no solicitaste esta recuperación, ignora este correo.
-                        </p>
-                        <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
-                        <p style="font-size: 12px; color: #999;">ZoneSport - Plataforma de Gestión de Deportes</p>
-                    </div>
-                `,
+          <div style="background:#18181b;color:#fff;font-family:sans-serif;padding:24px;border-radius:8px">
+            <h2>Hola ${firstName},</h2>
+            <p>Se ha iniciado sesión en tu cuenta de ZoneSport.</p>
+            <p>Fecha y hora: ${new Date().toLocaleString('es-CO')}</p>
+            <p style="color:#aaa;font-size:12px">Si no fuiste tú, cambia tu contraseña inmediatamente.</p>
+            <hr style="border:none;border-top:1px solid #333;margin:24px 0">
+            <p style="font-size:12px;color:#888">ZoneSport - Plataforma de Gestión de Deportes</p>
+          </div>
+        `,
       });
-      console.log(`[EMAIL] Password reset email sent to ${email}`);
     } catch (error) {
       const err = error as Error;
-      console.error(`[EMAIL] Error sending password reset email to ${email}:`, err.message);
+      throw new Error(`Failed to send login notification: ${err.message}`);
+    }
+  }
+
+  async sendPasswordResetEmail(email: string, firstName: string, resetLink: string): Promise<void> {
+    try {
+      await this.transporter.sendMail({
+        from: process.env.GMAIL_USER,
+        to: email,
+        subject: 'Recupera tu contraseña de ZoneSport',
+        html: `
+          <div style="background:#18181b;color:#fff;font-family:sans-serif;padding:24px;border-radius:8px">
+            <h2>Hola ${firstName},</h2>
+            <p>Recibimos una solicitud para restablecer tu contraseña en ZoneSport.</p>
+            <p>
+              <a href="${resetLink}" style="background:#2563eb;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold">Restablecer Contraseña</a>
+            </p>
+            <p>O copia este enlace: ${resetLink}</p>
+            <p style="color:#aaa;font-size:12px">Este enlace expirará en 1 hora.</p>
+            <hr style="border:none;border-top:1px solid #333;margin:24px 0">
+            <p style="font-size:12px;color:#888">ZoneSport - Plataforma de Gestión de Deportes</p>
+          </div>
+        `,
+      });
+    } catch (error) {
+      const err = error as Error;
       throw new Error(`Failed to send password reset email: ${err.message}`);
     }
   }
 
-  async sendWelcomeEmail(email: string, firstName: string): Promise<void> {
-    if (!this.resend) {
-      console.log(`[EMAIL] (Mock) Welcome email would be sent to ${email} - Configure RESEND_API_KEY to enable`);
-      return;
-    }
+  async sendVerificationEmail(email: string, firstName: string, code: string): Promise<void> {
     try {
-      await this.resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL || 'noreply@zonesport.com',
+      await this.transporter.sendMail({
+        from: process.env.GMAIL_USER,
         to: email,
-        subject: 'Bienvenido a ZoneSport',
+        subject: 'Verifica tu correo en ZoneSport',
         html: `
-                    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-                        <h2>¡Bienvenido a ZoneSport, ${firstName}!</h2>
-                        <p>Tu cuenta ha sido creada exitosamente.</p>
-                        <p>Ahora puedes:</p>
-                        <ul>
-                            <li>Participar en eventos deportivos</li>
-                            <li>Crear tus propios eventos</li>
-                            <li>Conectar con otros deportistas</li>
-                            <li>Seguir las noticias de tu deporte favorito</li>
-                        </ul>
-                        <p>
-                            <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/login" style="background-color: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                                Acceder a ZoneSport
-                            </a>
-                        </p>
-                        <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
-                        <p style="font-size: 12px; color: #999;">ZoneSport - Plataforma de Gestión de Deportes</p>
-                    </div>
-                `,
+          <div style="background:#18181b;color:#fff;font-family:sans-serif;padding:24px;border-radius:8px">
+            <h2>Hola ${firstName},</h2>
+            <p>Tu cuenta ha sido creada. Para activar todas las funciones, verifica tu correo.</p>
+            <p style="font-size:32px;font-weight:bold;margin:24px 0;letter-spacing:8px;color:#22c55e">${code}</p>
+            <p>Este código es válido por 15 minutos.</p>
+            <hr style="border:none;border-top:1px solid #333;margin:24px 0">
+            <p style="font-size:12px;color:#888">ZoneSport - Plataforma de Gestión de Deportes</p>
+          </div>
+        `,
       });
-      console.log(`[EMAIL] Welcome email sent to ${email}`);
     } catch (error) {
       const err = error as Error;
-      console.error(`[EMAIL] Error sending welcome email to ${email}:`, err.message);
-      throw new Error(`Failed to send welcome email: ${err.message}`);
+      throw new Error(`Failed to send verification email: ${err.message}`);
     }
   }
 }
