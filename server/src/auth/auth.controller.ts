@@ -66,4 +66,10 @@ export class AuthController {
   async verifyEmail(@Body() body: { email: string; code: string }) {
     return this.authService.verifyEmailCode(body.email, body.code);
   }
+
+  @Get('test-email')
+  async testEmail() {
+    await this.authService.testEmail();
+    return { message: 'Email enviado' };
+  }
 }

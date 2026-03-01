@@ -119,6 +119,13 @@ export class AuthService {
     return { message: 'Correo verificado exitosamente' };
   }
 
+  async testEmail() {
+    await this.emailService.sendWelcomeEmail(
+      'zonesportantioquia@gmail.com',
+      'Test',
+    );
+  }
+
   private isValidEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
