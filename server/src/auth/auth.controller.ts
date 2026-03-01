@@ -79,7 +79,7 @@ export class AuthController {
       const net = require('net');
       const results: any = {};
       let pending = 3;
-      
+
       const check = (port: number) => {
         const socket = net.createConnection(port, 'smtp-relay.brevo.com');
         socket.setTimeout(5000);
@@ -98,7 +98,7 @@ export class AuthController {
           if (--pending === 0) resolve(results);
         });
       };
-      
+
       check(587);
       check(465);
       check(2525);
