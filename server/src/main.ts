@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { DataSource } from 'typeorm';
+import { seedActivityTypesIfEmpty } from './database/seeds/activity-types.seed';
 import * as dotenv from 'dotenv';
 
 // Cargar variables de entorno desde .env
@@ -51,6 +53,14 @@ async function bootstrap() {
   console.log('Conectando con usuario:', process.env.DB_USERNAME || process.env.DATABASE_USER || 'postgres');
 
   const app = await NestFactory.create(AppModule);
+
+  try {
+    const dataSource = app.get(DataSource);
+    await seedActivityTypesIfEmpty(dataSource);
+    logger.log('✅ Activity types seed check completed');
+  } catch (err: any) {
+    logger.warn(`Activity types seed check failed: ${err?.message || err}`);
+  }
 
   // Configurar CORS - Permisivo en desarrollo, restrictivo en producción
   const isDevelopment = process.env.NODE_ENV === 'development';
