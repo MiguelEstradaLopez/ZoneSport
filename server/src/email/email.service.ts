@@ -10,12 +10,13 @@ export class EmailService {
     console.log('[EMAIL] GMAIL_PASS:', process.env.GMAIL_APP_PASSWORD ? 'SET' : 'NOT SET');
 
     this.transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
+      service: 'gmail',
       auth: {
         user: process.env.GMAIL_USER,
         pass: process.env.GMAIL_APP_PASSWORD,
+      },
+      tls: {
+        rejectUnauthorized: false,
       },
     });
   }
