@@ -22,8 +22,7 @@ export class TournamentsController {
     }
 
     @Post()
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(UserRole.ORGANIZER, UserRole.ADMIN)
+    @UseGuards(JwtAuthGuard)
     create(@Body() dto: CreateTournamentDto, @Request() req) {
         return this.tournamentService.create(dto, req.user);
     }
