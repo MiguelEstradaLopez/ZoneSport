@@ -17,7 +17,7 @@ import { User } from '../users/user.entity';
 @Controller('auth')
 @ApiTags('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   @Post('register')
   @ApiOperation({ summary: 'Registrar un nuevo usuario' })
