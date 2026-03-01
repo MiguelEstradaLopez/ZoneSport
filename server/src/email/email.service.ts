@@ -6,17 +6,15 @@ export class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor() {
-    console.log('[EMAIL] GMAIL_USER:', process.env.GMAIL_USER ? 'SET' : 'NOT SET');
-    console.log('[EMAIL] GMAIL_PASS:', process.env.GMAIL_APP_PASSWORD ? 'SET' : 'NOT SET');
+    console.log('[EMAIL] BREVO_SMTP_KEY:', process.env.BREVO_SMTP_KEY ? 'SET' : 'NOT SET');
 
     this.transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp-relay.brevo.com',
+      port: 587,
+      secure: false,
       auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD,
-      },
-      tls: {
-        rejectUnauthorized: false,
+        user: 'a3a6fc001@smtp-brevo.com',
+        pass: process.env.BREVO_SMTP_KEY,
       },
     });
   }
@@ -24,7 +22,7 @@ export class EmailService {
   async sendWelcomeEmail(email: string, firstName: string): Promise<void> {
     try {
       await this.transporter.sendMail({
-        from: process.env.GMAIL_USER,
+        from: 'ZoneSport <zonesportantioquia@gmail.com>',
         to: email,
         subject: `¡Bienvenido a ZoneSport, ${firstName}!`,
         html: `
@@ -54,7 +52,7 @@ export class EmailService {
   async sendLoginNotification(email: string, firstName: string): Promise<void> {
     try {
       await this.transporter.sendMail({
-        from: process.env.GMAIL_USER,
+        from: 'ZoneSport <zonesportantioquia@gmail.com>',
         to: email,
         subject: 'Nuevo inicio de sesión en ZoneSport',
         html: `
@@ -77,7 +75,7 @@ export class EmailService {
   async sendPasswordResetEmail(email: string, firstName: string, resetLink: string): Promise<void> {
     try {
       await this.transporter.sendMail({
-        from: process.env.GMAIL_USER,
+        from: 'ZoneSport <zonesportantioquia@gmail.com>',
         to: email,
         subject: 'Recupera tu contraseña de ZoneSport',
         html: `
@@ -103,7 +101,7 @@ export class EmailService {
   async sendVerificationEmail(email: string, firstName: string, code: string): Promise<void> {
     try {
       await this.transporter.sendMail({
-        from: process.env.GMAIL_USER,
+        from: 'ZoneSport <zonesportantioquia@gmail.com>',
         to: email,
         subject: 'Verifica tu correo en ZoneSport',
         html: `
