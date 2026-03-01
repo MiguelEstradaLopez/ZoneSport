@@ -113,5 +113,12 @@ async function bootstrap() {
   console.log(`✅ API Docs disponible en http://localhost:${port}/api/docs`);
   console.log(`✅ CORS habilitado para: ${isDevelopment ? 'todos los orígenes (desarrollo)' : process.env.FRONTEND_URL}`);
   console.log(`✅ Entorno: ${process.env.NODE_ENV || 'development'}`);
+  // Verify SMTP transporter once at startup (non-blocking)
+  try {
+    const emailService = app.get(require('./email/email.service').EmailService);
+    emailService.verifyTransporter && emailService.verifyTransporter();
+  } catch (err: any) {
+    console.warn('[EMAIL] Could not verify transporter at startup:', err?.message || err);
+  }
 }
 bootstrap();

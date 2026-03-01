@@ -121,4 +121,19 @@ export class EmailService {
       throw new Error(`Failed to send verification email: ${err.message}`);
     }
   }
+
+  verifyTransporter(): void {
+    // Verify transporter connection asynchronously and log result
+    try {
+      this.transporter.verify((error, success) => {
+        if (error) {
+          console.error('[EMAIL] SMTP connection failed:', error.message);
+        } else {
+          console.log('[EMAIL] SMTP connection successful, ready to send emails');
+        }
+      });
+    } catch (err: any) {
+      console.error('[EMAIL] Error during transporter.verify():', err?.message || err);
+    }
+  }
 }
