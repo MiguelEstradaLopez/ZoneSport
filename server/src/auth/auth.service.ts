@@ -48,11 +48,7 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
-    try {
-      await this.emailService.sendLoginNotification(user.email, user.firstName || '');
-    } catch {
-      // Email falla silenciosamente
-    }
+    this.emailService.sendLoginNotification(user.email, user.firstName || '').catch(() => { });
     const payload = { email: user.email, sub: user.id, role: user.role };
     return {
       access_token: this.jwtService.sign(payload, {
