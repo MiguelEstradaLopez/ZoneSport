@@ -26,7 +26,9 @@ export class TournamentService {
     }
 
     async create(dto: CreateTournamentDto, user: User) {
-        const tournament = this.tournamentRepo.create({ ...dto, organizer: user });
+        // Generar join code aleatorio
+        const joinCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        const tournament = this.tournamentRepo.create({ ...dto, organizer: user, joinCode });
         return this.tournamentRepo.save(tournament);
     }
 

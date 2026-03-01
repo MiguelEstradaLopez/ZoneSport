@@ -1,9 +1,16 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
+
+interface ActivityType {
+    id: string;
+    name: string;
+    category: string;
+    isCustom: boolean;
+}
 
 type TournamentFormat =
     | 'LEAGUE'
@@ -28,28 +35,31 @@ export default function CrearEventoPage() {
     const [fechaFin, setFechaFin] = useState('');
     const [fechaLimiteRegistro, setFechaLimiteRegistro] = useState('');
     const [esPublico, setEsPublico] = useState(true);
-    const [deporte, setDeporte] = useState('Fútbol');
-    const [deporteOtro, setDeporteOtro] = useState('');
     const [locationName, setLocationName] = useState('');
     const [locationAddress, setLocationAddress] = useState('');
 
-    const deportesComunes = [
-        'Fútbol',
-        'Baloncesto',
-        'Voleibol',
-        'Tenis',
-        'Natación',
-        'Ciclismo',
-        'Atletismo',
-        'Béisbol',
-        'Rugby',
-        'Boxeo',
-        'Artes Marciales',
-        'Pádel',
-        'Squash',
-        'Golf',
-        'Otro',
-    ];
+    // Activity Types desde el backend
+    const [activityTypes, setActivityTypes] = useState<ActivityType[]>([]);
+    const [selectedActivityTypeId, setSelectedActivityTypeId] = useState<string>('');
+    const [loadingActivityTypes, setLoadingActivityTypes] = useState(true);
+
+    // Cargar activity types al montar
+    useEffect(() => {
+        const fetchActivityTypes = async () => {
+            try {
+                const response = await api.get('/activity-types');
+                setActivityTypes(response.data);
+                if (response.data.length > 0) {
+                    setSelectedActivityTypeId(response.data[0].id);
+                }
+            } catch (err) {
+                console.error('Error cargando activity types:', err);
+            } finally {
+                setLoadingActivityTypes(false);
+            }
+        };
+        fetchActivityTypes();
+    }, []);
 
     // Redirect si no está autenticado
     if (!isAuthenticated) {
@@ -95,8 +105,8 @@ export default function CrearEventoPage() {
             if (!fechaInicio) {
                 throw new Error('La fecha de inicio es requerida');
             }
-            if (deporte === 'Otro' && !deporteOtro.trim()) {
-                throw new Error('Debes especificar el deporte personalizado');
+            if (!selectedActivityTypeId) {
+                throw new Error('Debes seleccionar un deporte');
             }
 
             // Crear payload
@@ -112,7 +122,7 @@ export default function CrearEventoPage() {
                     ? new Date(fechaLimiteRegistro).toISOString()
                     : undefined,
                 isPublic: esPublico,
-                activityType: deporte === 'Otro' ? deporteOtro.trim() : deporte,
+                activityTypeId: selectedActivityTypeId,
                 locationName: locationName.trim() || undefined,
                 locationAddress: locationAddress.trim() || undefined,
             };
@@ -297,35 +307,25 @@ export default function CrearEventoPage() {
                         <label className="block text-sm font-semibold mb-2">
                             Deporte *
                         </label>
-                        <select
-                            value={deporte}
-                            onChange={(e) => setDeporte(e.target.value)}
-                            className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2 text-white focus:outline-none focus:border-green-500"
-                            required
-                        >
-                            {deportesComunes.map((item) => (
-                                <option key={item} value={item}>
-                                    {item}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {deporte === 'Otro' && (
-                        <div>
-                            <label className="block text-sm font-semibold mb-2">
-                                Especifica el deporte *
-                            </label>
-                            <input
-                                type="text"
-                                value={deporteOtro}
-                                onChange={(e) => setDeporteOtro(e.target.value)}
-                                placeholder="Ej: Ultimate Frisbee"
-                                className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500"
+                        {loadingActivityTypes ? (
+                            <div className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2 text-zinc-500">
+                                Cargando deportes...
+                            </div>
+                        ) : (
+                            <select
+                                value={selectedActivityTypeId}
+                                onChange={(e) => setSelectedActivityTypeId(e.target.value)}
+                                className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2 text-white focus:outline-none focus:border-green-500"
                                 required
-                            />
-                        </div>
-                    )}
+                            >
+                                {activityTypes.map((type) => (
+                                    <option key={type.id} value={type.id}>
+                                        {type.name}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
+                    </div>
 
                     {/* Ubicación */}
                     <div>
@@ -378,7 +378,7 @@ export default function CrearEventoPage() {
                     <p className="text-sm font-semibold mb-3 text-zinc-300">Vista previa de etiquetas</p>
                     <div className="flex flex-wrap gap-2">
                         <span className="inline-block bg-zinc-700 text-zinc-100 px-3 py-1 rounded-full text-sm">
-                            {deporte === 'Otro' ? (deporteOtro.trim() || 'Otro') : deporte}
+                            {activityTypes.find(t => t.id === selectedActivityTypeId)?.name || 'Deporte'}
                         </span>
                         <span className="inline-block bg-zinc-700 text-zinc-100 px-3 py-1 rounded-full text-sm">
                             {tipoEvento === 'TORNEO' ? 'Torneo' : 'Amistoso'}

@@ -63,6 +63,9 @@ export class Tournament {
     @Column({ type: 'varchar', nullable: true })
     locationAddress?: string;
 
+    @Column({ unique: true, nullable: true })
+    joinCode?: string;
+
     @Column({ type: 'decimal', precision: 10, scale: 8, nullable: true })
     latitude?: number;
 
