@@ -1,163 +1,362 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import { eventsService, Event } from '@/services/eventsService';
-import { matchesService, Match } from '@/services/matchesService';
-import { classificationsService, Classification } from '@/services/classificationsService';
-import { Trophy, Zap } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+import api from '@/services/api';
+
+type Tournament = {
+    id: string;
+    name: string;
+    description?: string;
+    format: string;
+    status: string;
+    startDate: string;
+    endDate?: string;
+    maxTeams: number;
+    locationName?: string;
+    locationAddress?: string;
+    registrationDeadline?: string;
+    isPublic: boolean;
+    organizer?: {
+        id: string;
+        email: string;
+        firstName: string;
+        lastName: string;
+    };
+    createdAt?: string;
+};
+
+// Función para obtener color del estado
+const getStatusColor = (status: string) => {
+    switch (status) {
+        case 'DRAFT':
+            return 'bg-gray-600';
+        case 'REGISTRATION_OPEN':
+            return 'bg-green-600';
+        case 'IN_PROGRESS':
+            return 'bg-blue-600';
+        case 'FINISHED':
+            return 'bg-red-600';
+        default:
+            return 'bg-zinc-700';
+    }
+};
+
+const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+        DRAFT: 'Borrador',
+        REGISTRATION_OPEN: 'Inscripciones Abiertas',
+        IN_PROGRESS: 'En Progreso',
+        FINISHED: 'Finalizado',
+        CANCELLED: 'Cancelado',
+    };
+    return labels[status] || status;
+};
 
 export default function EventDetailPage() {
     const params = useParams();
-    const eventId = Number(params?.id);
-    const [evento, setEvento] = useState<Event | null>(null);
-    const [matches, setMatches] = useState<Match[]>([]);
-    const [clasificacion, setClasificacion] = useState<Classification[]>([]);
+    const router = useRouter();
+    const { isAuthenticated, user } = useAuth();
+    const tournamentId = params?.id as string;
+
+    const [torneo, setTorneo] = useState<Tournament | null>(null);
     const [loading, setLoading] = useState(true);
+    const [joining, setJoining] = useState(false);
     const [error, setError] = useState<string>('');
+    const [successMessage, setSuccessMessage] = useState<string>('');
 
     useEffect(() => {
-        if (!eventId) return;
+        if (!tournamentId) return;
 
-        const fetchData = async () => {
+        const fetchTorneo = async () => {
             try {
                 setLoading(true);
-                const [eventData, matchesData, clasificacionData] = await Promise.all([
-                    eventsService.getById(eventId),
-                    matchesService.getByEvent(eventId),
-                    classificationsService.getByEvent(eventId),
-                ]);
-                setEvento(eventData);
-                setMatches(matchesData);
-                setClasificacion(clasificacionData);
+                const response = await api.get(`/tournaments/${tournamentId}`);
+                setTorneo(response.data);
             } catch (err) {
-                setError('Error al cargar los datos del evento');
+                setError('Error al cargar el torneo');
                 console.error(err);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchData();
-    }, [eventId]);
+        fetchTorneo();
+    }, [tournamentId]);
+
+    // Función para unirse al torneo
+    const handleJoin = async () => {
+        if (!isAuthenticated) {
+            router.push('/login');
+            return;
+        }
+
+        setJoining(true);
+        setError('');
+        setSuccessMessage('');
+
+        try {
+            await api.post(`/tournaments/${tournamentId}/join`);
+            setSuccessMessage('¡Te has unido exitosamente al evento!');
+            // Recargar datos del torneo después de unirse
+            const response = await api.get(`/tournaments/${tournamentId}`);
+            setTorneo(response.data);
+        } catch (err: any) {
+            const message = err.response?.data?.message || 'Error al unirse al evento';
+            setError(message);
+        } finally {
+            setJoining(false);
+        }
+    };
 
     if (loading) {
         return (
-            <main className="page-container flex items-center justify-center">
-                <p className="text-muted">Cargando evento...</p>
-            </main>
-        );
-    }
-
-    if (error || !evento) {
-        return (
-            <main className="page-container">
-                <div className="content-wrapper">
-                    <p className="text-red-400">{error || 'Evento no encontrado'}</p>
+            <main className="min-h-screen bg-zinc-900 text-white flex items-center justify-center">
+                <div className="text-center">
+                    <div className="mb-4 text-xl">Cargando evento...</div>
                 </div>
             </main>
         );
     }
 
+    if (error && !torneo) {
+        return (
+            <main className="min-h-screen bg-zinc-900 text-white p-4">
+                <div className="max-w-4xl mx-auto">
+                    <button
+                        onClick={() => router.back()}
+                        className="mb-6 text-zinc-400 hover:text-white"
+                    >
+                        ← Volver
+                    </button>
+                    <div className="bg-red-900 text-red-100 p-4 rounded-lg border border-red-700">
+                        {error}
+                    </div>
+                </div>
+            </main>
+        );
+    }
+
+    if (!torneo) {
+        return (
+            <main className="min-h-screen bg-zinc-900 text-white p-4">
+                <div className="max-w-4xl mx-auto">
+                    <button
+                        onClick={() => router.back()}
+                        className="mb-6 text-zinc-400 hover:text-white"
+                    >
+                        ← Volver
+                    </button>
+                    <p className="text-zinc-400">Evento no encontrado</p>
+                </div>
+            </main>
+        );
+    }
+
+    const isOrganizer = user?.id === torneo.organizer?.id;
+    const canJoin =
+        isAuthenticated &&
+        torneo.status === 'REGISTRATION_OPEN' &&
+        !isOrganizer;
+
     return (
-        <main className="page-container">
-            <div className="content-wrapper">
-                {/* Header del evento */}
-                <header className="mb-8">
-                    <h1 className="mb-2">{evento.name}</h1>
-                    <p className="text-muted">{evento.description}</p>
-                    <span className="badge mt-4">
-                        {evento.status}
-                    </span>
-                </header>
+        <main className="min-h-screen bg-zinc-900 text-white p-4 md:p-8">
+            <div className="max-w-4xl mx-auto">
+                {/* Botón Volver */}
+                <button
+                    onClick={() => router.back()}
+                    className="mb-6 text-zinc-400 hover:text-white transition"
+                >
+                    ← Volver a eventos
+                </button>
 
-                <div className="grid gap-8 lg:grid-cols-3">
-                    {/* Partidos */}
-                    <div className="lg:col-span-2">
-                        <div className="card">
-                            <div className="card-header">
-                                <h2 className="flex items-center gap-2">
-                                    <Zap className="text-zs-blue" size={24} />
-                                    Partidos
-                                </h2>
-                            </div>
+                {/* Mensajes */}
+                {error && (
+                    <div className="bg-red-900 text-red-100 p-4 rounded-lg border border-red-700 mb-6">
+                        {error}
+                    </div>
+                )}
+                {successMessage && (
+                    <div className="bg-green-900 text-green-100 p-4 rounded-lg border border-green-700 mb-6">
+                        {successMessage}
+                    </div>
+                )}
 
-                            <div className="card-body">
-                                <div className="space-y-4">
-                                    {matches.length > 0 ? (
-                                        matches.map((match) => (
-                                            <div key={match.id} className="match-item">
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex-1">
-                                                        <p className="font-semibold">{match.teamA}</p>
-                                                    </div>
-                                                    <div className="mx-4 text-center">
-                                                        {match.scoreA !== null && match.scoreB !== null ? (
-                                                            <span className="text-2xl font-bold text-zs-green">
-                                                                {match.scoreA} - {match.scoreB}
-                                                            </span>
-                                                        ) : (
-                                                            <span className="text-zs-text-secondary">vs</span>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex-1 text-right">
-                                                        <p className="font-semibold">{match.teamB}</p>
-                                                    </div>
-                                                </div>
-                                                <p className="text-text-muted text-xs mt-2">
-                                                    {new Date(match.scheduledDate).toLocaleDateString('es-ES')} - {match.status}
-                                                </p>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p className="text-muted">No hay partidos registrados</p>
-                                    )}
-                                </div>
-                            </div>
+                {/* Header */}
+                <div className="mb-8">
+                    <div className="flex items-start justify-between gap-4 mb-4">
+                        <div className="flex-1">
+                            <h1 className="text-4xl font-bold mb-2">{torneo.name}</h1>
+                            <span
+                                className={`inline-block px-4 py-1 rounded-full text-sm font-semibold text-white ${getStatusColor(
+                                    torneo.status
+                                )}`}
+                            >
+                                {getStatusLabel(torneo.status)}
+                            </span>
                         </div>
                     </div>
 
-                    {/* Clasificación */}
-                    <div>
-                        <div className="card">
-                            <div className="card-header">
-                                <h2 className="flex items-center gap-2">
-                                    <Trophy className="text-zs-green" size={24} />
-                                    Tabla
-                                </h2>
-                            </div>
+                    {torneo.description && (
+                        <p className="text-zinc-300 text-lg">{torneo.description}</p>
+                    )}
+                </div>
 
-                            <div className="card-body">
-                                <div className="space-y-3">
-                                    {clasificacion.length > 0 ? (
-                                        clasificacion.map((team) => (
-                                            <div key={team.id} className="team-card">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <span className="font-bold text-lg text-zs-blue">#{team.position}</span>
-                                                    <span className="font-semibold text-sm">{team.teamName}</span>
-                                                </div>
-                                                <div className="grid grid-cols-4 gap-2 text-xs text-center">
-                                                    <div>
-                                                        <p className="text-zs-text-secondary">PJ</p>
-                                                        <p className="font-bold">{team.wins + team.draws + team.losses}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-zs-text-secondary">G</p>
-                                                        <p className="text-zs-green font-bold">{team.wins}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-zs-text-secondary">GF</p>
-                                                        <p className="font-bold">{team.goalsFor}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-zs-green font-bold">{team.points} pts</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p className="text-muted text-sm">No hay clasificación</p>
+                {/* Contenido principal */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Información principal */}
+                    <div className="lg:col-span-2">
+                        {/* Información General */}
+                        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 mb-6">
+                            <h2 className="text-2xl font-bold mb-4">Información General</h2>
+
+                            <div className="space-y-4">
+                                {/* Tipo */}
+                                <div>
+                                    <span className="text-zinc-400">Tipo:</span>{' '}
+                                    <span className="font-semibold">
+                                        {torneo.format === 'CASUAL_MATCH' ? 'Partido Amistoso' : `Torneo (${torneo.format})`}
+                                    </span>
+                                </div>
+
+                                {/* Fechas */}
+                                <div>
+                                    <span className="text-zinc-400">Inicio:</span>{' '}
+                                    <span className="font-semibold">
+                                        {new Date(torneo.startDate).toLocaleDateString('es-ES', {
+                                            weekday: 'long',
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                        })}
+                                    </span>
+                                </div>
+
+                                {torneo.endDate && (
+                                    <div>
+                                        <span className="text-zinc-400">Fin:</span>{' '}
+                                        <span className="font-semibold">
+                                            {new Date(torneo.endDate).toLocaleDateString('es-ES', {
+                                                weekday: 'long',
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric',
+                                            })}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {torneo.registrationDeadline && (
+                                    <div>
+                                        <span className="text-zinc-400">Límite de Inscripción:</span>{' '}
+                                        <span className="font-semibold">
+                                            {new Date(torneo.registrationDeadline).toLocaleDateString('es-ES')}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {/* Equipos */}
+                                <div>
+                                    <span className="text-zinc-400">Máximo de Equipos:</span>{' '}
+                                    <span className="font-semibold">{torneo.maxTeams}</span>
+                                </div>
+
+                                {/* Privacidad */}
+                                <div>
+                                    <span className="text-zinc-400">Visibilidad:</span>{' '}
+                                    <span className="font-semibold">
+                                        {torneo.isPublic ? 'Público' : 'Privado'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Ubicación */}
+                        {(torneo.locationName || torneo.locationAddress) && (
+                            <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 mb-6">
+                                <h2 className="text-2xl font-bold mb-4">📍 Ubicación</h2>
+
+                                <div className="space-y-2">
+                                    {torneo.locationName && (
+                                        <div>
+                                            <span className="text-zinc-400">Nombre:</span>{' '}
+                                            <span className="font-semibold">{torneo.locationName}</span>
+                                        </div>
                                     )}
+                                    {torneo.locationAddress && (
+                                        <div>
+                                            <span className="text-zinc-400">Dirección:</span>{' '}
+                                            <span className="font-semibold">{torneo.locationAddress}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Organizador */}
+                        {torneo.organizer && (
+                            <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6">
+                                <h2 className="text-lg font-bold mb-3">👤 Organizador</h2>
+                                <p className="font-semibold">
+                                    {torneo.organizer.firstName} {torneo.organizer.lastName}
+                                </p>
+                                <p className="text-zinc-400 text-sm">{torneo.organizer.email}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Panel Lateral */}
+                    <div>
+                        {/* Botones de Acción */}
+                        {canJoin ? (
+                            <button
+                                onClick={handleJoin}
+                                disabled={joining}
+                                className="w-full bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white font-bold py-3 rounded-lg transition mb-4"
+                            >
+                                {joining ? 'Uniéndose...' : '✓ Unirse al Evento'}
+                            </button>
+                        ) : !isAuthenticated ? (
+                            <button
+                                onClick={() => router.push('/login')}
+                                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition mb-4"
+                            >
+                                Iniciar Sesión
+                            </button>
+                        ) : null}
+
+                        {isOrganizer && (
+                            <button
+                                onClick={() => router.push(`/eventos/${tournamentId}/editar`)}
+                                className="w-full bg-zinc-700 hover:bg-zinc-600 text-white font-bold py-3 rounded-lg transition"
+                            >
+                                ✎ Editar Evento
+                            </button>
+                        )}
+
+                        {/* Información General (Card) */}
+                        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-4 mt-6">
+                            <h3 className="font-bold mb-3">Resumen Rápido</h3>
+
+                            <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                    <span className="text-zinc-400">Estado:</span>
+                                    <span className="font-semibold">
+                                        {getStatusLabel(torneo.status)}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-zinc-400">Equipos Máx:</span>
+                                    <span className="font-semibold">{torneo.maxTeams}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-zinc-400">Tipo:</span>
+                                    <span className="font-semibold">
+                                        {torneo.format === 'CASUAL_MATCH' ? 'Amistoso' : 'Torneo'}
+                                    </span>
                                 </div>
                             </div>
                         </div>
