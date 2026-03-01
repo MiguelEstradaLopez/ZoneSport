@@ -14,7 +14,7 @@ type TournamentFormat =
 
 export default function CrearEventoPage() {
     const router = useRouter();
-    const { isAuthenticated, user } = useAuth();
+    const { isAuthenticated } = useAuth();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -28,8 +28,28 @@ export default function CrearEventoPage() {
     const [fechaFin, setFechaFin] = useState('');
     const [fechaLimiteRegistro, setFechaLimiteRegistro] = useState('');
     const [esPublico, setEsPublico] = useState(true);
-    const [ubicacion, setUbicacion] = useState('');
-    const [direccion, setDireccion] = useState('');
+    const [deporte, setDeporte] = useState('Fútbol');
+    const [deporteOtro, setDeporteOtro] = useState('');
+    const [locationName, setLocationName] = useState('');
+    const [locationAddress, setLocationAddress] = useState('');
+
+    const deportesComunes = [
+        'Fútbol',
+        'Baloncesto',
+        'Voleibol',
+        'Tenis',
+        'Natación',
+        'Ciclismo',
+        'Atletismo',
+        'Béisbol',
+        'Rugby',
+        'Boxeo',
+        'Artes Marciales',
+        'Pádel',
+        'Squash',
+        'Golf',
+        'Otro',
+    ];
 
     // Redirect si no está autenticado
     if (!isAuthenticated) {
@@ -75,6 +95,9 @@ export default function CrearEventoPage() {
             if (!fechaInicio) {
                 throw new Error('La fecha de inicio es requerida');
             }
+            if (deporte === 'Otro' && !deporteOtro.trim()) {
+                throw new Error('Debes especificar el deporte personalizado');
+            }
 
             // Crear payload
             const payload = {
@@ -89,13 +112,13 @@ export default function CrearEventoPage() {
                     ? new Date(fechaLimiteRegistro).toISOString()
                     : undefined,
                 isPublic: esPublico,
-                locationName: ubicacion.trim() || undefined,
-                locationAddress: direccion.trim() || undefined,
-                // activityType se configurará en el backend si  es necesario
+                activityType: deporte === 'Otro' ? deporteOtro.trim() : deporte,
+                locationName: locationName.trim() || undefined,
+                locationAddress: locationAddress.trim() || undefined,
             };
 
             // POST a /tournaments
-            const response = await api.post('/tournaments', payload);
+            await api.post('/tournaments', payload);
 
             // Redirigir a /eventos
             router.push('/eventos');
@@ -108,7 +131,7 @@ export default function CrearEventoPage() {
     };
 
     return (
-        <div className="min-h-screen bg-zinc-900 text-white p-4 md:p-8">
+        <div className="min-h-screen bg-zinc-900 text-white p-4 pt-20 md:p-8 md:pt-24">
             <div className="max-w-2xl mx-auto">
                 <h1 className="text-4xl font-bold mb-8">Crear Evento</h1>
 
@@ -269,6 +292,41 @@ export default function CrearEventoPage() {
                         </label>
                     </div>
 
+                    {/* Deporte */}
+                    <div>
+                        <label className="block text-sm font-semibold mb-2">
+                            Deporte *
+                        </label>
+                        <select
+                            value={deporte}
+                            onChange={(e) => setDeporte(e.target.value)}
+                            className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2 text-white focus:outline-none focus:border-green-500"
+                            required
+                        >
+                            {deportesComunes.map((item) => (
+                                <option key={item} value={item}>
+                                    {item}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {deporte === 'Otro' && (
+                        <div>
+                            <label className="block text-sm font-semibold mb-2">
+                                Especifica el deporte *
+                            </label>
+                            <input
+                                type="text"
+                                value={deporteOtro}
+                                onChange={(e) => setDeporteOtro(e.target.value)}
+                                placeholder="Ej: Ultimate Frisbee"
+                                className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500"
+                                required
+                            />
+                        </div>
+                    )}
+
                     {/* Ubicación */}
                     <div>
                         <label className="block text-sm font-semibold mb-2">
@@ -276,8 +334,8 @@ export default function CrearEventoPage() {
                         </label>
                         <input
                             type="text"
-                            value={ubicacion}
-                            onChange={(e) => setUbicacion(e.target.value)}
+                            value={locationName}
+                            onChange={(e) => setLocationName(e.target.value)}
                             placeholder="Ej: Estadio Principal"
                             className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500"
                         />
@@ -290,8 +348,8 @@ export default function CrearEventoPage() {
                         </label>
                         <input
                             type="text"
-                            value={direccion}
-                            onChange={(e) => setDireccion(e.target.value)}
+                            value={locationAddress}
+                            onChange={(e) => setLocationAddress(e.target.value)}
                             placeholder="Ej: Calle 50 #40-20, Medellín"
                             className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500"
                         />
@@ -315,6 +373,21 @@ export default function CrearEventoPage() {
                         </button>
                     </div>
                 </form>
+
+                <div className="mt-8 bg-zinc-800 border border-zinc-700 rounded-lg p-4">
+                    <p className="text-sm font-semibold mb-3 text-zinc-300">Vista previa de etiquetas</p>
+                    <div className="flex flex-wrap gap-2">
+                        <span className="inline-block bg-zinc-700 text-zinc-100 px-3 py-1 rounded-full text-sm">
+                            {deporte === 'Otro' ? (deporteOtro.trim() || 'Otro') : deporte}
+                        </span>
+                        <span className="inline-block bg-zinc-700 text-zinc-100 px-3 py-1 rounded-full text-sm">
+                            {tipoEvento === 'TORNEO' ? 'Torneo' : 'Amistoso'}
+                        </span>
+                        <span className="inline-block bg-zinc-700 text-zinc-100 px-3 py-1 rounded-full text-sm">
+                            {esPublico ? 'Público' : 'Privado'}
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
     );

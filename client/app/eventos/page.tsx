@@ -126,22 +126,6 @@ export default function EventosPage() {
             <p className="text-zinc-400 text-lg mb-6">
               No hay eventos disponibles por el momento.
             </p>
-            {isAuthenticated && (
-              <button
-                onClick={() => router.push('/crear-evento')}
-                className="bg-green-500 hover:bg-green-600 px-6 py-3 rounded font-semibold transition"
-              >
-                Crear el primer evento
-              </button>
-            )}
-            {!isAuthenticated && (
-              <button
-                onClick={() => router.push('/login')}
-                className="bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded font-semibold transition"
-              >
-                Inicia sesión para crear eventos
-              </button>
-            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
