@@ -72,4 +72,36 @@ export class AuthController {
     await this.authService.testEmail();
     return { message: 'Email enviado' };
   }
+
+  @Get('test-smtp-connection')
+  async testSmtpConnection() {
+    return new Promise((resolve) => {
+      const net = require('net');
+      const results: any = {};
+      let pending = 3;
+      
+      const check = (port: number) => {
+        const socket = net.createConnection(port, 'smtp-relay.brevo.com');
+        socket.setTimeout(5000);
+        socket.on('connect', () => {
+          results[`port_${port}`] = 'OPEN';
+          socket.destroy();
+          if (--pending === 0) resolve(results);
+        });
+        socket.on('error', (err: any) => {
+          results[`port_${port}`] = `BLOCKED: ${err.message}`;
+          if (--pending === 0) resolve(results);
+        });
+        socket.on('timeout', () => {
+          results[`port_${port}`] = 'TIMEOUT';
+          socket.destroy();
+          if (--pending === 0) resolve(results);
+        });
+      };
+      
+      check(587);
+      check(465);
+      check(2525);
+    });
+  }
 }
