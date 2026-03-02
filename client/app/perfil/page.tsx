@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Camera, LogOut } from 'lucide-react';
+import { Camera } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
@@ -175,20 +175,20 @@ export default function PerfilPage() {
                     <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="absolute -bottom-16 left-8 w-32 h-32 rounded-full border-[3px] border-green-400 overflow-hidden shadow-lg cursor-pointer group"
+                        className="absolute -bottom-[70px] sm:-bottom-[70px] left-8 w-[100px] h-[100px] sm:w-[140px] sm:h-[140px] rounded-full border-[3px] border-emerald-500 overflow-hidden shadow-xl cursor-pointer group bg-zinc-900"
                     >
                         {profilePicture ? (
                             <img
                                 src={profilePicture}
                                 alt="Foto de perfil"
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-cover object-center"
                             />
                         ) : (
-                            <div className={`w-full h-full flex items-center justify-center text-4xl font-bold text-white ${avatarColorClass}`}>
+                            <div className={`w-full h-full flex items-center justify-center text-4xl sm:text-5xl font-bold text-white ${avatarColorClass}`}>
                                 {avatarLetter}
                             </div>
                         )}
-                        <span className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white text-xs sm:text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                             <Camera size={20} className="mb-1" />
                             Cambiar foto
                         </span>
@@ -202,7 +202,7 @@ export default function PerfilPage() {
                         onChange={handleProfilePictureChange}
                     />
 
-                    <div className="px-6 pb-6 pt-20">
+                    <div className="px-6 pb-6 pt-[80px] sm:pt-24">
                         <div className="ml-2">
                             <h1 className="text-3xl font-bold leading-tight">{fullName}</h1>
                             <p className="text-zinc-400 mt-1">
@@ -401,20 +401,6 @@ export default function PerfilPage() {
                         )}
                     </div>
                 </section>
-
-                <div className="mt-12 flex justify-center">
-                    <button
-                        type="button"
-                        onClick={() => {
-                            logout();
-                            router.push('/login');
-                        }}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium border-2 border-red-400/40 text-red-400 hover:bg-red-400/10 hover:border-red-400/60 transition"
-                    >
-                        <LogOut size={18} />
-                        Cerrar sesión
-                    </button>
-                </div>
             </div>
         </main>
     );
