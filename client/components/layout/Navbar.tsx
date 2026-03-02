@@ -1,20 +1,20 @@
 'use client';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Bell, ChevronDown, User, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { usePathname, useRouter } from 'next/navigation';
 
 const AVATAR_COLORS = [
-  'bg-emerald-500',
-  'bg-blue-500',
-  'bg-violet-500',
-  'bg-fuchsia-500',
-  'bg-cyan-500',
-  'bg-teal-500',
+  '#10b981', // emerald-500
+  '#3b82f6', // blue-500
+  '#8b5cf6', // violet-500
+  '#d946ef', // fuchsia-500
+  '#06b6d4', // cyan-500
+  '#14b8a6', // teal-500
 ];
 
-function getAvatarColorClass(seed: string) {
+function getAvatarColor(seed: string) {
   let hash = 0;
   for (let i = 0; i < seed.length; i += 1) {
     hash = seed.charCodeAt(i) + ((hash << 5) - hash);
@@ -37,7 +37,6 @@ const Navbar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -47,24 +46,13 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  useEffect(() => {
     setShowDropdown(false);
     setShowMobileMenu(false);
   }, [pathname]);
 
   const fullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'U';
   const avatarLetter = (fullName[0] || 'U').toUpperCase();
-  const avatarColorClass = getAvatarColorClass(fullName);
+  const avatarColor = getAvatarColor(fullName);
 
   const handleLogout = () => {
     logout();
@@ -79,94 +67,262 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="sticky top-0 left-0 w-full bg-zinc-900 border-b border-zinc-800 z-50" style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.4)' }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-[72px]">
-          <Link href="/" className="text-2xl sm:text-3xl font-bold text-white hover:text-emerald-400 transition-all duration-200">
-            Zone<span className="font-extrabold text-emerald-500">Sport</span>
+    <nav
+      style={{
+        position: 'sticky',
+        top: 0,
+        left: 0,
+        width: '100%',
+        backgroundColor: '#18181b',
+        borderBottom: '1px solid #27272a',
+        zIndex: 50,
+        boxShadow: '0 2px 10px rgba(0,0,0,0.4)',
+      }}
+    >
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '72px' }}>
+          <Link
+            href="/"
+            style={{
+              fontSize: '28px',
+              fontWeight: 'bold',
+              color: 'white',
+              textDecoration: 'none',
+              transition: 'color 0.2s',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = '#10b981')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'white')}
+          >
+            Zone<span style={{ fontWeight: 900, color: '#10b981' }}>Sport</span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-6">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
             {NAV_LINKS.map((link) => {
               const active = isActiveRoute(link.href);
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`relative pb-1 text-sm font-medium transition-all duration-200 ${active ? 'text-emerald-400' : 'text-zinc-300 hover:text-emerald-400'
-                    } group`}
+                  style={{
+                    position: 'relative',
+                    paddingBottom: '4px',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    color: active ? '#10b981' : '#d4d4d8',
+                    textDecoration: 'none',
+                    transition: 'color 0.2s',
+                    borderBottom: active ? '2px solid #10b981' : '2px solid transparent',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#10b981')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = active ? '#10b981' : '#d4d4d8')}
                 >
                   {link.label}
-                  <span
-                    className={`absolute left-0 -bottom-[2px] h-[2px] bg-emerald-400 transition-all duration-200 ${active ? 'w-full' : 'w-0 group-hover:w-full'
-                      }`}
-                  />
                 </Link>
               );
             })}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             {isAuthenticated ? (
               <>
                 <Link
                   href="/crear-evento"
-                  className="hidden sm:inline-flex px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold rounded-lg transition-all duration-200"
+                  style={{
+                    display: 'inline-flex',
+                    padding: '10px 20px',
+                    backgroundColor: '#10b981',
+                    color: 'white',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    borderRadius: '8px',
+                    textDecoration: 'none',
+                    transition: 'background-color 0.2s',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#059669')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#10b981')}
                 >
                   + Crear torneo
                 </Link>
 
                 <button
                   type="button"
-                  className="relative p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-all duration-200"
+                  style={{
+                    padding: '8px',
+                    color: '#a1a1aa',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = 'white';
+                    e.currentTarget.style.backgroundColor = '#27272a';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = '#a1a1aa';
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
                   aria-label="Notificaciones"
                 >
                   <Bell size={20} />
                 </button>
 
-                <div className="relative" ref={dropdownRef}>
+                <div style={{ position: 'relative' }}>
                   <button
                     type="button"
                     onClick={() => setShowDropdown(!showDropdown)}
-                    className="flex items-center gap-2 p-1 hover:bg-zinc-800 rounded-lg transition-all duration-200"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '4px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.2s',
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#27272a')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >
-                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-emerald-500">
+                    <div
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        overflow: 'hidden',
+                        border: '2px solid #10b981',
+                      }}
+                    >
                       {profilePicture ? (
                         <img
                           src={profilePicture}
                           alt="Avatar"
-                          className="w-full h-full object-cover object-center"
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            objectPosition: 'center',
+                          }}
                         />
                       ) : (
-                        <div className={`w-full h-full flex items-center justify-center text-sm font-bold text-white ${avatarColorClass}`}>
+                        <div
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '14px',
+                            fontWeight: 'bold',
+                            color: 'white',
+                            backgroundColor: avatarColor,
+                          }}
+                        >
                           {avatarLetter}
                         </div>
                       )}
                     </div>
-                    <ChevronDown size={16} className="text-zinc-400" />
+                    <ChevronDown size={16} style={{ color: '#a1a1aa' }} />
                   </button>
 
                   {showDropdown && (
-                    <div className="absolute right-0 mt-2 w-56 bg-zinc-800 border border-zinc-700 rounded-lg shadow-xl py-2 animate-in fade-in slide-in-from-top-2 duration-200">
-                      <div className="px-4 py-3 border-b border-zinc-700">
-                        <p className="text-sm font-semibold text-white truncate">{fullName}</p>
-                        <p className="text-xs text-zinc-400 truncate">{user?.email}</p>
+                    <div
+                      style={{
+                        position: 'absolute',
+                        right: 0,
+                        marginTop: '8px',
+                        width: '224px',
+                        backgroundColor: '#27272a',
+                        border: '1px solid #3f3f46',
+                        borderRadius: '8px',
+                        boxShadow: '0 10px 15px rgba(0,0,0,0.3)',
+                        paddingTop: '8px',
+                        paddingBottom: '8px',
+                      }}
+                    >
+                      <div style={{ padding: '12px 16px', borderBottom: '1px solid #3f3f46' }}>
+                        <p
+                          style={{
+                            fontSize: '14px',
+                            fontWeight: 600,
+                            color: 'white',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            margin: 0,
+                          }}
+                        >
+                          {fullName}
+                        </p>
+                        <p
+                          style={{
+                            fontSize: '12px',
+                            color: '#a1a1aa',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            margin: 0,
+                            marginTop: '2px',
+                          }}
+                        >
+                          {user?.email}
+                        </p>
                       </div>
 
                       <Link
                         href="/perfil"
                         onClick={() => setShowDropdown(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-700 hover:text-white transition-all duration-200"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          padding: '10px 16px',
+                          fontSize: '14px',
+                          color: '#d4d4d8',
+                          textDecoration: 'none',
+                          transition: 'all 0.2s',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#3f3f46';
+                          e.currentTarget.style.color = 'white';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                          e.currentTarget.style.color = '#d4d4d8';
+                        }}
                       >
                         <User size={16} />
                         Mi perfil
                       </Link>
 
-                      <div className="border-t border-zinc-700 mt-1 pt-1">
+                      <div style={{ borderTop: '1px solid #3f3f46', marginTop: '4px', paddingTop: '4px' }}>
                         <button
                           type="button"
                           onClick={handleLogout}
-                          className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-400 hover:bg-zinc-700 hover:text-red-300 transition-all duration-200"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            width: '100%',
+                            padding: '10px 16px',
+                            fontSize: '14px',
+                            color: '#f87171',
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            transition: 'all 0.2s',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#3f3f46';
+                            e.currentTarget.style.color = '#fca5a5';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.color = '#f87171';
+                          }}
                         >
                           <LogOut size={16} />
                           Cerrar sesión
@@ -180,13 +336,30 @@ const Navbar = () => {
               <>
                 <Link
                   href="/login"
-                  className="px-4 py-2 text-zinc-300 hover:text-white transition-all duration-200"
+                  style={{
+                    padding: '8px 16px',
+                    color: '#d4d4d8',
+                    textDecoration: 'none',
+                    transition: 'color 0.2s',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = 'white')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '#d4d4d8')}
                 >
                   Iniciar Sesión
                 </Link>
                 <Link
                   href="/registrar"
-                  className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg transition-all duration-200"
+                  style={{
+                    padding: '10px 20px',
+                    backgroundColor: '#10b981',
+                    color: 'white',
+                    fontWeight: 600,
+                    borderRadius: '8px',
+                    textDecoration: 'none',
+                    transition: 'background-color 0.2s',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#059669')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#10b981')}
                 >
                   Registrarse
                 </Link>
@@ -196,7 +369,16 @@ const Navbar = () => {
             <button
               type="button"
               onClick={() => setShowMobileMenu((prev) => !prev)}
-              className="md:hidden p-2 text-zinc-300 hover:text-white hover:bg-zinc-800 rounded-lg transition-all duration-200"
+              style={{
+                display: 'none',
+                padding: '8px',
+                color: '#d4d4d8',
+                backgroundColor: 'transparent',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
               aria-label="Abrir menú"
             >
               {showMobileMenu ? <X size={22} /> : <Menu size={22} />}
@@ -205,15 +387,25 @@ const Navbar = () => {
         </div>
 
         {showMobileMenu && (
-          <div className="md:hidden border-t border-zinc-800 py-3 space-y-2">
+          <div style={{ borderTop: '1px solid #27272a', padding: '12px 0' }}>
             {NAV_LINKS.map((link) => {
               const active = isActiveRoute(link.href);
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`block px-2 py-2 text-sm font-medium rounded-md transition-all duration-200 ${active ? 'text-emerald-400 bg-zinc-800/70' : 'text-zinc-300 hover:text-emerald-400 hover:bg-zinc-800/60'
-                    }`}
+                  style={{
+                    display: 'block',
+                    padding: '8px',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    color: active ? '#10b981' : '#d4d4d8',
+                    backgroundColor: active ? 'rgba(39,39,42,0.7)' : 'transparent',
+                    borderRadius: '6px',
+                    textDecoration: 'none',
+                    marginBottom: '8px',
+                    transition: 'all 0.2s',
+                  }}
                 >
                   {link.label}
                 </Link>
@@ -223,7 +415,17 @@ const Navbar = () => {
             {isAuthenticated && (
               <Link
                 href="/crear-evento"
-                className="mt-1 inline-flex px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold rounded-lg transition-all duration-200"
+                style={{
+                  display: 'inline-flex',
+                  marginTop: '4px',
+                  padding: '8px 16px',
+                  backgroundColor: '#10b981',
+                  color: 'white',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                }}
               >
                 + Crear torneo
               </Link>
