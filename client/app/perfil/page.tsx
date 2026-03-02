@@ -59,6 +59,7 @@ export default function PerfilPage() {
     const [isEditing, setIsEditing] = useState(false);
     const [profilePicture, setProfilePicture] = useState<string | null>(null);
     const [memberSince, setMemberSince] = useState('—');
+    const [birthdateError, setBirthdateError] = useState('');
     const [formData, setFormData] = useState({
         firstName: user?.firstName || '',
         lastName: user?.lastName || '',
@@ -66,6 +67,11 @@ export default function PerfilPage() {
         birthdate: '',
         city: '',
     });
+
+    const todayString = useMemo(() => {
+        const today = new Date();
+        return today.toISOString().split('T')[0];
+    }, []);
 
     useEffect(() => {
         const storedPicture = localStorage.getItem('profile_picture');
@@ -107,6 +113,19 @@ export default function PerfilPage() {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
+
+        if (name === 'birthdate') {
+            setBirthdateError('');
+            if (value) {
+                const selectedDate = new Date(value);
+                const minDate = new Date('1900-01-01');
+                const today = new Date();
+
+                if (selectedDate < minDate || selectedDate > today) {
+                    setBirthdateError('Fecha de nacimiento inválida');
+                }
+            }
+        }
     };
 
     const handleProfilePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,45 +172,44 @@ export default function PerfilPage() {
                         Editar perfil
                     </button>
 
-                    <div className="px-6 pb-6">
-                        <div className="-mt-12 flex flex-col sm:flex-row sm:items-end gap-4">
-                            <button
-                                type="button"
-                                onClick={() => fileInputRef.current?.click()}
-                                className="relative group w-24 h-24 rounded-full border-4 border-zinc-900 overflow-hidden shrink-0"
-                            >
-                                {profilePicture ? (
-                                    <img
-                                        src={profilePicture}
-                                        alt="Foto de perfil"
-                                        className="w-full h-full object-cover"
-                                    />
-                                ) : (
-                                    <div className={`w-full h-full flex items-center justify-center text-3xl font-bold text-white ${avatarColorClass}`}>
-                                        {avatarLetter}
-                                    </div>
-                                )}
-                                <span className="absolute inset-0 hidden group-hover:flex items-center justify-center bg-black/45">
-                                    <Camera size={18} />
-                                </span>
-                            </button>
-
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={handleProfilePictureChange}
+                    <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="absolute -bottom-16 left-8 w-32 h-32 rounded-full border-[3px] border-green-400 overflow-hidden shadow-lg cursor-pointer group"
+                    >
+                        {profilePicture ? (
+                            <img
+                                src={profilePicture}
+                                alt="Foto de perfil"
+                                className="w-full h-full object-cover"
                             />
-
-                            <div className="flex-1">
-                                <h1 className="text-3xl font-bold leading-tight">{fullName}</h1>
-                                <p className="text-zinc-400 mt-1">
-                                    {age !== null ? `${age} años` : 'Edad no definida'}
-                                    {' · '}
-                                    {formData.city?.trim() || 'Ubicación no definida'}
-                                </p>
+                        ) : (
+                            <div className={`w-full h-full flex items-center justify-center text-4xl font-bold text-white ${avatarColorClass}`}>
+                                {avatarLetter}
                             </div>
+                        )}
+                        <span className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Camera size={20} className="mb-1" />
+                            Cambiar foto
+                        </span>
+                    </button>
+
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleProfilePictureChange}
+                    />
+
+                    <div className="px-6 pb-6 pt-20">
+                        <div className="ml-2">
+                            <h1 className="text-3xl font-bold leading-tight">{fullName}</h1>
+                            <p className="text-zinc-400 mt-1">
+                                {age !== null ? `${age} años` : 'Edad no definida'}
+                                {' · '}
+                                {formData.city?.trim() || 'Ubicación no definida'}
+                            </p>
                         </div>
                     </div>
                 </section>
@@ -235,73 +253,109 @@ export default function PerfilPage() {
                     <div className="p-5">
                         {activeTab === 'perfil' && (
                             <div className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm text-zinc-400 mb-1">Nombre</label>
-                                        <input
-                                            name="firstName"
-                                            type="text"
-                                            value={formData.firstName}
-                                            onChange={handleChange}
-                                            disabled={!isEditing}
-                                            className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white disabled:opacity-70"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm text-zinc-400 mb-1">Apellido</label>
-                                        <input
-                                            name="lastName"
-                                            type="text"
-                                            value={formData.lastName}
-                                            onChange={handleChange}
-                                            disabled={!isEditing}
-                                            className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white disabled:opacity-70"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm text-zinc-400 mb-1">Email</label>
-                                    <input
-                                        name="email"
-                                        type="email"
-                                        value={formData.email}
-                                        onChange={handleChange}
-                                        disabled={!isEditing}
-                                        className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white disabled:opacity-70"
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm text-zinc-400 mb-1">Fecha de nacimiento</label>
-                                        <div className="flex items-center gap-3">
-                                            <input
-                                                name="birthdate"
-                                                type="date"
-                                                value={formData.birthdate}
-                                                onChange={handleChange}
-                                                disabled={!isEditing}
-                                                className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white disabled:opacity-70"
-                                            />
-                                            <span className="text-sm text-zinc-300 whitespace-nowrap">
-                                                {age !== null ? `${age} años` : '—'}
-                                            </span>
+                                {!isEditing ? (
+                                    <>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <p className="text-xs text-gray-400 mb-1">Nombre</p>
+                                                <p className="font-semibold text-white">{formData.firstName || '—'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-gray-400 mb-1">Apellido</p>
+                                                <p className="font-semibold text-white">{formData.lastName || '—'}</p>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm text-zinc-400 mb-1">Ciudad</label>
-                                        <input
-                                            name="city"
-                                            type="text"
-                                            value={formData.city}
-                                            onChange={handleChange}
-                                            placeholder="Ej: Medellín"
-                                            disabled={!isEditing}
-                                            className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white disabled:opacity-70"
-                                        />
-                                    </div>
-                                </div>
+
+                                        <div>
+                                            <p className="text-xs text-gray-400 mb-1">Email</p>
+                                            <p className="font-semibold text-white">{formData.email || '—'}</p>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <p className="text-xs text-gray-400 mb-1">Fecha de nacimiento</p>
+                                                <p className="font-semibold text-white">
+                                                    {formData.birthdate ? formatDateLabel(formData.birthdate) : '—'}
+                                                    {age !== null && ` (${age} años)`}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-gray-400 mb-1">Ciudad</p>
+                                                <p className="font-semibold text-white">{formData.city || '—'}</p>
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm text-zinc-400 mb-1">Nombre</label>
+                                                <input
+                                                    name="firstName"
+                                                    type="text"
+                                                    value={formData.firstName}
+                                                    onChange={handleChange}
+                                                    className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm text-zinc-400 mb-1">Apellido</label>
+                                                <input
+                                                    name="lastName"
+                                                    type="text"
+                                                    value={formData.lastName}
+                                                    onChange={handleChange}
+                                                    className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm text-zinc-400 mb-1">Email</label>
+                                            <input
+                                                name="email"
+                                                type="email"
+                                                value={formData.email}
+                                                onChange={handleChange}
+                                                className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white"
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm text-zinc-400 mb-1">Fecha de nacimiento</label>
+                                                <div className="flex items-center gap-3">
+                                                    <input
+                                                        name="birthdate"
+                                                        type="date"
+                                                        value={formData.birthdate}
+                                                        onChange={handleChange}
+                                                        min="1900-01-01"
+                                                        max={todayString}
+                                                        className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white"
+                                                    />
+                                                    <span className="text-sm text-zinc-300 whitespace-nowrap">
+                                                        {age !== null && !birthdateError ? `${age} años` : '—'}
+                                                    </span>
+                                                </div>
+                                                {birthdateError && (
+                                                    <p className="text-xs text-red-400 mt-1">{birthdateError}</p>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm text-zinc-400 mb-1">Ciudad</label>
+                                                <input
+                                                    name="city"
+                                                    type="text"
+                                                    value={formData.city}
+                                                    onChange={handleChange}
+                                                    placeholder="Ej: Medellín"
+                                                    className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white"
+                                                />
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
 
                                 <div className="flex flex-wrap gap-3 pt-2">
                                     {isEditing ? (
@@ -348,16 +402,16 @@ export default function PerfilPage() {
                     </div>
                 </section>
 
-                <div className="mt-6 flex justify-center">
+                <div className="mt-12 flex justify-center">
                     <button
                         type="button"
                         onClick={() => {
                             logout();
                             router.push('/login');
                         }}
-                        className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200 transition"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium border-2 border-red-400/40 text-red-400 hover:bg-red-400/10 hover:border-red-400/60 transition"
                     >
-                        <LogOut size={16} />
+                        <LogOut size={18} />
                         Cerrar sesión
                     </button>
                 </div>
