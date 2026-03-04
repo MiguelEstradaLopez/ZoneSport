@@ -196,8 +196,8 @@ export default function CrearEventoPage() {
                 activityTypeId: selectedActivityTypeId,
                 locationName: locationName.trim() || undefined,
                 locationAddress: locationAddress.trim() || undefined,
-                latitude: latitude || undefined,
-                longitude: longitude || undefined,
+                latitude: latitude ? Number(latitude) : undefined,
+                longitude: longitude ? Number(longitude) : undefined,
                 customScoringConfig,
             };
 

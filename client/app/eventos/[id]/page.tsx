@@ -87,6 +87,10 @@ export default function EventDetailPage() {
         fetchTorneo();
     }, [tournamentId]);
 
+    // Debug: Log de usuario y organizador
+    console.log('user.id:', user?.id);
+    console.log('organizer:', torneo?.organizer);
+
     // Función para eliminar torneo
     const handleDelete = async () => {
         setDeleting(true);
