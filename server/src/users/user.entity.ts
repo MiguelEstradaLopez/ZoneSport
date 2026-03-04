@@ -4,7 +4,10 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
+import { ActivityType } from '../activity-types/activity-type.entity';
 
 export enum UserRole {
   ATHLETE = 'ATHLETE',
@@ -38,6 +41,10 @@ export class User {
 
   @Column({ default: false })
   isVerified: boolean;
+
+  @ManyToMany(() => ActivityType)
+  @JoinTable({ name: 'user_interests' })
+  interests: ActivityType[];
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;

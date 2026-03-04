@@ -23,10 +23,14 @@ export class UsersController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Obtener todos los usuarios' })
-  @ApiResponse({ status: 200, description: 'Lista de usuarios' })
-  async findAll(): Promise<User[]> {
-    return this.usersService.findAll();
+  @ApiOperation({ summary: 'Obtener usuarios públicos paginados' })
+  @ApiResponse({ status: 200, description: 'Lista paginada de usuarios' })
+  async findAll(
+    @Query('page') page = '1',
+    @Query('limit') limit = '20',
+    @Query('search') search?: string,
+  ) {
+    return this.usersService.findPublicUsers(Number(page), Number(limit), search);
   }
 
   @Get('search/email')
@@ -38,11 +42,44 @@ export class UsersController {
     return this.usersService.searchByEmail(email, user.id);
   }
 
+  @Post('interests/:activityTypeId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Agregar interés del usuario autenticado' })
+  @ApiResponse({ status: 200, description: 'Interés agregado' })
+  async addInterest(
+    @Param('activityTypeId') activityTypeId: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.usersService.addInterest(user.id, activityTypeId);
+  }
+
+  @Delete('interests/:activityTypeId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Quitar interés del usuario autenticado' })
+  @ApiResponse({ status: 200, description: 'Interés removido' })
+  async removeInterest(
+    @Param('activityTypeId') activityTypeId: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.usersService.removeInterest(user.id, activityTypeId);
+  }
+
+  @Get('me/interests')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Obtener mis intereses' })
+  @ApiResponse({ status: 200, description: 'Lista de intereses del usuario' })
+  async getMyInterests(@CurrentUser() user: User) {
+    return this.usersService.getUserInterests(user.id);
+  }
+
   @Get(':id')
-  @ApiOperation({ summary: 'Obtener usuario por ID' })
-  @ApiResponse({ status: 200, description: 'Datos del usuario' })
-  async findOne(@Param('id') id: string): Promise<User> {
-    return this.usersService.findOne(id);
+  @ApiOperation({ summary: 'Obtener perfil público por ID' })
+  @ApiResponse({ status: 200, description: 'Perfil público del usuario' })
+  async findOne(@Param('id') id: string) {
+    return this.usersService.findPublicProfile(id);
   }
 
   @Patch(':id')
