@@ -4,6 +4,7 @@ import { FormEvent, useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
+import MapPicker from '@/components/MapPicker';
 
 interface ActivityType {
     id: string;
@@ -32,6 +33,8 @@ type Tournament = {
     isPublic: boolean;
     locationName?: string;
     locationAddress?: string;
+    latitude?: number;
+    longitude?: number;
     organizer?: {
         id: string;
         email: string;
@@ -90,6 +93,9 @@ export default function EditarEventoPage() {
     const [esPublico, setEsPublico] = useState(true);
     const [locationName, setLocationName] = useState('');
     const [locationAddress, setLocationAddress] = useState('');
+    const [latitude, setLatitude] = useState<number | undefined>();
+    const [longitude, setLongitude] = useState<number | undefined>();
+    const [showMapPicker, setShowMapPicker] = useState(false);
 
     // Activity Types
     const [activityTypes, setActivityTypes] = useState<ActivityType[]>([]);
@@ -141,6 +147,8 @@ export default function EditarEventoPage() {
                 if (tournamentData.registrationDeadline) {
                     setFechaLimiteRegistro(tournamentData.registrationDeadline.split('T')[0]);
                 }
+                setLatitude(tournamentData.latitude);
+                setLongitude(tournamentData.longitude);
                 setEsPublico(tournamentData.isPublic);
                 setLocationName(tournamentData.locationName || '');
                 setLocationAddress(tournamentData.locationAddress || '');
@@ -218,6 +226,13 @@ export default function EditarEventoPage() {
         );
     }
 
+    // Manejar selección de ubicación en MapPicker
+    const handleMapLocationSelect = (data: { lat: number; lng: number; address: string; mapsUrl: string }) => {
+        setLatitude(data.lat);
+        setLongitude(data.lng);
+        setLocationAddress(data.mapsUrl);
+    };
+
     // Submit del formulario
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -275,6 +290,8 @@ export default function EditarEventoPage() {
                 activityTypeId: selectedActivityTypeId,
                 locationName: locationName.trim() || undefined,
                 locationAddress: locationAddress.trim() || undefined,
+                latitude: latitude || undefined,
+                longitude: longitude || undefined,
                 customScoringConfig,
             };
 
@@ -547,18 +564,56 @@ export default function EditarEventoPage() {
                     {/* Enlace de Ubicación */}
                     <div>
                         <label className="block text-sm font-semibold mb-2">
-                            Enlace de ubicación (Google Maps u otro)
+                            Ubicación del Evento
                         </label>
-                        <input
-                            type="text"
-                            value={locationAddress}
-                            onChange={(e) => setLocationAddress(e.target.value)}
-                            placeholder="https://maps.app.goo.gl/..."
-                            className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500"
-                        />
-                        <p className="text-xs text-zinc-400 mt-2">
-                            Pega el enlace de Google Maps para que los participantes puedan encontrar el lugar fácilmente
-                        </p>
+
+                        {showMapPicker ? (
+                            <div className="mb-4">
+                                <MapPicker
+                                    onLocationSelect={handleMapLocationSelect}
+                                    initialLat={latitude || undefined}
+                                    initialLng={longitude || undefined}
+                                />
+                                {locationAddress && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowMapPicker(false)}
+                                        className="mt-3 w-full bg-zinc-700 hover:bg-zinc-600 text-white font-semibold py-2 rounded transition"
+                                    >
+                                        ✓ Ubicación Confirmada - Cerrar Mapa
+                                    </button>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {latitude && longitude ? (
+                                    <div className="bg-zinc-800 border border-zinc-700 rounded p-4">
+                                        <p className="text-sm">
+                                            <span className="text-zinc-400">Ubicación seleccionada:</span>
+                                        </p>
+                                        <p className="text-white font-semibold mt-2">{locationAddress || 'Ubicación seleccionada'}</p>
+                                        <p className="text-xs text-zinc-400 mt-2">
+                                            {latitude.toFixed(4)}, {longitude.toFixed(4)}
+                                        </p>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowMapPicker(true)}
+                                            className="mt-3 w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded transition"
+                                        >
+                                            ✏️ Editar Ubicación
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowMapPicker(true)}
+                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded transition"
+                                    >
+                                        📍 Seleccionar Ubicación en el Mapa
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     {/* Botones */}
