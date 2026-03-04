@@ -20,7 +20,10 @@ export class TournamentService {
     }
 
     async findOne(id: string) {
-        const tournament = await this.tournamentRepo.findOne({ where: { id } });
+        const tournament = await this.tournamentRepo.findOne({
+            where: { id },
+            relations: ['organizer', 'activityType'],
+        });
         if (!tournament) throw new NotFoundException('Tournament not found');
         return tournament;
     }
