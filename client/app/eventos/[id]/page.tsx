@@ -65,6 +65,8 @@ export default function EventDetailPage() {
     const [joining, setJoining] = useState(false);
     const [error, setError] = useState<string>('');
     const [successMessage, setSuccessMessage] = useState<string>('');
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
         if (!tournamentId) return;
@@ -84,6 +86,26 @@ export default function EventDetailPage() {
 
         fetchTorneo();
     }, [tournamentId]);
+
+    // Función para eliminar torneo
+    const handleDelete = async () => {
+        setDeleting(true);
+        setError('');
+
+        try {
+            await api.delete(`/tournaments/${tournamentId}`);
+            setSuccessMessage('Evento eliminado exitosamente');
+            setTimeout(() => {
+                router.push('/eventos');
+            }, 1500);
+        } catch (err: any) {
+            const message = err.response?.data?.message || 'Error al eliminar el evento';
+            setError(message);
+            setShowDeleteConfirm(false);
+        } finally {
+            setDeleting(false);
+        }
+    };
 
     // Función para unirse al torneo
     const handleJoin = async () => {
@@ -163,6 +185,34 @@ export default function EventDetailPage() {
     return (
         <main className="min-h-screen bg-zinc-900 text-white p-4 md:p-8">
             <div className="max-w-4xl mx-auto">
+                {/* Modal de Confirmación de Eliminación */}
+                {showDeleteConfirm && (
+                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+                        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 max-w-sm">
+                            <h2 className="text-2xl font-bold mb-4 text-white">Eliminar Evento</h2>
+                            <p className="text-zinc-300 mb-6">
+                                ¿Estás seguro? Esta acción no se puede deshacer.
+                            </p>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowDeleteConfirm(false)}
+                                    disabled={deleting}
+                                    className="flex-1 bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 text-white font-semibold py-2 rounded transition"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={handleDelete}
+                                    disabled={deleting}
+                                    className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-semibold py-2 rounded transition"
+                                >
+                                    {deleting ? 'Eliminando...' : 'Sí, Eliminar'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Botón Volver */}
                 <button
                     onClick={() => router.back()}
@@ -329,12 +379,20 @@ export default function EventDetailPage() {
                         ) : null}
 
                         {isOrganizer && (
-                            <button
-                                onClick={() => router.push(`/eventos/${tournamentId}/editar`)}
-                                className="w-full bg-zinc-700 hover:bg-zinc-600 text-white font-bold py-3 rounded-lg transition"
-                            >
-                                ✎ Editar Evento
-                            </button>
+                            <div className="space-y-2">
+                                <button
+                                    onClick={() => router.push(`/eventos/${tournamentId}/editar`)}
+                                    className="w-full bg-zinc-700 hover:bg-zinc-600 text-white font-bold py-3 rounded-lg transition"
+                                >
+                                    ✎ Editar Evento
+                                </button>
+                                <button
+                                    onClick={() => setShowDeleteConfirm(true)}
+                                    className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition"
+                                >
+                                    🗑 Eliminar Evento
+                                </button>
+                            </div>
                         )}
 
                         {/* Información General (Card) */}

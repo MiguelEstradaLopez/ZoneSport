@@ -1,7 +1,7 @@
 'use client';
 
 import { FormEvent, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
 
@@ -19,8 +19,31 @@ type TournamentFormat =
     | 'ROUND_ROBIN'
     | 'CASUAL_MATCH';
 
+type Tournament = {
+    id: string;
+    name: string;
+    description?: string;
+    format: TournamentFormat;
+    status: string;
+    maxTeams: number;
+    startDate: string;
+    endDate?: string;
+    registrationDeadline?: string;
+    isPublic: boolean;
+    locationName?: string;
+    locationAddress?: string;
+    organizer?: {
+        id: string;
+        email: string;
+        firstName: string;
+        lastName: string;
+    };
+    activityTypeId?: string;
+    customScoringConfig?: any;
+};
+
 // Descripción de formatos
-const FORMAT_DESCRIPTIONS: Record<TournamentFormat | 'CASUAL_MATCH', string> = {
+const FORMAT_DESCRIPTIONS: Record<TournamentFormat, string> = {
     LEAGUE: 'Todos juegan contra todos. Gana quien acumule más puntos al final.',
     SINGLE_ELIMINATION: 'Eliminación directa. Pierdes y quedas fuera del torneo.',
     DOUBLE_ELIMINATION: 'Necesitas perder dos veces para quedar eliminado. Más justo.',
@@ -46,16 +69,19 @@ const calculateMatches = (maxTeams: number, format: TournamentFormat): { matches
     }
 };
 
-export default function CrearEventoPage() {
+export default function EditarEventoPage() {
     const router = useRouter();
-    const { isAuthenticated } = useAuth();
-    const [loading, setLoading] = useState(false);
+    const params = useParams();
+    const { isAuthenticated, user } = useAuth();
+    const tournamentId = params?.id as string;
+
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
 
     // State del formulario
     const [nombre, setNombre] = useState('');
     const [descripcion, setDescripcion] = useState('');
-    const [tipoEvento, setTipoEvento] = useState<'TORNEO' | 'AMISTOSO'>('TORNEO');
     const [formato, setFormato] = useState<TournamentFormat>('LEAGUE');
     const [maxTeams, setMaxTeams] = useState('');
     const [fechaInicio, setFechaInicio] = useState('');
@@ -65,7 +91,7 @@ export default function CrearEventoPage() {
     const [locationName, setLocationName] = useState('');
     const [locationAddress, setLocationAddress] = useState('');
 
-    // Activity Types desde el backend
+    // Activity Types
     const [activityTypes, setActivityTypes] = useState<ActivityType[]>([]);
     const [selectedActivityTypeId, setSelectedActivityTypeId] = useState<string>('');
     const [loadingActivityTypes, setLoadingActivityTypes] = useState(true);
@@ -74,45 +100,80 @@ export default function CrearEventoPage() {
     const [roundDates, setRoundDates] = useState<{ [key: number]: string }>({});
     const [matchInfo, setMatchInfo] = useState({ matches: 0, rounds: 0 });
 
-    // Cargar activity types al montar
+    // Datos del torneo actual
+    const [torneo, setTorneo] = useState<Tournament | null>(null);
+    const [isOrganizer, setIsOrganizer] = useState(false);
+
+    // Cargar datos del torneo y activity types
     useEffect(() => {
-        const fetchActivityTypes = async () => {
+        const fetchData = async () => {
             try {
-                const response = await api.get('/activity-types');
-                setActivityTypes(response.data);
-                if (response.data.length > 0) {
-                    setSelectedActivityTypeId(response.data[0].id);
+                const [torneoRes, typesRes] = await Promise.all([
+                    api.get(`/tournaments/${tournamentId}`),
+                    api.get('/activity-types'),
+                ]);
+
+                const tournamentData = torneoRes.data as Tournament;
+                setTorneo(tournamentData);
+
+                // Verificar si es organizador
+                if (user?.id !== tournamentData.organizer?.id) {
+                    setError('Solo el organizador puede editar este evento');
+                    setTimeout(() => router.push(`/eventos/${tournamentId}`), 2000);
+                    return;
+                }
+
+                setIsOrganizer(true);
+
+                // Cargar activity types
+                setActivityTypes(typesRes.data);
+                setSelectedActivityTypeId(tournamentData.activityTypeId || typesRes.data[0]?.id || '');
+
+                // Pre-rellenar formulario
+                setNombre(tournamentData.name);
+                setDescripcion(tournamentData.description || '');
+                setFormato(tournamentData.format);
+                setMaxTeams(tournamentData.maxTeams.toString());
+                setFechaInicio(tournamentData.startDate.split('T')[0]);
+                if (tournamentData.endDate) {
+                    setFechaFin(tournamentData.endDate.split('T')[0]);
+                }
+                if (tournamentData.registrationDeadline) {
+                    setFechaLimiteRegistro(tournamentData.registrationDeadline.split('T')[0]);
+                }
+                setEsPublico(tournamentData.isPublic);
+                setLocationName(tournamentData.locationName || '');
+                setLocationAddress(tournamentData.locationAddress || '');
+
+                // Cargar fechas de rondas si existen
+                if (tournamentData.customScoringConfig?.rounds) {
+                    const dates: { [key: number]: string } = {};
+                    tournamentData.customScoringConfig.rounds.forEach((r: any) => {
+                        dates[r.round] = r.date;
+                    });
+                    setRoundDates(dates);
                 }
             } catch (err) {
-                console.error('Error cargando activity types:', err);
+                console.error('Error cargando datos:', err);
+                setError('Error al cargar los datos del evento');
             } finally {
+                setLoading(false);
                 setLoadingActivityTypes(false);
             }
         };
-        fetchActivityTypes();
-    }, []);
 
-    // Recalcular partidos cuando cambian maxTeams o format
+        if (tournamentId && isAuthenticated) {
+            fetchData();
+        }
+    }, [tournamentId, isAuthenticated, user]);
+
+    // Recalcular partidos
     useEffect(() => {
         if (maxTeams) {
             const info = calculateMatches(parseInt(maxTeams), formato);
             setMatchInfo(info);
-            // Limpiar roundDates anteriores
-            setRoundDates({});
         }
     }, [maxTeams, formato]);
-
-    // Cuando cambia el tipo de evento, ajusta el formato y maxTeams
-    const handleTipoEventoChange = (tipo: 'TORNEO' | 'AMISTOSO') => {
-        setTipoEvento(tipo);
-        if (tipo === 'AMISTOSO') {
-            setFormato('CASUAL_MATCH');
-            setMaxTeams('2'); // Forzar a 2 para amistosos
-        } else {
-            setFormato('LEAGUE');
-            setMaxTeams(''); // Limpiar para torneos
-        }
-    };
 
     // Redirect si no está autenticado
     if (!isAuthenticated) {
@@ -131,14 +192,39 @@ export default function CrearEventoPage() {
         );
     }
 
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-zinc-900 text-white flex items-center justify-center pt-20">
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold mb-4">Cargando evento...</h1>
+                </div>
+            </div>
+        );
+    }
+
+    if (!isOrganizer || !torneo) {
+        return (
+            <div className="min-h-screen bg-zinc-900 text-white flex items-center justify-center pt-20">
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold mb-4">No tienes permiso para editar este evento</h1>
+                    <button
+                        onClick={() => router.push(`/eventos/${tournamentId}`)}
+                        className="bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded font-semibold"
+                    >
+                        Volver al evento
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     // Submit del formulario
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError('');
-        setLoading(true);
+        setSaving(true);
 
         try {
-            // Validaciones básicas
             if (!nombre.trim()) {
                 throw new Error('El nombre del evento es requerido');
             }
@@ -153,10 +239,10 @@ export default function CrearEventoPage() {
             }
 
             // Validar fechas de rondas
-            if (tipoEvento === 'AMISTOSO' && !roundDates[0]) {
+            if (formato === 'CASUAL_MATCH' && !roundDates[0]) {
                 throw new Error('Debes seleccionar la fecha del partido');
             }
-            if (tipoEvento === 'TORNEO') {
+            if (formato !== 'CASUAL_MATCH') {
                 for (let i = 1; i <= matchInfo.rounds; i++) {
                     if (!roundDates[i]) {
                         throw new Error(`Debes seleccionar la fecha para la ronda ${i}`);
@@ -164,9 +250,9 @@ export default function CrearEventoPage() {
                 }
             }
 
-            // Crear customScoringConfig con roundDates
+            // Crear customScoringConfig
             const customScoringConfig = {
-                rounds: tipoEvento === 'AMISTOSO'
+                rounds: formato === 'CASUAL_MATCH'
                     ? [{ round: 1, date: roundDates[0] }]
                     : Object.entries(roundDates).map(([roundNum, date]) => ({
                         round: parseInt(roundNum),
@@ -179,7 +265,6 @@ export default function CrearEventoPage() {
                 name: nombre.trim(),
                 description: descripcion.trim() || undefined,
                 format: formato,
-                status: 'DRAFT' as const,
                 maxTeams: parseInt(maxTeams),
                 startDate: new Date(fechaInicio).toISOString(),
                 endDate: fechaFin ? new Date(fechaFin).toISOString() : undefined,
@@ -193,29 +278,27 @@ export default function CrearEventoPage() {
                 customScoringConfig,
             };
 
-            // POST a /tournaments
-            await api.post('/tournaments', payload);
+            // PATCH a /tournaments/:id
+            await api.patch(`/tournaments/${tournamentId}`, payload);
 
-            // Redirigir a /eventos
-            router.push('/eventos');
+            // Redirigir a /eventos/:id
+            router.push(`/eventos/${tournamentId}`);
         } catch (err: any) {
-            const message = err.response?.data?.message || err.message || 'Error al crear evento';
+            const message = err.response?.data?.message || err.message || 'Error al actualizar evento';
             setError(message);
         } finally {
-            setLoading(false);
+            setSaving(false);
         }
     };
 
     const renderFormatSelect = () => {
-        if (tipoEvento !== 'TORNEO') return null;
-
         return (
             <div>
                 <label className="block text-sm font-semibold mb-2">
                     Formato del Torneo *
                 </label>
                 <div className="space-y-2">
-                    {(['LEAGUE', 'SINGLE_ELIMINATION', 'DOUBLE_ELIMINATION', 'ROUND_ROBIN'] as TournamentFormat[]).map((fmt) => (
+                    {(['LEAGUE', 'SINGLE_ELIMINATION', 'DOUBLE_ELIMINATION', 'ROUND_ROBIN', 'CASUAL_MATCH'] as TournamentFormat[]).map((fmt) => (
                         <label key={fmt} className="flex items-center cursor-pointer group">
                             <input
                                 type="radio"
@@ -225,7 +308,9 @@ export default function CrearEventoPage() {
                                 onChange={() => setFormato(fmt)}
                                 className="mr-3 w-4 h-4 accent-green-500"
                             />
-                            <span className="flex-1">{fmt === 'LEAGUE' ? 'Liga' : fmt === 'SINGLE_ELIMINATION' ? 'Eliminación Simple' : fmt === 'DOUBLE_ELIMINATION' ? 'Eliminación Doble' : 'Todos contra Todos'}</span>
+                            <span className="flex-1">
+                                {fmt === 'LEAGUE' ? 'Liga' : fmt === 'SINGLE_ELIMINATION' ? 'Eliminación Simple' : fmt === 'DOUBLE_ELIMINATION' ? 'Eliminación Doble' : fmt === 'ROUND_ROBIN' ? 'Todos contra Todos' : 'Amistoso'}
+                            </span>
                             <div className="relative">
                                 <span className="text-zinc-400 cursor-help ml-2">ⓘ</span>
                                 <div className="absolute right-0 bottom-full mb-2 bg-zinc-700 text-white text-xs rounded px-3 py-2 w-48 hidden group-hover:block shadow-lg border border-zinc-600 z-10">
@@ -242,7 +327,7 @@ export default function CrearEventoPage() {
     const renderRoundDatePickers = () => {
         if (!maxTeams || matchInfo.rounds === 0) return null;
 
-        const isFriendly = tipoEvento === 'AMISTOSO';
+        const isFriendly = formato === 'CASUAL_MATCH';
 
         return (
             <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6">
@@ -292,7 +377,7 @@ export default function CrearEventoPage() {
     return (
         <div className="min-h-screen bg-zinc-900 text-white p-4 pt-20 md:p-8 md:pt-24">
             <div className="max-w-2xl mx-auto">
-                <h1 className="text-4xl font-bold mb-8">Crear Evento</h1>
+                <h1 className="text-4xl font-bold mb-8">Editar Evento</h1>
 
                 {error && (
                     <div className="bg-red-900 text-red-100 p-4 rounded-lg mb-6 border border-red-700">
@@ -330,70 +415,30 @@ export default function CrearEventoPage() {
                         />
                     </div>
 
-                    {/* Tipo de Evento */}
-                    <fieldset>
-                        <legend className="block text-sm font-semibold mb-3">
-                            Tipo de Evento *
-                        </legend>
-                        <div className="space-y-2">
-                            <label className="flex items-center cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name="tipoEvento"
-                                    value="TORNEO"
-                                    checked={tipoEvento === 'TORNEO'}
-                                    onChange={() => handleTipoEventoChange('TORNEO')}
-                                    className="mr-3 w-4 h-4 accent-green-500"
-                                />
-                                <span>Torneo</span>
-                            </label>
-                            <label className="flex items-center cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name="tipoEvento"
-                                    value="AMISTOSO"
-                                    checked={tipoEvento === 'AMISTOSO'}
-                                    onChange={() => handleTipoEventoChange('AMISTOSO')}
-                                    className="mr-3 w-4 h-4 accent-green-500"
-                                />
-                                <span>Partido Amistoso</span>
-                            </label>
-                        </div>
-                    </fieldset>
-
-                    {/* Formato (solo si es Torneo) */}
+                    {/* Formato */}
                     {renderFormatSelect()}
 
                     {/* Máximo de Equipos */}
                     <div>
                         <label className="block text-sm font-semibold mb-2">
-                            Máximo de Equipos {tipoEvento === 'AMISTOSO' ? '' : '*'}
+                            Máximo de Equipos *
                         </label>
-                        <div>
-                            <input
-                                type="number"
-                                value={maxTeams}
-                                onChange={(e) => tipoEvento === 'TORNEO' && setMaxTeams(e.target.value)}
-                                placeholder={tipoEvento === 'AMISTOSO' ? '2' : '4'}
-                                min="2"
-                                max={tipoEvento === 'AMISTOSO' ? '2' : undefined}
-                                disabled={tipoEvento === 'AMISTOSO'}
-                                className={`w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2 text-white placeholder-zinc-500 focus:outline-none ${tipoEvento === 'AMISTOSO' ? 'bg-zinc-700 cursor-not-allowed opacity-70' : 'focus:border-green-500'}`}
-                                required={tipoEvento === 'TORNEO'}
-                            />
-                            {tipoEvento === 'AMISTOSO' && (
-                                <p className="text-xs text-zinc-400 mt-2">
-                                    Los partidos amistosos son siempre 1 vs 1 (2 equipos)
-                                </p>
-                            )}
-                        </div>
+                        <input
+                            type="number"
+                            value={maxTeams}
+                            onChange={(e) => setMaxTeams(e.target.value)}
+                            placeholder="4"
+                            min="2"
+                            className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500"
+                            required
+                        />
                     </div>
 
                     {/* Información de Partidos */}
                     {maxTeams && (
                         <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-4">
                             <p className="text-sm font-semibold">
-                                📊 Este {tipoEvento === 'AMISTOSO' ? 'partido' : 'torneo'} tendrá <span className="text-green-400">{matchInfo.matches} partido{matchInfo.matches !== 1 ? 's' : ''}</span> en <span className="text-green-400">{matchInfo.rounds} ronda{matchInfo.rounds !== 1 ? 's' : ''}</span>
+                                📊 Este torneo tendrá <span className="text-green-400">{matchInfo.matches} partido{matchInfo.matches !== 1 ? 's' : ''}</span> en <span className="text-green-400">{matchInfo.rounds} ronda{matchInfo.rounds !== 1 ? 's' : ''}</span>
                             </p>
                         </div>
                     )}
@@ -513,10 +558,10 @@ export default function CrearEventoPage() {
                     <div className="flex gap-4 pt-6">
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={saving}
                             className="flex-1 bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white font-semibold py-3 rounded transition"
                         >
-                            {loading ? 'Creando...' : 'Crear Evento'}
+                            {saving ? 'Guardando...' : 'Guardar Cambios'}
                         </button>
                         <button
                             type="button"
@@ -527,21 +572,6 @@ export default function CrearEventoPage() {
                         </button>
                     </div>
                 </form>
-
-                <div className="mt-8 bg-zinc-800 border border-zinc-700 rounded-lg p-4">
-                    <p className="text-sm font-semibold mb-3 text-zinc-300">Vista previa de etiquetas</p>
-                    <div className="flex flex-wrap gap-2">
-                        <span className="inline-block bg-zinc-700 text-zinc-100 px-3 py-1 rounded-full text-sm">
-                            {activityTypes.find(t => t.id === selectedActivityTypeId)?.name || 'Deporte'}
-                        </span>
-                        <span className="inline-block bg-zinc-700 text-zinc-100 px-3 py-1 rounded-full text-sm">
-                            {tipoEvento === 'TORNEO' ? 'Torneo' : 'Amistoso'}
-                        </span>
-                        <span className="inline-block bg-zinc-700 text-zinc-100 px-3 py-1 rounded-full text-sm">
-                            {esPublico ? 'Público' : 'Privado'}
-                        </span>
-                    </div>
-                </div>
             </div>
         </div>
     );
