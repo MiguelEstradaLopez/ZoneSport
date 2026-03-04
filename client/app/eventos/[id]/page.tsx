@@ -338,8 +338,19 @@ export default function EventDetailPage() {
                                     )}
                                     {torneo.locationAddress && (
                                         <div>
-                                            <span className="text-zinc-400">Dirección:</span>{' '}
-                                            <span className="font-semibold">{torneo.locationAddress}</span>
+                                            <span className="text-zinc-400">Ubicación:</span>{' '}
+                                            {torneo.locationAddress.startsWith('http') ? (
+                                                <a
+                                                    href={torneo.locationAddress}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="font-semibold text-green-400 hover:text-green-300 transition underline"
+                                                >
+                                                    Ver en mapa →
+                                                </a>
+                                            ) : (
+                                                <span className="font-semibold">{torneo.locationAddress}</span>
+                                            )}
                                         </div>
                                     )}
                                 </div>

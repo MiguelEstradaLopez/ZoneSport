@@ -292,37 +292,41 @@ export default function EditarEventoPage() {
     };
 
     const renderFormatSelect = () => {
+        const formatDescriptions: Record<TournamentFormat, { label: string; desc: string }> = {
+            LEAGUE: { label: 'Liga', desc: 'Todos juegan contra todos, gana quien acumule más puntos' },
+            SINGLE_ELIMINATION: { label: 'Eliminación Simple', desc: 'Un partido perdido y quedas fuera' },
+            DOUBLE_ELIMINATION: { label: 'Eliminación Doble', desc: 'Debes perder dos veces para quedar eliminado' },
+            ROUND_ROBIN: { label: 'Todos contra Todos', desc: 'Rondas organizadas, ideal para grupos' },
+            CASUAL_MATCH: { label: 'Amistoso', desc: 'Un solo partido sin puntuación oficial' },
+        };
+
         return (
             <div>
                 <label className="block text-sm font-semibold mb-2">
                     Formato del Torneo *
                 </label>
-                <div className="space-y-2">
+                <div className="space-y-3">
                     {(['LEAGUE', 'SINGLE_ELIMINATION', 'DOUBLE_ELIMINATION', 'ROUND_ROBIN', 'CASUAL_MATCH'] as TournamentFormat[]).map((fmt) => (
-                        <label key={fmt} className="flex items-center cursor-pointer group">
-                            <input
-                                type="radio"
-                                name="formato"
-                                value={fmt}
-                                checked={formato === fmt}
-                                onChange={() => setFormato(fmt)}
-                                className="mr-3 w-4 h-4 accent-green-500"
-                            />
-                            <span className="flex-1">
-                                {fmt === 'LEAGUE' ? 'Liga' : fmt === 'SINGLE_ELIMINATION' ? 'Eliminación Simple' : fmt === 'DOUBLE_ELIMINATION' ? 'Eliminación Doble' : fmt === 'ROUND_ROBIN' ? 'Todos contra Todos' : 'Amistoso'}
-                            </span>
-                            <div className="relative">
-                                <span className="text-zinc-400 cursor-help ml-2">ⓘ</span>
-                                <div className="absolute right-0 bottom-full mb-2 bg-zinc-700 text-white text-xs rounded px-3 py-2 w-48 hidden group-hover:block shadow-lg border border-zinc-600 z-10">
-                                    {FORMAT_DESCRIPTIONS[fmt]}
-                                </div>
+                        <label key={fmt} className="flex flex-col cursor-pointer">
+                            <div className="flex items-center">
+                                <input
+                                    type="radio"
+                                    name="formato"
+                                    value={fmt}
+                                    checked={formato === fmt}
+                                    onChange={() => setFormato(fmt)}
+                                    className="mr-3 w-4 h-4 accent-green-500"
+                                />
+                                <span className="font-medium">{formatDescriptions[fmt].label}</span>
                             </div>
+                            <p className="text-xs text-zinc-400 ml-7 mt-1">{formatDescriptions[fmt].desc}</p>
                         </label>
                     ))}
                 </div>
             </div>
         );
     };
+
 
     const renderRoundDatePickers = () => {
         if (!maxTeams || matchInfo.rounds === 0) return null;
@@ -540,18 +544,21 @@ export default function EditarEventoPage() {
                         />
                     </div>
 
-                    {/* Dirección */}
+                    {/* Enlace de Ubicación */}
                     <div>
                         <label className="block text-sm font-semibold mb-2">
-                            Dirección
+                            Enlace de ubicación (Google Maps u otro)
                         </label>
                         <input
                             type="text"
                             value={locationAddress}
                             onChange={(e) => setLocationAddress(e.target.value)}
-                            placeholder="Ej: Calle 50 #40-20, Medellín"
+                            placeholder="https://maps.app.goo.gl/..."
                             className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500"
                         />
+                        <p className="text-xs text-zinc-400 mt-2">
+                            Pega el enlace de Google Maps para que los participantes puedan encontrar el lugar fácilmente
+                        </p>
                     </div>
 
                     {/* Botones */}
