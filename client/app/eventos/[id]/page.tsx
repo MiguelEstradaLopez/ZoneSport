@@ -18,6 +18,7 @@ type Tournament = {
     locationAddress?: string;
     registrationDeadline?: string;
     isPublic: boolean;
+    organizerId?: string;
     organizer?: {
         id: string;
         email: string;
@@ -180,7 +181,8 @@ export default function EventDetailPage() {
         );
     }
 
-    const isOrganizer = user?.id === torneo.organizer?.id;
+    const isOrganizer = user?.id === torneo.organizer?.id
+        || user?.id === torneo.organizerId;
     const canJoin =
         isAuthenticated &&
         torneo.status === 'REGISTRATION_OPEN' &&

@@ -1,4 +1,5 @@
 import { IsString, IsEnum, IsDateString, IsInt, IsBoolean, IsOptional, IsNumber, IsUUID } from 'class-validator';
+import { Type } from 'class-transformer';
 import { TournamentFormat, TournamentStatus } from '../tournament.entity';
 
 export class CreateTournamentDto {
@@ -42,12 +43,14 @@ export class CreateTournamentDto {
     @IsOptional()
     locationAddress?: string;
 
-    @IsNumber({ maxDecimalPlaces: 8 })
     @IsOptional()
+    @IsNumber({ maxDecimalPlaces: 8 })
+    @Type(() => Number)
     latitude?: number;
 
-    @IsNumber({ maxDecimalPlaces: 8 })
     @IsOptional()
+    @IsNumber({ maxDecimalPlaces: 8 })
+    @Type(() => Number)
     longitude?: number;
 
     @IsDateString()
