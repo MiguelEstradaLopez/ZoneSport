@@ -222,7 +222,7 @@ export default function RegistroPage() {
             <button
               type="submit"
               disabled={loading}
-              className="btn btn-primary w-full mt-6"
+              className="w-full mt-6 py-3 px-4 rounded font-bold text-white bg-green-500 hover:bg-green-600 disabled:opacity-50 transition-all duration-200"
             >
               {loading ? 'Registrando...' : 'Crear Cuenta'}
             </button>

@@ -34,7 +34,9 @@ const AVATAR_COLORS = [
 
 function formatDateLabel(dateValue?: string | null) {
     if (!dateValue) return '—';
-    const date = new Date(dateValue);
+    // Si es formato YYYY-MM-DD, agregar tiempo para evitar problemas de zona horaria
+    const dateStr = dateValue.includes('T') ? dateValue : dateValue + 'T00:00:00';
+    const date = new Date(dateStr);
     if (Number.isNaN(date.getTime())) return '—';
     return date.toLocaleDateString('es-CO', {
         day: '2-digit',
@@ -45,7 +47,9 @@ function formatDateLabel(dateValue?: string | null) {
 
 function calculateAge(birthdate?: string | null) {
     if (!birthdate) return null;
-    const dob = new Date(birthdate);
+    // Si es formato YYYY-MM-DD, agregar tiempo para evitar problemas de zona horaria
+    const dateStr = birthdate.includes('T') ? birthdate : birthdate + 'T00:00:00';
+    const dob = new Date(dateStr);
     if (Number.isNaN(dob.getTime())) return null;
 
     const today = new Date();
@@ -512,10 +516,10 @@ export default function PerfilPage() {
                                                     {tournament.status && (
                                                         <span
                                                             className={`px-3 py-1 rounded-full text-xs font-semibold ${tournament.status === 'active'
-                                                                    ? 'bg-green-500/20 text-green-400'
-                                                                    : tournament.status === 'completed'
-                                                                        ? 'bg-blue-500/20 text-blue-400'
-                                                                        : 'bg-zinc-700 text-zinc-300'
+                                                                ? 'bg-green-500/20 text-green-400'
+                                                                : tournament.status === 'completed'
+                                                                    ? 'bg-blue-500/20 text-blue-400'
+                                                                    : 'bg-zinc-700 text-zinc-300'
                                                                 }`}
                                                         >
                                                             {tournament.status === 'active' && 'Activo'}
@@ -552,8 +556,8 @@ export default function PerfilPage() {
                                                         key={interest.id}
                                                         onClick={() => toggleInterest(interest.id)}
                                                         className={`px-4 py-2 rounded-full font-medium transition ${isSelected
-                                                                ? 'bg-emerald-500 text-white'
-                                                                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                                                            ? 'bg-emerald-500 text-white'
+                                                            : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
                                                             }`}
                                                     >
                                                         {interest.name}

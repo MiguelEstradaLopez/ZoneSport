@@ -84,7 +84,7 @@ export default function NoticiasPage() {
                   className="w-full h-40 object-cover rounded-lg mb-4"
                   onError={e => (e.currentTarget.src = PLACEHOLDER_IMG)}
                 />
-                <h2 className="heading-md mt-2 text-zs-green">
+                <h2 className="heading-md mt-2 text-white font-bold">
                   {item.title}
                 </h2>
                 <p className="text-muted text-sm mt-2">
@@ -98,7 +98,7 @@ export default function NoticiasPage() {
                   href={item.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn btn-primary mt-4 w-full"
+                  className="block text-center mt-4 w-full py-2 px-4 bg-green-500 hover:bg-green-600 text-white font-semibold rounded transition"
                 >
                   Leer más
                 </a>

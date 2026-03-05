@@ -112,9 +112,9 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={!isFormValid || loading}
-              className={`w-full py-3 px-4 rounded font-semibold text-white flex items-center justify-center gap-2 transition-all duration-200 ${isFormValid && !loading
-                ? 'bg-zonesport-blue hover:bg-zonesport-blue-hover shadow-lg'
-                : 'bg-zonesport-blue opacity-50 cursor-not-allowed'
+              className={`w-full py-3 px-4 rounded font-bold text-white flex items-center justify-center gap-2 transition-all duration-200 ${isFormValid && !loading
+                ? 'bg-green-500 hover:bg-green-600 shadow-lg'
+                : 'bg-green-500 opacity-50 cursor-not-allowed'
                 }`}
             >
               {loading && <Loader className="animate-spin" size={20} />}
@@ -122,13 +122,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="flex items-center gap-4 my-6">
-            <div className="flex-1 h-px bg-zonesport-blue opacity-30"></div>
-            <span className="text-gray-400 text-xs uppercase tracking-widest">O</span>
-            <div className="flex-1 h-px bg-zonesport-blue opacity-30"></div>
-          </div>
-
-          <p className="text-center text-gray-300 text-sm">
+          <p className="text-center text-gray-300 text-sm mt-6">
             ¿No tienes cuenta?{' '}
             <Link
               href="/registrar"

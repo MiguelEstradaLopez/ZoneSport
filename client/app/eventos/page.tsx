@@ -17,6 +17,10 @@ type Tournament = {
   maxTeams: number;
   locationName?: string;
   locationAddress?: string;
+  activityType?: {
+    id: string;
+    name: string;
+  };
   createdAt?: string;
   updatedAt?: string;
 };
@@ -148,9 +152,18 @@ export default function EventosPage() {
                 {/* Nombre */}
                 <h2 className="text-xl font-bold mb-2 line-clamp-2">{torneo.name}</h2>
 
-                {/* Tipo de evento */}
+                {/* Deporte y Tipo de evento */}
                 <p className="text-sm text-zinc-400 mb-4">
-                  {getTournamentType(torneo.format)} • {torneo.format === 'CASUAL_MATCH' ? 'Amistoso' : torneo.format}
+                  {torneo.activityType?.name || 'Deporte'} • {(() => {
+                    const formatLabels: Record<string, string> = {
+                      LEAGUE: 'Liga',
+                      SINGLE_ELIMINATION: 'Eliminación Simple',
+                      DOUBLE_ELIMINATION: 'Eliminación Doble',
+                      ROUND_ROBIN: 'Todos contra Todos',
+                      CASUAL_MATCH: 'Partido Amistoso',
+                    };
+                    return formatLabels[torneo.format] || torneo.format;
+                  })()}
                 </p>
 
                 {/* Fecha inicio */}
@@ -181,7 +194,18 @@ export default function EventosPage() {
                     <span className="text-zinc-300">{torneo.locationName}</span>
                     {torneo.locationAddress && (
                       <div className="text-xs text-zinc-500 ml-4">
-                        {torneo.locationAddress}
+                        {torneo.locationAddress.startsWith('http') ? (
+                          <a
+                            href={torneo.locationAddress}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-green-500 hover:text-green-400 transition"
+                          >
+                            Ver ubicación →
+                          </a>
+                        ) : (
+                          torneo.locationAddress
+                        )}
                       </div>
                     )}
                   </div>
