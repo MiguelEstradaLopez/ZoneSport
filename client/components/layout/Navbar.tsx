@@ -174,48 +174,6 @@ const Navbar = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             {isAuthenticated ? (
               <>
-                <Link
-                  href="/crear-evento"
-                  style={{
-                    display: 'inline-flex',
-                    padding: '10px 20px',
-                    backgroundColor: '#10b981',
-                    color: 'white',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    borderRadius: '8px',
-                    textDecoration: 'none',
-                    transition: 'background-color 0.2s',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#059669')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#10b981')}
-                >
-                  + Crear torneo
-                </Link>
-
-                <button
-                  type="button"
-                  style={{
-                    padding: '8px',
-                    color: '#a1a1aa',
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = 'white';
-                    e.currentTarget.style.backgroundColor = '#27272a';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = '#a1a1aa';
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }}
-                  aria-label="Notificaciones"
-                >
-                  <Bell size={20} />
-                </button>
                 {/* Notificaciones Container */}
                 <div style={{ position: 'relative' }}>
                   <button
@@ -615,24 +573,6 @@ const Navbar = () => {
               );
             })}
 
-            {isAuthenticated && (
-              <Link
-                href="/crear-evento"
-                style={{
-                  display: 'inline-flex',
-                  marginTop: '4px',
-                  padding: '8px 16px',
-                  backgroundColor: '#10b981',
-                  color: 'white',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  borderRadius: '8px',
-                  textDecoration: 'none',
-                }}
-              >
-                + Crear torneo
-              </Link>
-            )}
           </div>
         )}
       </div>

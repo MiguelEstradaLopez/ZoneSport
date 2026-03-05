@@ -149,7 +149,7 @@ export default function CrearEventoPage() {
             if (!maxTeams || parseInt(maxTeams) < 2) {
                 throw new Error('El máximo de equipos debe ser al menos 2');
             }
-            if (!fechaInicio) {
+            if (tipoEvento === 'TORNEO' && !fechaInicio) {
                 throw new Error('La fecha de inicio es requerida');
             }
             if (!selectedActivityTypeId) {
@@ -178,6 +178,8 @@ export default function CrearEventoPage() {
                     })),
             };
 
+            const fechaPartido = roundDates[0];
+
             // Crear payload
             const payload = {
                 name: nombre.trim(),
@@ -185,12 +187,14 @@ export default function CrearEventoPage() {
                 format: formato,
                 status: 'DRAFT' as const,
                 maxTeams: parseInt(maxTeams),
-                startDate: new Date(fechaInicio).toISOString(),
+                startDate: tipoEvento === 'AMISTOSO'
+                    ? new Date(fechaPartido + 'T00:00:00').toISOString()
+                    : new Date(fechaInicio + 'T00:00:00').toISOString(),
                 endDate: tipoEvento === 'AMISTOSO'
-                    ? new Date(new Date(fechaInicio).getTime() + 24 * 60 * 60 * 1000).toISOString()
-                    : fechaFin ? new Date(fechaFin).toISOString() : undefined,
+                    ? new Date(fechaPartido + 'T23:59:59').toISOString()
+                    : fechaFin ? new Date(fechaFin + 'T00:00:00').toISOString() : undefined,
                 registrationDeadline: fechaLimiteRegistro
-                    ? new Date(fechaLimiteRegistro).toISOString()
+                    ? new Date(fechaLimiteRegistro + 'T00:00:00').toISOString()
                     : undefined,
                 isPublic: esPublico,
                 activityTypeId: selectedActivityTypeId,
@@ -285,8 +289,6 @@ export default function CrearEventoPage() {
                             type="date"
                             value={roundDates[0] || ''}
                             onChange={(e) => setRoundDates({ ...roundDates, 0: e.target.value })}
-                            min={fechaInicio}
-                            max={fechaFin}
                             className="w-full bg-zinc-700 border border-zinc-600 rounded px-4 py-2 text-white focus:outline-none focus:border-green-500"
                             required
                         />
@@ -428,20 +430,7 @@ export default function CrearEventoPage() {
                     {maxTeams && renderRoundDatePickers()}
 
                     {/* Fechas */}
-                    {tipoEvento === 'AMISTOSO' ? (
-                        <div>
-                            <label className="block text-sm font-semibold mb-2">
-                                Fecha del Partido *
-                            </label>
-                            <input
-                                type="date"
-                                value={fechaInicio}
-                                onChange={(e) => setFechaInicio(e.target.value)}
-                                className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2 text-white focus:outline-none focus:border-green-500"
-                                required
-                            />
-                        </div>
-                    ) : (
+                    {tipoEvento === 'TORNEO' && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-semibold mb-2">
