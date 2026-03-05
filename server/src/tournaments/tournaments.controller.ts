@@ -1,4 +1,17 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, Query, UseGuards, Request } from '@nestjs/common';
+import {
+    BadRequestException,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Query,
+    Request,
+    UseGuards,
+    ValidationPipe,
+} from '@nestjs/common';
 import { TournamentService } from './tournaments.service';
 import { CreateTournamentDto } from './dto/create-tournament.dto';
 import { UpdateTournamentDto } from './dto/update-tournament.dto';
@@ -23,7 +36,21 @@ export class TournamentsController {
 
     @Post()
     @UseGuards(JwtAuthGuard)
-    create(@Body() dto: CreateTournamentDto, @Request() req) {
+    async create(
+        @Body(
+            new ValidationPipe({
+                transform: true,
+                whitelist: true,
+                exceptionFactory: (errors) => {
+                    console.log('[TOURNAMENT CREATE] Errores de validación:', JSON.stringify(errors));
+                    return new BadRequestException(errors);
+                },
+            }),
+        )
+        dto: CreateTournamentDto,
+        @Request() req,
+    ) {
+        console.log('[TOURNAMENT CREATE] Body recibido:', JSON.stringify(dto));
         return this.tournamentService.create(dto, req.user);
     }
 
