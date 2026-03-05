@@ -32,6 +32,15 @@ export class User {
   @Column({ type: 'varchar', length: 100, nullable: true })
   lastName?: string;
 
+  @Column({ nullable: true })
+  birthDate?: string;
+
+  @Column({ nullable: true })
+  city?: string;
+
+  @Column({ nullable: true, type: 'text' })
+  profilePicture?: string;
+
   @Column({
     type: 'enum',
     enum: UserRole,

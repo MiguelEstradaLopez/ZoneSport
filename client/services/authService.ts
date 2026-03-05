@@ -6,6 +6,9 @@ export type AuthUser = {
     firstName: string | null;
     lastName: string | null;
     role: 'ATHLETE' | 'ORGANIZER' | 'ADMIN';
+    birthDate?: string;
+    city?: string;
+    profilePicture?: string;
 };
 
 export type LoginResponse = {

@@ -207,4 +207,15 @@ export class UsersService {
 
     return user.interests || [];
   }
+
+  async updateProfile(userId: string, data: {
+    firstName?: string;
+    lastName?: string;
+    birthDate?: string;
+    city?: string;
+    profilePicture?: string;
+  }) {
+    await this.usersRepository.update(userId, data);
+    return this.findOne(userId);
+  }
 }

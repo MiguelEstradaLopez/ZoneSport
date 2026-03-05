@@ -53,11 +53,12 @@ const Navbar = () => {
   const [loadingNotifications, setLoadingNotifications] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('profile_picture');
-      if (stored) setProfilePicture(stored);
+    if (user?.profilePicture) {
+      setProfilePicture(user.profilePicture);
+    } else {
+      setProfilePicture(null);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (isAuthenticated) {

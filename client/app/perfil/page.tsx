@@ -98,30 +98,47 @@ export default function PerfilPage() {
         return today.toISOString().split('T')[0];
     }, []);
 
+    const minBirthdate = useMemo(() => {
+        const date = new Date();
+        date.setFullYear(date.getFullYear() - 120);
+        return date.toISOString().split('T')[0];
+    }, []);
+
+    const maxBirthdate = useMemo(() => {
+        const date = new Date();
+        date.setFullYear(date.getFullYear() - 8);
+        return date.toISOString().split('T')[0];
+    }, []);
+
     useEffect(() => {
-        const storedPicture = localStorage.getItem('profile_picture');
-        const storedBirthdate = localStorage.getItem('user_birthdate') || '';
-        const storedCity = localStorage.getItem('user_city') || '';
-        const userWithCreatedAt = user as (typeof user & { createdAt?: string }) | null;
+        const loadProfile = async () => {
+            try {
+                const response = await api.get('/users/me');
+                const userData = response.data;
 
-        if (userWithCreatedAt?.createdAt) {
-            localStorage.setItem('user_created_at', userWithCreatedAt.createdAt);
+                setFormData({
+                    firstName: userData.firstName || '',
+                    lastName: userData.lastName || '',
+                    email: userData.email || '',
+                    birthdate: userData.birthDate || '',
+                    city: userData.city || '',
+                });
+
+                if (userData.profilePicture) {
+                    setProfilePicture(userData.profilePicture);
+                }
+
+                if (userData.createdAt) {
+                    setMemberSince(formatDateLabel(userData.createdAt));
+                }
+            } catch (err) {
+                console.error('Error cargando perfil:', err);
+            }
+        };
+
+        if (user) {
+            loadProfile();
         }
-
-        const createdAt = userWithCreatedAt?.createdAt || localStorage.getItem('user_created_at');
-        setMemberSince(formatDateLabel(createdAt));
-
-        if (storedPicture) {
-            setProfilePicture(storedPicture);
-        }
-
-        setFormData({
-            firstName: user?.firstName || '',
-            lastName: user?.lastName || '',
-            email: user?.email || '',
-            birthdate: storedBirthdate,
-            city: storedCity,
-        });
     }, [user]);
 
     useEffect(() => {
@@ -205,12 +222,17 @@ export default function PerfilPage() {
         if (name === 'birthdate') {
             setBirthdateError('');
             if (value) {
-                const selectedDate = new Date(value);
+                const selectedDate = new Date(value + 'T00:00:00');
                 const minDate = new Date('1900-01-01');
+                const maxDate = new Date(maxBirthdate + 'T00:00:00');
                 const today = new Date();
 
-                if (selectedDate < minDate || selectedDate > today) {
-                    setBirthdateError('Fecha de nacimiento inválida');
+                if (selectedDate < minDate) {
+                    setBirthdateError('La fecha debe ser posterior a 1900');
+                } else if (selectedDate > today) {
+                    setBirthdateError('La fecha no puede ser futura');
+                } else if (selectedDate > maxDate) {
+                    setBirthdateError('Debes tener al menos 8 años');
                 }
             }
         }
@@ -223,26 +245,44 @@ export default function PerfilPage() {
         reader.onload = (event) => {
             const base64 = event.target?.result as string;
             setProfilePicture(base64);
-            localStorage.setItem('profile_picture', base64);
         };
         reader.readAsDataURL(file);
     };
 
-    const handleSave = () => {
-        localStorage.setItem('user_birthdate', formData.birthdate);
-        localStorage.setItem('user_city', formData.city);
-        setIsEditing(false);
+    const handleSave = async () => {
+        if (birthdateError) return;
+
+        try {
+            await api.patch('/users/me', {
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                birthDate: formData.birthdate,
+                city: formData.city,
+                profilePicture: profilePicture,
+            });
+            setIsEditing(false);
+        } catch (err) {
+            console.error('Error guardando perfil:', err);
+        }
     };
 
-    const handleCancel = () => {
-        setFormData((prev) => ({
-            ...prev,
-            firstName: user?.firstName || '',
-            lastName: user?.lastName || '',
-            email: user?.email || '',
-            birthdate: localStorage.getItem('user_birthdate') || '',
-            city: localStorage.getItem('user_city') || '',
-        }));
+    const handleCancel = async () => {
+        try {
+            const response = await api.get('/users/me');
+            const userData = response.data;
+            setFormData({
+                firstName: userData.firstName || '',
+                lastName: userData.lastName || '',
+                email: userData.email || '',
+                birthdate: userData.birthDate || '',
+                city: userData.city || '',
+            });
+            if (userData.profilePicture) {
+                setProfilePicture(userData.profilePicture);
+            }
+        } catch (err) {
+            console.error('Error recargando perfil:', err);
+        }
         setIsEditing(false);
     };
 
@@ -419,7 +459,7 @@ export default function PerfilPage() {
                                                         value={formData.birthdate}
                                                         onChange={handleChange}
                                                         min="1900-01-01"
-                                                        max={todayString}
+                                                        max={maxBirthdate}
                                                         className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-2 text-white"
                                                     />
                                                     <span className="text-sm text-zinc-300 whitespace-nowrap">

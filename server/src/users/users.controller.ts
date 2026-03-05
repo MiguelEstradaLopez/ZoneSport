@@ -75,6 +75,24 @@ export class UsersController {
     return this.usersService.getUserInterests(user.id);
   }
 
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Obtener mi perfil completo' })
+  @ApiResponse({ status: 200, description: 'Perfil completo del usuario autenticado' })
+  async getMyProfile(@CurrentUser() user: User) {
+    return this.usersService.findOne(user.id);
+  }
+
+  @Patch('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Actualizar mi perfil' })
+  @ApiResponse({ status: 200, description: 'Perfil actualizado' })
+  async updateMyProfile(@CurrentUser() user: User, @Body() body: any) {
+    return this.usersService.updateProfile(user.id, body);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Obtener perfil público por ID' })
   @ApiResponse({ status: 200, description: 'Perfil público del usuario' })
