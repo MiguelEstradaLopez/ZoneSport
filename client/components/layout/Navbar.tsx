@@ -4,6 +4,17 @@ import Link from 'next/link';
 import { Bell, ChevronDown, User, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { usePathname, useRouter } from 'next/navigation';
+import api from '@/services/api';
+
+interface Notification {
+  id: string;
+  userId: string;
+  type: string;
+  message: string;
+  referenceId?: string;
+  isRead: boolean;
+  createdAt: string;
+}
 
 const AVATAR_COLORS = [
   '#10b981', // emerald-500
@@ -37,6 +48,9 @@ const Navbar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -44,6 +58,41 @@ const Navbar = () => {
       if (stored) setProfilePicture(stored);
     }
   }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchNotifications();
+      const interval = setInterval(fetchNotifications, 10000);
+      return () => clearInterval(interval);
+    }
+  }, [isAuthenticated]);
+
+  const fetchNotifications = async () => {
+    try {
+      setLoadingNotifications(true);
+      const response = await api.get('/notifications');
+      setNotifications(response.data);
+    } catch (err) {
+      console.error('Error cargando notificaciones:', err);
+    } finally {
+      setLoadingNotifications(false);
+    }
+  };
+
+  const markAsRead = async (notificationId: string) => {
+    try {
+      await api.patch(`/notifications/${notificationId}/read`);
+      setNotifications(
+        notifications.map((n) =>
+          n.id === notificationId ? { ...n, isRead: true } : n
+        )
+      );
+    } catch (err) {
+      console.error('Error marcando notificación como leída:', err);
+    }
+  };
+
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   useEffect(() => {
     setShowDropdown(false);
@@ -167,6 +216,160 @@ const Navbar = () => {
                 >
                   <Bell size={20} />
                 </button>
+                {/* Notificaciones Container */}
+                <div style={{ position: 'relative' }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowNotifications(!showNotifications)}
+                    style={{
+                      padding: '8px',
+                      color: '#a1a1aa',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      position: 'relative',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = 'white';
+                      e.currentTarget.style.backgroundColor = '#27272a';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = '#a1a1aa';
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                    aria-label="Notificaciones"
+                  >
+                    <Bell size={20} />
+                    {unreadCount > 0 && (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: '2px',
+                          right: '2px',
+                          width: '20px',
+                          height: '20px',
+                          borderRadius: '50%',
+                          backgroundColor: '#10b981',
+                          color: 'white',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '12px',
+                          fontWeight: 'bold',
+                        }}
+                      >
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
+                  </button>
+
+                  {showNotifications && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        right: '0',
+                        top: '60px',
+                        width: '360px',
+                        maxHeight: '400px',
+                        backgroundColor: '#27272a',
+                        border: '1px solid #3f3f46',
+                        borderRadius: '8px',
+                        boxShadow: '0 10px 15px rgba(0,0,0,0.3)',
+                        zIndex: 100,
+                        display: 'flex',
+                        flexDirection: 'column',
+                      }}
+                    >
+                      <div
+                        style={{
+                          padding: '12px 16px',
+                          borderBottom: '1px solid #3f3f46',
+                          fontWeight: 600,
+                          color: 'white',
+                        }}
+                      >
+                        Notificaciones
+                      </div>
+
+                      {loadingNotifications ? (
+                        <div style={{ padding: '16px', textAlign: 'center', color: '#a1a1aa' }}>
+                          Cargando...
+                        </div>
+                      ) : notifications.length === 0 ? (
+                        <div style={{ padding: '16px', textAlign: 'center', color: '#a1a1aa' }}>
+                          Sin notificaciones
+                        </div>
+                      ) : (
+                        <div style={{ overflowY: 'auto', maxHeight: '320px' }}>
+                          {notifications.map((notif) => (
+                            <div
+                              key={notif.id}
+                              style={{
+                                padding: '12px 16px',
+                                borderBottom: '1px solid #3f3f46',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                gap: '8px',
+                                backgroundColor: notif.isRead ? 'transparent' : 'rgba(16, 185, 129, 0.1)',
+                              }}
+                            >
+                              <div style={{ flex: 1 }}>
+                                <p
+                                  style={{
+                                    margin: 0,
+                                    fontSize: '13px',
+                                    color: notif.isRead ? '#a1a1aa' : 'white',
+                                    fontWeight: notif.isRead ? 400 : 500,
+                                  }}
+                                >
+                                  {notif.message}
+                                </p>
+                                <p
+                                  style={{
+                                    margin: '4px 0 0 0',
+                                    fontSize: '11px',
+                                    color: '#71717a',
+                                  }}
+                                >
+                                  {new Date(notif.createdAt).toLocaleDateString('es-ES', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })}
+                                </p>
+                              </div>
+                              {!notif.isRead && (
+                                <button
+                                  type="button"
+                                  onClick={() => markAsRead(notif.id)}
+                                  style={{
+                                    padding: '4px 8px',
+                                    fontSize: '11px',
+                                    backgroundColor: '#10b981',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    transition: 'background-color 0.2s',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#059669')}
+                                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#10b981')}
+                                >
+                                  Marcar
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
 
                 <div style={{ position: 'relative' }}>
                   <button

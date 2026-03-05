@@ -202,6 +202,7 @@ export default function CrearEventoPage() {
             };
 
             // POST a /tournaments
+            console.log('PAYLOAD ENVIADO:', JSON.stringify(payload));
             await api.post('/tournaments', payload);
 
             // Redirigir a /eventos

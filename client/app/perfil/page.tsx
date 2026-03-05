@@ -1,11 +1,27 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Camera } from 'lucide-react';
+import { Camera, Loader } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import api from '@/services/api';
 
 type PerfilTab = 'perfil' | 'eventos' | 'intereses';
+
+interface Tournament {
+    id: string;
+    name: string;
+    startDate?: string;
+    endDate?: string;
+    status?: string;
+    sport?: { id: string; name: string };
+    location?: string;
+}
+
+interface Interest {
+    id: string;
+    name: string;
+}
 
 const AVATAR_COLORS = [
     'bg-emerald-500',
@@ -60,6 +76,11 @@ export default function PerfilPage() {
     const [profilePicture, setProfilePicture] = useState<string | null>(null);
     const [memberSince, setMemberSince] = useState('—');
     const [birthdateError, setBirthdateError] = useState('');
+    const [tournaments, setTournaments] = useState<Tournament[]>([]);
+    const [loadingTournaments, setLoadingTournaments] = useState(false);
+    const [availableInterests, setAvailableInterests] = useState<Interest[]>([]);
+    const [myInterests, setMyInterests] = useState<Interest[]>([]);
+    const [loadingInterests, setLoadingInterests] = useState(false);
     const [formData, setFormData] = useState({
         firstName: user?.firstName || '',
         lastName: user?.lastName || '',
@@ -98,6 +119,69 @@ export default function PerfilPage() {
             city: storedCity,
         });
     }, [user]);
+
+    useEffect(() => {
+        if (activeTab === 'eventos') {
+            fetchUserTournaments();
+        }
+    }, [activeTab]);
+
+    useEffect(() => {
+        if (activeTab === 'intereses') {
+            fetchAvailableInterests();
+            fetchMyInterests();
+        }
+    }, [activeTab]);
+
+    const fetchUserTournaments = async () => {
+        try {
+            setLoadingTournaments(true);
+            const response = await api.get('/tournaments', {
+                params: { createdBy: 'me' },
+            });
+            setTournaments(response.data.data || response.data);
+        } catch (err) {
+            console.error('Error cargando torneos:', err);
+        } finally {
+            setLoadingTournaments(false);
+        }
+    };
+
+    const fetchAvailableInterests = async () => {
+        try {
+            const response = await api.get('/activity-types');
+            setAvailableInterests(response.data);
+        } catch (err) {
+            console.error('Error cargando intereses disponibles:', err);
+        }
+    };
+
+    const fetchMyInterests = async () => {
+        try {
+            const response = await api.get('/users/me/interests');
+            setMyInterests(response.data);
+        } catch (err) {
+            console.error('Error cargando mis intereses:', err);
+        }
+    };
+
+    const toggleInterest = async (interestId: string) => {
+        const isSelected = myInterests.some((i) => i.id === interestId);
+        try {
+            if (isSelected) {
+                await api.delete(`/users/interests/${interestId}`);
+                setMyInterests(myInterests.filter((i) => i.id !== interestId));
+            } else {
+                await api.post(`/users/interests/${interestId}`);
+                const interest = availableInterests.find((i) => i.id === interestId);
+                if (interest) {
+                    setMyInterests([...myInterests, interest]);
+                }
+            }
+        } catch (err) {
+            console.error('Error al cambiar interés:', err);
+        }
+    };
 
     const fullName = useMemo(() => {
         const composed = `${formData.firstName} ${formData.lastName}`.trim();
@@ -389,14 +473,96 @@ export default function PerfilPage() {
                         )}
 
                         {activeTab === 'eventos' && (
-                            <div className="rounded-xl border border-zinc-800 bg-zinc-800/40 p-6 text-zinc-300">
-                                Próximamente
+                            <div>
+                                {loadingTournaments ? (
+                                    <div className="flex items-center justify-center py-8">
+                                        <Loader className="w-5 h-5 animate-spin text-emerald-500" />
+                                    </div>
+                                ) : tournaments.length === 0 ? (
+                                    <div className="rounded-xl border border-zinc-800 bg-zinc-800/40 p-6 text-center text-zinc-400">
+                                        <p>No has creado ningún evento aún.</p>
+                                        <button
+                                            onClick={() => router.push('/crear-evento')}
+                                            className="mt-4 px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-medium transition"
+                                        >
+                                            Crear mi primer evento
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {tournaments.map((tournament) => (
+                                            <div
+                                                key={tournament.id}
+                                                className="rounded-lg border border-zinc-800 bg-zinc-800/40 p-4 hover:bg-zinc-800/60 transition cursor-pointer"
+                                                onClick={() => router.push(`/eventos/${tournament.id}`)}
+                                            >
+                                                <div className="flex items-start justify-between">
+                                                    <div className="flex-1">
+                                                        <h3 className="font-semibold text-white">{tournament.name}</h3>
+                                                        <p className="text-sm text-zinc-400 mt-1">
+                                                            {tournament.sport?.name || 'Deporte no especificado'}
+                                                            {tournament.location && ` · ${tournament.location}`}
+                                                        </p>
+                                                        <p className="text-xs text-zinc-500 mt-2">
+                                                            {tournament.startDate
+                                                                ? new Date(tournament.startDate).toLocaleDateString('es-CO')
+                                                                : 'Fecha no definida'}
+                                                        </p>
+                                                    </div>
+                                                    {tournament.status && (
+                                                        <span
+                                                            className={`px-3 py-1 rounded-full text-xs font-semibold ${tournament.status === 'active'
+                                                                    ? 'bg-green-500/20 text-green-400'
+                                                                    : tournament.status === 'completed'
+                                                                        ? 'bg-blue-500/20 text-blue-400'
+                                                                        : 'bg-zinc-700 text-zinc-300'
+                                                                }`}
+                                                        >
+                                                            {tournament.status === 'active' && 'Activo'}
+                                                            {tournament.status === 'completed' && 'Finalizado'}
+                                                            {!['active', 'completed'].includes(tournament.status) && tournament.status}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         )}
 
                         {activeTab === 'intereses' && (
-                            <div className="rounded-xl border border-zinc-800 bg-zinc-800/40 p-6 text-zinc-300">
-                                Próximamente
+                            <div>
+                                {loadingInterests ? (
+                                    <div className="flex items-center justify-center py-8">
+                                        <Loader className="w-5 h-5 animate-spin text-emerald-500" />
+                                    </div>
+                                ) : availableInterests.length === 0 ? (
+                                    <div className="text-center text-zinc-400">
+                                        <p>No hay intereses disponibles.</p>
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <p className="text-sm text-zinc-400 mb-4">Selecciona los deportes que te interesan:</p>
+                                        <div className="flex flex-wrap gap-3">
+                                            {availableInterests.map((interest) => {
+                                                const isSelected = myInterests.some((i) => i.id === interest.id);
+                                                return (
+                                                    <button
+                                                        key={interest.id}
+                                                        onClick={() => toggleInterest(interest.id)}
+                                                        className={`px-4 py-2 rounded-full font-medium transition ${isSelected
+                                                                ? 'bg-emerald-500 text-white'
+                                                                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                                                            }`}
+                                                    >
+                                                        {interest.name}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
