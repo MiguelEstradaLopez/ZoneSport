@@ -6,7 +6,15 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import api from '@/services/api';
 
-type PerfilTab = 'perfil' | 'eventos' | 'intereses';
+type PerfilTab = 'perfil' | 'eventos' | 'amigos' | 'intereses';
+
+interface Friend {
+    id: string;
+    firstName?: string;
+    lastName?: string;
+    email: string;
+    profilePicture?: string;
+}
 
 interface Tournament {
     id: string;
@@ -85,6 +93,8 @@ export default function PerfilPage() {
     const [availableInterests, setAvailableInterests] = useState<Interest[]>([]);
     const [myInterests, setMyInterests] = useState<Interest[]>([]);
     const [loadingInterests, setLoadingInterests] = useState(false);
+    const [friends, setFriends] = useState<Friend[]>([]);
+    const [loadingFriends, setLoadingFriends] = useState(false);
     const [formData, setFormData] = useState({
         firstName: user?.firstName || '',
         lastName: user?.lastName || '',
@@ -151,6 +161,24 @@ export default function PerfilPage() {
         if (activeTab === 'intereses') {
             fetchAvailableInterests();
             fetchMyInterests();
+        }
+    }, [activeTab]);
+
+    useEffect(() => {
+        if (activeTab === 'amigos') {
+            const fetchFriends = async () => {
+                try {
+                    setLoadingFriends(true);
+                    const response = await api.get('/friendships');
+                    setFriends(response.data || []);
+                } catch (err) {
+                    console.error('Error cargando amigos:', err);
+                    setFriends([]);
+                } finally {
+                    setLoadingFriends(false);
+                }
+            };
+            fetchFriends();
         }
     }, [activeTab]);
 
@@ -308,8 +336,14 @@ export default function PerfilPage() {
                         {profilePicture ? (
                             <img
                                 src={profilePicture}
-                                alt="Foto de perfil"
-                                className="w-full h-full object-cover object-center"
+                                alt="avatar"
+                                style={{
+                                    width: '80px',
+                                    height: '80px',
+                                    borderRadius: '50%',
+                                    objectFit: 'cover',
+                                    border: '3px solid #22c55e'
+                                }}
                             />
                         ) : (
                             <div className={`w-full h-full flex items-center justify-center text-4xl sm:text-5xl font-bold text-white ${avatarColorClass}`}>
@@ -362,6 +396,7 @@ export default function PerfilPage() {
                         {[
                             { id: 'perfil', label: 'Perfil' },
                             { id: 'eventos', label: 'Eventos' },
+                            { id: 'amigos', label: 'Amigos' },
                             { id: 'intereses', label: 'Intereses' },
                         ].map((tab) => (
                             <button
@@ -570,6 +605,65 @@ export default function PerfilPage() {
                                                 </div>
                                             </div>
                                         ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {activeTab === 'amigos' && (
+                            <div>
+                                {loadingFriends ? (
+                                    <div className="flex items-center justify-center py-8">
+                                        <Loader className="w-5 h-5 animate-spin text-emerald-500" />
+                                    </div>
+                                ) : friends.length === 0 ? (
+                                    <div className="rounded-xl border border-zinc-800 bg-zinc-800/40 p-6 text-center text-zinc-400">
+                                        <p>Aún no tienes amigos en ZoneSport</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {friends.map((friend) => {
+                                            const friendFullName = `${friend.firstName || ''} ${friend.lastName || ''}`.trim() || friend.email || 'Usuario';
+                                            const friendLetter = (friendFullName[0] || 'U').toUpperCase();
+                                            const friendColor = getAvatarColorClass(friendFullName);
+                                            return (
+                                                <div
+                                                    key={friend.id}
+                                                    className="rounded-lg border border-zinc-800 bg-zinc-800/40 p-4 flex items-center gap-4 hover:bg-zinc-800/60 transition"
+                                                >
+                                                    <div
+                                                        style={{
+                                                            width: '50px',
+                                                            height: '50px',
+                                                            borderRadius: '50%',
+                                                            overflow: 'hidden',
+                                                            flexShrink: 0,
+                                                        }}
+                                                        className={friend.profilePicture ? '' : friendColor}
+                                                    >
+                                                        {friend.profilePicture ? (
+                                                            <img
+                                                                src={friend.profilePicture}
+                                                                alt={friendFullName}
+                                                                style={{
+                                                                    width: '100%',
+                                                                    height: '100%',
+                                                                    objectFit: 'cover',
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center text-white font-bold text-lg">
+                                                                {friendLetter}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <h4 className="font-semibold text-white">{friendFullName}</h4>
+                                                        <p className="text-sm text-zinc-400">{friend.email}</p>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </div>

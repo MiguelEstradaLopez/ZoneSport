@@ -65,6 +65,7 @@ export default function RegistroPage() {
         confirmPassword: '',
       });
       router.push('/perfil');
+      router.refresh();
     } catch (err: any) {
       setError(err.message || 'Error desconocido');
     } finally {
@@ -73,16 +74,16 @@ export default function RegistroPage() {
   };
 
   return (
-    <main className="page-container flex items-center justify-center py-8">
-      <article className="card w-full max-w-md">
-        <header className="card-header text-center">
-          <h1 className="mb-2">
+    <main className="flex items-center justify-center py-8" style={{ backgroundColor: '#0f172a', minHeight: '100vh' }}>
+      <article className="w-full max-w-md rounded-lg overflow-hidden shadow-lg" style={{ backgroundColor: '#1e293b' }}>
+        <header className="text-center p-6">
+          <h1 className="mb-2 text-2xl font-bold text-zonesport-lime">
             Zone<span className="text-zs-green">Sport</span>
           </h1>
-          <p className="text-muted">Crea tu cuenta como deportista</p>
+          <p className="text-gray-400 text-sm">Crea tu cuenta como deportista</p>
         </header>
 
-        <div className="card-body">
+        <div className="p-6">
           {success && (
             <aside className="alert alert-success">
               <CheckCircle className="text-green-400" size={20} />
@@ -238,9 +239,9 @@ export default function RegistroPage() {
           </p>
         </div>
 
-        <footer className="card-footer text-center text-small">
+        <footer className="text-center text-sm p-6 border-t border-gray-700">
           Al registrarte, aceptas nuestros{' '}
-          <Link href="#" className="btn-link-secondary">
+          <Link href="#" className="text-zonesport-blue hover:text-zonesport-lime transition">
             términos de servicio
           </Link>
         </footer>

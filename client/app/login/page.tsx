@@ -36,8 +36,8 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="page-container flex items-center justify-center min-h-screen bg-zonesport-bg-dark py-12 px-4">
-      <article className="w-full max-w-md bg-zonesport-bg-dark border border-zonesport-blue border-opacity-20 rounded-lg p-10 shadow-lg">
+    <main className="page-container flex items-center justify-center min-h-screen py-12 px-4" style={{ backgroundColor: '#0f172a' }}>
+      <article className="w-full max-w-md border border-zonesport-blue border-opacity-20 rounded-lg p-10 shadow-lg" style={{ backgroundColor: '#1e293b' }}>
         <header className="text-center mb-8">
           <h1 className="text-2xl font-bold text-zonesport-lime mb-3">
             Zone<span className="font-extrabold">Sport</span>

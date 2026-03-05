@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Bell, ChevronDown, User, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -45,6 +45,7 @@ const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
@@ -64,7 +65,12 @@ const Navbar = () => {
     if (isAuthenticated) {
       fetchNotifications();
       const interval = setInterval(fetchNotifications, 10000);
-      return () => clearInterval(interval);
+      intervalIdRef.current = interval;
+      return () => {
+        if (intervalIdRef.current) {
+          clearInterval(intervalIdRef.current);
+        }
+      };
     }
   }, [isAuthenticated]);
 
@@ -105,6 +111,11 @@ const Navbar = () => {
   const avatarColor = getAvatarColor(fullName);
 
   const handleLogout = () => {
+    // Limpiar el interval de notificaciones antes de logout
+    if (intervalIdRef.current) {
+      clearInterval(intervalIdRef.current);
+      intervalIdRef.current = null;
+    }
     logout();
     setShowDropdown(false);
     setShowMobileMenu(false);
@@ -362,10 +373,10 @@ const Navbar = () => {
                           src={profilePicture}
                           alt="Avatar"
                           style={{
-                            width: '100%',
-                            height: '100%',
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '50%',
                             objectFit: 'cover',
-                            objectPosition: 'center',
                           }}
                         />
                       ) : (
