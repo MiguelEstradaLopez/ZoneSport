@@ -189,6 +189,16 @@ export default function CrearEventoPage() {
 
             const fechaPartido = roundDates[0];
 
+            console.log('FECHAS ESTADO:', {
+                tipoEvento,
+                fechaInicio,
+                fechaFin,
+                fechaLimiteRegistro,
+                roundDates,
+                latitude,
+                longitude
+            });
+
             // Crear payload
             const payload = {
                 name: nombre.trim(),
