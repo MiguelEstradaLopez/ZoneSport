@@ -70,7 +70,9 @@ export class TournamentsController {
     @Delete(':id')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.ORGANIZER, UserRole.ADMIN)
-    remove(@Param('id') id: string, @Request() req) {
+    async remove(@Param('id') id: string, @Request() req) {
+        console.log('[DELETE] user del JWT:', JSON.stringify(req.user));
+        console.log('[DELETE] tournament id:', id);
         return this.tournamentService.remove(id, req.user);
     }
 
