@@ -187,8 +187,6 @@ export default function CrearEventoPage() {
                     })),
             };
 
-            const fechaPartido = roundDates[0];
-
             console.log('FECHAS ESTADO:', {
                 tipoEvento,
                 fechaInicio,
@@ -207,18 +205,18 @@ export default function CrearEventoPage() {
                 status: 'DRAFT' as const,
                 maxTeams: parseInt(maxTeams),
                 startDate: tipoEvento === 'AMISTOSO'
-                    ? toISO(fechaPartido)
+                    ? toISO(roundDates[0] as string)
                     : toISO(fechaInicio),
                 endDate: tipoEvento === 'AMISTOSO'
-                    ? toISO(fechaPartido)
+                    ? toISO(roundDates[0] as string)
                     : fechaFin ? toISO(fechaFin) : toISO(fechaInicio),
-                registrationDeadline: toISO(fechaLimiteRegistro),
+                registrationDeadline: fechaLimiteRegistro ? toISO(fechaLimiteRegistro) : undefined,
                 isPublic: esPublico,
                 activityTypeId: selectedActivityTypeId,
                 locationName: locationName.trim() || undefined,
                 locationAddress: locationAddress.trim() || undefined,
-                latitude: latitude ?? undefined,
-                longitude: longitude ?? undefined,
+                latitude: latitude !== null ? parseFloat(String(latitude)) : undefined,
+                longitude: longitude !== null ? parseFloat(String(longitude)) : undefined,
                 customScoringConfig,
             };
 
@@ -306,6 +304,7 @@ export default function CrearEventoPage() {
                             type="date"
                             value={roundDates[0] || ''}
                             onChange={(e) => setRoundDates({ ...roundDates, 0: e.target.value })}
+                            style={{ colorScheme: 'dark' }}
                             className="w-full bg-zinc-700 border border-zinc-600 rounded px-4 py-2 text-white focus:outline-none focus:border-green-500"
                             required
                         />
@@ -323,6 +322,7 @@ export default function CrearEventoPage() {
                                     onChange={(e) => setRoundDates({ ...roundDates, [round]: e.target.value })}
                                     min={fechaInicio}
                                     max={fechaFin}
+                                    style={{ colorScheme: 'dark' }}
                                     className="w-full bg-zinc-700 border border-zinc-600 rounded px-4 py-2 text-white focus:outline-none focus:border-green-500"
                                     required
                                 />
@@ -457,6 +457,7 @@ export default function CrearEventoPage() {
                                     type="date"
                                     value={fechaInicio}
                                     onChange={(e) => setFechaInicio(e.target.value)}
+                                    style={{ colorScheme: 'dark' }}
                                     className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2 text-white focus:outline-none focus:border-green-500"
                                     required
                                 />
@@ -469,6 +470,7 @@ export default function CrearEventoPage() {
                                     type="date"
                                     value={fechaFin}
                                     onChange={(e) => setFechaFin(e.target.value)}
+                                    style={{ colorScheme: 'dark' }}
                                     className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2 text-white focus:outline-none focus:border-green-500"
                                 />
                             </div>
@@ -484,6 +486,7 @@ export default function CrearEventoPage() {
                             type="date"
                             value={fechaLimiteRegistro}
                             onChange={(e) => setFechaLimiteRegistro(e.target.value)}
+                            style={{ colorScheme: 'dark' }}
                             className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-2 text-white focus:outline-none focus:border-green-500"
                         />
                     </div>
