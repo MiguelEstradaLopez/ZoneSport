@@ -141,6 +141,15 @@ export default function CrearEventoPage() {
         setError('');
         setLoading(true);
 
+        // Función robusta para convertir YYYY-MM-DD a ISO
+        const toISO = (dateStr: string) => {
+            if (!dateStr) return undefined;
+            // El input type="date" devuelve YYYY-MM-DD
+            const [year, month, day] = dateStr.split('-');
+            if (!year || !month || !day) return undefined;
+            return new Date(Number(year), Number(month) - 1, Number(day), 12, 0, 0).toISOString();
+        };
+
         try {
             // Validaciones básicas
             if (!nombre.trim()) {
@@ -188,14 +197,12 @@ export default function CrearEventoPage() {
                 status: 'DRAFT' as const,
                 maxTeams: parseInt(maxTeams),
                 startDate: tipoEvento === 'AMISTOSO'
-                    ? new Date(fechaPartido + 'T00:00:00').toISOString()
-                    : new Date(fechaInicio + 'T00:00:00').toISOString(),
+                    ? toISO(fechaPartido)
+                    : toISO(fechaInicio),
                 endDate: tipoEvento === 'AMISTOSO'
-                    ? new Date(fechaPartido + 'T23:59:59').toISOString()
-                    : fechaFin ? new Date(fechaFin + 'T00:00:00').toISOString() : undefined,
-                registrationDeadline: fechaLimiteRegistro
-                    ? new Date(fechaLimiteRegistro + 'T00:00:00').toISOString()
-                    : undefined,
+                    ? toISO(fechaPartido)
+                    : fechaFin ? toISO(fechaFin) : toISO(fechaInicio),
+                registrationDeadline: toISO(fechaLimiteRegistro),
                 isPublic: esPublico,
                 activityTypeId: selectedActivityTypeId,
                 locationName: locationName.trim() || undefined,

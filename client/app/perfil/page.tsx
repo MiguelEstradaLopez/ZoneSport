@@ -328,34 +328,6 @@ export default function PerfilPage() {
                         Editar perfil
                     </button>
 
-                    <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="absolute -bottom-[70px] sm:-bottom-[70px] left-8 w-[100px] h-[100px] sm:w-[140px] sm:h-[140px] rounded-full border-[3px] border-emerald-500 overflow-hidden shadow-xl cursor-pointer group bg-zinc-900"
-                    >
-                        {profilePicture ? (
-                            <img
-                                src={profilePicture}
-                                alt="avatar"
-                                style={{
-                                    width: '80px',
-                                    height: '80px',
-                                    borderRadius: '50%',
-                                    objectFit: 'cover',
-                                    border: '3px solid #22c55e'
-                                }}
-                            />
-                        ) : (
-                            <div className={`w-full h-full flex items-center justify-center text-4xl sm:text-5xl font-bold text-white ${avatarColorClass}`}>
-                                {avatarLetter}
-                            </div>
-                        )}
-                        <span className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white text-xs sm:text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <Camera size={20} className="mb-1" />
-                            Cambiar foto
-                        </span>
-                    </button>
-
                     <input
                         ref={fileInputRef}
                         type="file"
@@ -364,15 +336,61 @@ export default function PerfilPage() {
                         onChange={handleProfilePictureChange}
                     />
 
-                    <div className="px-6 pb-6 pt-[80px] sm:pt-24">
-                        <div className="ml-2">
-                            <h1 className="text-3xl font-bold leading-tight">{fullName}</h1>
-                            <p className="text-zinc-400 mt-1">
+                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '20px', padding: '0 32px', marginTop: '-40px' }}>
+                        {/* Avatar izquierda */}
+                        <div style={{ position: 'relative', flexShrink: 0 }}>
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="cursor-pointer group relative"
+                                style={{ display: 'block' }}
+                            >
+                                {profilePicture ? (
+                                    <img
+                                        src={profilePicture}
+                                        alt="avatar"
+                                        style={{
+                                            width: '80px',
+                                            height: '80px',
+                                            borderRadius: '50%',
+                                            objectFit: 'cover',
+                                            border: '3px solid #22c55e'
+                                        }}
+                                    />
+                                ) : (
+                                    <div className={`flex items-center justify-center text-2xl font-bold text-white ${avatarColorClass}`}
+                                        style={{
+                                            width: '80px',
+                                            height: '80px',
+                                            borderRadius: '50%',
+                                            border: '3px solid #22c55e'
+                                        }}
+                                    >
+                                        {avatarLetter}
+                                    </div>
+                                )}
+                                <span className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-full">
+                                    <Camera size={16} className="mb-1" />
+                                    Cambiar
+                                </span>
+                            </button>
+                        </div>
+
+                        {/* Info derecha del avatar */}
+                        <div style={{ paddingBottom: '8px' }}>
+                            <h1 style={{ color: '#84cc16', fontSize: '24px', fontWeight: 800, lineHeight: 1.2 }}>
+                                {fullName}
+                            </h1>
+                            <p style={{ color: '#94a3b8', fontSize: '14px', marginTop: '4px' }}>
                                 {age !== null ? `${age} años` : 'Edad no definida'}
-                                {' · '}
+                                {' • '}
                                 {formData.city?.trim() || 'Ubicación no definida'}
                             </p>
                         </div>
+                    </div>
+
+                    <div className="px-6 pb-6 pt-4">
+                        {/* Contenido adicional si es necesario */}
                     </div>
                 </section>
 
