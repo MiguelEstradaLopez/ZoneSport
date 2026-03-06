@@ -391,10 +391,15 @@ export default function ChatsPage() {
                                                     padding: '12px 16px',
                                                     borderRadius: '12px',
                                                     backgroundColor: isOwn ? '#22c55e' : '#1e293b',
-                                                    color: 'white'
                                                 }}
                                             >
-                                                <p style={{ wordBreak: 'break-word', fontSize: '14px' }}>
+                                                <p style={{
+                                                    wordBreak: 'break-word',
+                                                    fontSize: '15px',
+                                                    color: '#ffffff',
+                                                    fontWeight: isOwn ? '500' : '400',
+                                                    margin: 0
+                                                }}>
                                                     {msg.content}
                                                 </p>
                                                 <p style={{

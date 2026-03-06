@@ -83,7 +83,7 @@ async function bootstrap() {
     origin: corsOrigin,
     credentials: false,
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id'],
   });
 
   // Pipes de validación global
@@ -117,6 +117,12 @@ async function bootstrap() {
       persistAuthorization: true,
       displayRequestDuration: true,
     },
+  });
+
+  // Configurar límites de payload
+  import('express').then((express) => {
+    app.use(express.json({ limit: '10mb' }));
+    app.use(express.urlencoded({ limit: '10mb', extended: true }));
   });
 
   const port = process.env.PORT || 3001;
