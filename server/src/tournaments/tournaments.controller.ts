@@ -61,15 +61,13 @@ export class TournamentsController {
     }
 
     @Patch(':id')
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(UserRole.ORGANIZER, UserRole.ADMIN)
+    @UseGuards(JwtAuthGuard)
     update(@Param('id') id: string, @Body() dto: UpdateTournamentDto, @Request() req) {
         return this.tournamentService.update(id, dto, req.user);
     }
 
     @Delete(':id')
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(UserRole.ORGANIZER, UserRole.ADMIN)
+    @UseGuards(JwtAuthGuard)
     async remove(@Param('id') id: string, @Request() req) {
         console.log('[DELETE] user del JWT:', JSON.stringify(req.user));
         console.log('[DELETE] tournament id:', id);
