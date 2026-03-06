@@ -96,7 +96,13 @@ client/
 │   ├── noticias/                 # Blog de noticias
 │   │   └── page.tsx
 │   │
+│   ├── chats/                    # Mensajería directa
+│   │   └── page.tsx              # Chat con amigos
+│   │
 │   ├── perfil/                   # Perfil del usuario
+│   │   └── page.tsx
+│   │
+│   ├── social/                   # Búsqueda de usuarios/amigos
 │   │   └── page.tsx
 │   │
 │   ├── olvide-contrasena/        # Recuperar contraseña
@@ -111,14 +117,18 @@ client/
 │       └── Navbar.tsx            # Barra de navegación
 │
 ├── services/                     # Servicios HTTP
-│   ├── api.ts                    # Cliente HTTP base
+│   ├── api.ts                    # Cliente HTTP base (Axios)
 │   ├── authService.ts            # Autenticación
 │   ├── eventsService.ts          # Eventos
 │   ├── matchesService.ts         # Partidos
 │   ├── sportsService.ts          # Deportes
 │   ├── classificationsService.ts # Clasificaciones
+│   ├── tournamentsService.ts     # Torneos
 │   ├── usersService.ts           # Usuarios
 │   └── newsService.ts            # Noticias
+│
+├── context/                      # React Context
+│   └── AuthContext.tsx           # Autenticación global
 │
 ├── public/                       # Archivos estáticos
 │   └── images/
@@ -714,6 +724,81 @@ Formulario para cambiar contraseña:
 
 ---
 
+### **12. Home - Feed de Posts** (`app/page.tsx`)
+
+Feed social con publicaciones de usuarios:
+
+- Modal para crear post (solo autenticados)
+  - Textarea con contador de caracteres (max 500)
+  - Upload de imagen (compresión automática a 800px)
+  - Preview de imagen
+- Grid de posts con:
+  - Avatar del autor (color dinámico)
+  - Nombre y apellido del autor
+  - Timestamp relativo ("Justo ahora", "hace 5 min", etc)
+  - Contenido del post
+  - Imagen si existe
+  - Botones de votos (upvote/downvote con colores)
+  - Contador de puntos
+
+**Ruta:** `/`
+
+**Características:**
+
+- Polling cada 30 segundos para nuevos posts
+- Votos toggleables (cambiar/eliminar voto)
+- Compresión de imágenes antes de enviar (max 1MB payload)
+- Autenticación requerida para crear/votar
+
+---
+
+### **13. Chats** (`app/chats/page.tsx`)
+
+Mensajería directa con amigos (estilo Steam):
+
+**Interfaz dividida:**
+
+- **Sidebar izquierdo (280px):**
+  - Barra de búsqueda de amigos
+  - Lista de amigos con búsqueda dinámica
+  - Avatar de color
+  - Nombre del amigo
+  - Highlight del amigo seleccionado
+
+- **Panel derecho (resto):**
+  - Nombre del amigo seleccionado
+  - Historial de mensajes
+  - Auto-scroll al último mensaje
+  - Input para escribir mensaje
+  - Botón enviar
+
+**Características:**
+
+- Polling cada 3 segundos para nuevos mensajes
+- Timestamp en cada mensaje (HH:MM formato 24h)
+- Mensajes propios: fondo verde, texto blanco
+- Mensajes de otros: fondo oscuro, texto blanco
+- Búsqueda en tiempo real de amigos
+- Límite de 500 caracteres por mensaje
+
+**Ruta:** `/chats` (requiere autenticación)
+
+---
+
+### **14. Social/Búsqueda** (`app/social/page.tsx`)
+
+Búsqueda de usuarios y gestión de amigos:
+
+- Buscador de usuarios
+- Listado de resultados con cards
+- Botón "Agregar como amigo" o "Eliminar amigo"
+- Lista de amigos actuales
+- Opción de enviar mensaje directo
+
+**Ruta:** `/social` (requiere autenticación)
+
+---
+
 ## 🧩 Componentes
 
 ### **Navbar** (`components/layout/Navbar.tsx`)
@@ -728,6 +813,8 @@ Barra de navegación principal:
   - Eventos
   - Clasificación
   - Noticias
+  - Chats (si autenticado)
+  - Amigos (si autenticado)
 - Si está autenticado:
   - Botón de perfil (desplegable)
     - Mi Perfil

@@ -84,6 +84,13 @@ server/
 │   │   ├── match.entity.ts
 │   │   └── dtos/
 │   │
+│   ├── tournaments/           # Gestión de torneos
+│   │   ├── tournaments.service.ts
+│   │   ├── tournaments.controller.ts
+│   │   ├── tournaments.module.ts
+│   │   ├── tournament.entity.ts
+│   │   └── dtos/
+│   │
 │   ├── sports/                # Catálogo de deportes
 │   │   ├── sports.service.ts
 │   │   ├── sports.controller.ts
@@ -105,9 +112,42 @@ server/
 │   │   ├── news.entity.ts
 │   │   └── dtos/
 │   │
-│   ├── email/                 # Servicio de email (Resend)
+│   ├── posts/                 # Feed de publicaciones (NEW)
+│   │   ├── posts.service.ts
+│   │   ├── posts.controller.ts
+│   │   ├── posts.module.ts
+│   │   ├── post.entity.ts
+│   │   ├── post-vote.entity.ts
+│   │   └── dtos/
+│   │
+│   ├── chats/                 # Mensajería directa (NEW)
+│   │   ├── chats.service.ts
+│   │   ├── chats.controller.ts
+│   │   ├── chats.module.ts
+│   │   ├── message.entity.ts
+│   │   └── dtos/
+│   │
+│   ├── friendships/           # Sistema de amigos (NEW)
+│   │   ├── friendships.service.ts
+│   │   ├── friendships.controller.ts
+│   │   ├── friendships.module.ts
+│   │   ├── friendship.entity.ts
+│   │   └── dtos/
+│   │
+│   ├── notifications/         # Notificaciones (NEW)
+│   │   ├── notifications.service.ts
+│   │   ├── notifications.controller.ts
+│   │   ├── notifications.module.ts
+│   │   ├── notification.entity.ts
+│   │   └── dtos/
+│   │
+│   ├── email/                 # Servicio de email
 │   │   ├── email.service.ts
 │   │   └── email.module.ts
+│   │
+│   ├── database/              # Configuración DB y seeds
+│   │   ├── seeds/
+│   │   └── config/
 │   │
 │   ├── app.module.ts          # Módulo raíz
 │   ├── app.service.ts
@@ -390,6 +430,113 @@ DELETE /news/:id                   # Eliminar (autor/admin)
 **NO es un endpoint REST** - Se usa internamente
 
 Usa **Resend API** (alternativa moderna a SendGrid).
+
+---
+
+### 9. **Posts Module** - Feed de Publicaciones
+
+**¿Qué hace?**
+
+- Publicar contenido con texto e imágenes (base64)
+- Sistema de votos (upvote/downvote) con conteo de puntos
+- Feed público sin autenticación requerida
+- Imágenes comprimidas automáticamente (max 800px, JPEG 0.7)
+
+**Entidades:**
+
+- `Post` - Publicaciones con autor, contenido, imagen, likes
+- `PostVote` - Registro de votos de usuarios (value: 1 o -1)
+
+**Endpoints:**
+
+```bash
+GET    /posts?limit=20             # Ver feed (público)
+POST   /posts                      # Crear post (autenticado, max 500 chars)
+POST   /posts/:id/vote             # Votar post (autenticado, toggleable)
+```
+
+**Payload Ejemplo:**
+
+```json
+POST /posts
+{
+  "content": "¡Acabo de ganar el torneo!",
+  "imageBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEA..."
+}
+
+POST /posts/:id/vote
+{
+  "value": 1  // 1 = upvote, -1 = downvote, toggle si ya votó
+}
+```
+
+---
+
+### 10. **Chats Module** - Mensajería Directa
+
+**¿Qué hace?**
+
+- Mensajería directa entre amigos
+- Historial de conversaciones
+- Polling de nuevo mensaje cada 30s (frontend)
+- Marca mensajes como leídos
+
+**Entidad:**
+
+- `Message` - Mensajes con sender, receiver, contenido, timestamp
+
+**Endpoints:**
+
+```bash
+GET    /chats/:friendId            # Ver conversación con amigo
+POST   /chats/:friendId/send       # Enviar mensaje
+```
+
+**Payload Ejemplo:**
+
+```json
+POST /chats/:friendId/send
+{
+  "content": "¡Hola! ¿Cómo estuvo el partido?"
+}
+```
+
+---
+
+### 11. **Friendships Module** - Sistema de Amigos
+
+**¿Qué hace?**
+
+- Agregar/eliminar amigos
+- Listar amigos con búsqueda
+- Valida que no sea el mismo usuario
+- Previene duplicados
+
+**Entidad:**
+
+- `Friendship` - Relación entre dos usuarios
+
+**Endpoints:**
+
+```bash
+GET    /friendships                # Listar mis amigos
+GET    /friendships/search?q=...   # Buscar amigos
+POST   /friendships/:userId        # Agregar amigo
+DELETE /friendships/:userId        # Eliminar amigo
+```
+
+---
+
+### 12. **Notifications Module** - Notificaciones
+
+**¿Qué hace?**
+
+- Registra acciones importantes (mensaje nuevo, torneo comenzó, etc)
+- Notificaciones persistentes para usuarios
+
+**Entidad:**
+
+- `Notification` - Eventos importantes para el usuario
 
 ---
 

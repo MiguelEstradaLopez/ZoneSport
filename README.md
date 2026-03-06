@@ -10,10 +10,13 @@
 ✅ **Gestión de eventos/torneos** - Crear, editar y administrar torneos deportivos  
 ✅ **Sistema de partidos** - Registrar encuentros con resultados en tiempo real  
 ✅ **Clasificaciones dinámicas** - Tablas de posiciones que se actualizan automáticamente  
+✅ **Feed de posts** - Publicar contenido con imágenes, votos (upvote/downvote) y compresión automática  
+✅ **Sistema de chat** - Mensajería directa entre amigos con polling en tiempo real (30s)  
+✅ **Sistema de amigos** - Agregar/eliminar amigos, lista de amigos con búsqueda  
 ✅ **Blog y noticias** - Publicar y gestionar contenido sobre eventos  
 ✅ **Búsqueda de usuarios** - Conectar con otros deportistas en la plataforma  
 ✅ **Recuperación segura de contraseña** - Tokens con expiración temporal por email  
-✅ **Interfaz moderna y responsive** - Funciona en desktop, tablet y móvil  
+✅ **Interfaz moderna y responsive** - Funciona en desktop, tablet y móvil (Steam-style dark UI)  
 ✅ **API REST documentada** - Swagger interactivo para pruebas de endpoints  
 ✅ **Base de datos robusta** - PostgreSQL con validaciones y relaciones inteligentes  
 
@@ -92,7 +95,7 @@ cd server && npm install && npm run dev
 cd client && npm install && npm run dev
 ```
 
-**URLs**: Frontend (http://localhost:3000) | Backend (http://localhost:3001) | Docs (http://localhost:3001/api/docs)
+**URLs**: Frontend (<http://localhost:3000>) | Backend (<http://localhost:3001>) | Docs (<http://localhost:3001/api/docs>)
 
 ---
 
@@ -101,6 +104,7 @@ cd client && npm install && npm run dev
 ### 🔧 [SETUP.md](SETUP.md) - Guía Completa de Configuración
 
 Incluye:
+
 - Instalación detallada paso a paso
 - Configuración de variables de entorno (.env)
 - Setup de base de datos (Docker vs local)
@@ -112,6 +116,7 @@ Incluye:
 ### 🖥️ [BACKEND.md](BACKEND.md) - Documentación del Backend
 
 Incluye:
+
 - Estructura de módulos NestJS completa
 - Descripción de cada entidad de base de datos
 - Referencia de API REST (todos los endpoints)
@@ -123,6 +128,7 @@ Incluye:
 ### 💻 [FRONTEND.md](FRONTEND.md) - Documentación del Frontend
 
 Incluye:
+
 - Estructura de carpetas y componentes
 - Sistema CSS con clases semánticas
 - Paleta de colores corporativa
@@ -139,14 +145,20 @@ Incluye:
 ZoneSport/
 ├── server/                          # Backend NestJS
 │   ├── src/
-│   │   ├── auth/                   # Módulo de autenticación
-│   │   ├── users/                  # Gestión de usuarios
+│   │   ├── auth/                   # Módulo de autenticación (JWT)
+│   │   ├── users/                  # Gestión de usuarios y perfiles
 │   │   ├── events/                 # Gestión de eventos
 │   │   ├── matches/                # Gestión de partidos
+│   │   ├── tournaments/            # Gestión de torneos
 │   │   ├── sports/                 # Catálogo de deportes
 │   │   ├── classifications/        # Tablas de clasificación
 │   │   ├── news/                   # Blog y noticias
+│   │   ├── posts/                  # Feed de posts con votos
+│   │   ├── chats/                  # Sistema de mensajería
+│   │   ├── friendships/            # Sistema de amigos
+│   │   ├── notifications/          # Notificaciones
 │   │   ├── email/                  # Servicio de email
+│   │   ├── database/               # Configuración DB y seeds
 │   │   ├── main.ts                 # Punto de entrada
 │   │   └── app.module.ts           # Módulo raíz
 │   ├── test/                       # Tests E2E
@@ -154,43 +166,50 @@ ZoneSport/
 │   ├── .env.example                # Template (SÍ commitar)
 │   └── package.json
 │
-├── client/                          # Frontend Next.js
+├── client/                          # Frontend Next.js 16+
 │   ├── app/
-│   │   ├── page.tsx               # Home
+│   │   ├── page.tsx               # Home con feed de posts
 │   │   ├── layout.tsx             # Layout global
-│   │   ├── globals.css            # Estilos globales
+│   │   ├── globals.css            # Estilos globales (Tailwind)
 │   │   ├── login/                 # Página de login
 │   │   ├── registrar/             # Registro de usuarios
 │   │   ├── eventos/               # Listado y detalle de eventos
 │   │   ├── crear-evento/          # Formulario crear evento
 │   │   ├── clasificacion/         # Tablas de posiciones
 │   │   ├── noticias/              # Blog de noticias
+│   │   ├── chats/                 # Mensajería directa
 │   │   ├── perfil/                # Perfil de usuario
 │   │   ├── olvide-contrasena/     # Recuperar contraseña
-│   │   └── reset-password/        # Resetear con token
+│   │   ├── reset-password/        # Resetear con token
+│   │   └── social/                # Búsqueda de usuarios/amigos
 │   ├── components/
 │   │   └── layout/
 │   │       └── Navbar.tsx         # Barra de navegación
 │   ├── services/
-│   │   ├── api.ts                 # Cliente HTTP base
+│   │   ├── api.ts                 # Cliente HTTP base (Axios)
 │   │   ├── authService.ts         # Servicio de autenticación
 │   │   ├── eventsService.ts       # Servicio de eventos
 │   │   ├── matchesService.ts      # Servicio de partidos
 │   │   ├── sportsService.ts       # Servicio de deportes
 │   │   ├── classificationsService.ts
+│   │   ├── tournamentsService.ts  # Servicio de torneos
 │   │   ├── usersService.ts        # Servicio de usuarios
 │   │   └── newsService.ts         # Servicio de noticias
+│   ├── context/
+│   │   └── AuthContext.tsx        # Context de autenticación
 │   ├── public/                    # Archivos estáticos
 │   ├── next.config.ts             # Configuración Next.js
 │   ├── tailwind.config.ts         # Configuración Tailwind
 │   ├── tsconfig.json              # Configuración TypeScript
 │   └── package.json
 │
-├── docker-compose.yml               # Docker para base de datos
+├── docker-compose.yml               # Docker para PostgreSQL
 ├── README.md                        # Este archivo
 ├── SETUP.md                         # Guía de instalación y configuración
 ├── BACKEND.md                       # Documentación del backend
-└── FRONTEND.md                      # Documentación del frontend
+├── FRONTEND.md                      # Documentación del frontend
+├── IMPORTANT.md                     # Información crítica y deployment
+└── DEPLOYMENT_CONFIG.md             # Guía de deployment (Render + Vercel)
 ```
 
 ---
@@ -229,6 +248,7 @@ El proyecto implementa múltiples capas de seguridad:
 ## 🛠️ Comandos Principales
 
 ### Backend
+
 ```bash
 npm run dev          # Modo desarrollo (watch)
 npm run build        # Compilar para producción
@@ -240,6 +260,7 @@ npm run format      # Prettier
 ```
 
 ### Frontend
+
 ```bash
 npm run dev          # Modo desarrollo
 npm run build        # Compilar para producción
@@ -252,6 +273,7 @@ npm run lint        # ESLint
 ## 📱 Responsive Design
 
 Optimizado para:
+
 - 📱 Móviles
 - 📱 Tablets
 - 💻 Laptops
@@ -262,7 +284,7 @@ Optimizado para:
 ## 📞 Soporte
 
 - **Documentación**: [SETUP.md](SETUP.md), [BACKEND.md](BACKEND.md), [FRONTEND.md](FRONTEND.md)
-- **API interactiva**: http://localhost:3001/api/docs
+- **API interactiva**: <http://localhost:3001/api/docs>
 - **Issues**: GitHub
 
 ---

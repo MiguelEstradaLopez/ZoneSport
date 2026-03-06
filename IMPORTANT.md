@@ -4,21 +4,52 @@ Documento consolidado con configuración, seguridad, base de datos y deployment.
 
 ---
 
-## � DEPLOYMENT STATUS & IMPORTANT FIXES (Febrero 2026)
+## 🚀 DEPLOYMENT STATUS & RECENT UPDATES (Marzo 2026)
 
-**ÚLTIMA ACTUALIZACIÓN**: 2026-02-16
+**ÚLTIMA ACTUALIZACIÓN**: 2026-03-06
 
-### ✅ Problemas Resueltos Hoy
+### ✅ Nuevas Características Implementadas
 
-1. **Vercel Schema Validation** ✅ FIXED
-   - Problema: `env.NEXT_PUBLIC_API_URL should be string`
-   - Solución: Removido env config de vercel.json
-   - Acción requerida: Set NEXT_PUBLIC_API_URL en Vercel Dashboard
+1. **Posts/Feed System** ✅ COMPLETO
+   - Publicaciones con texto (max 500 chars) e imágenes
+   - Sistema de votos (upvote/downvote) toggleable
+   - Compresión automática de imágenes (max 800px, JPEG 0.7)
+   - Polling cada 30 segundos para actualizaciones
+   - Backend: Post, PostVote entities + service + controller
+   - Frontend: Modal crear post + feed grid + voting UI
 
-2. **Render Database Connection** 🔴 REQUIRES MANUAL SETUP
-   - Problema: Backend muestra `Database Host: NOT SET (using localhost)`
-   - Causa: Environment variables no están configuradas en Render dashboard
-   - Solución: Ver **[DEPLOYMENT_CONFIG.md](./DEPLOYMENT_CONFIG.md)** para instrucciones paso-a-paso
+2. **Chat System** ✅ COMPLETO
+   - Mensajería directa entre amigos
+   - Interfaz estilo Steam (sidebar 280px + panel chat)
+   - Polling cada 3 segundos para nuevos mensajes
+   - Búsqueda dinámica de amigos
+   - Timestamps y límite de 500 caracteres
+
+3. **Friendships System** ✅ COMPLETO
+   - Agregar/eliminar amigos
+   - Búsqueda de usuarios
+   - Lista de amigos con búsqueda dinámica
+
+### 🔧 Critical Fixes Implementados (Marzo 2026)
+
+1. **Chat Message Text Colors** ✅
+   - Texto blanco puro (#ffffff) en mensajes
+   - Own messages: fontWeight 500, fontSize 15px
+   - Readable en fondos verde y oscuro
+
+2. **Image Compression & 413 Error** ✅
+   - Función `compressImage()` que resize a 800px max
+   - Backend: Express middleware con 10mb limit
+   - Frontend: Automatic image compression antes de enviar
+   - Elimina Error 413 (Render 1MB default)
+
+3. **Time Formatting** ✅
+   - Formato compacto español: "Justo ahora", "hace Xmin", "hace Xh", "hace Xd"
+   - Mejor UX en feed de posts
+
+4. **CORS Headers** ✅
+   - Added 'x-user-id' to allowedHeaders
+   - Permite envío de user ID header desde frontend
 
 ### 📋 Quick Setup Checklist
 
