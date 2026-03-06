@@ -41,16 +41,22 @@ export class TournamentsController {
             new ValidationPipe({
                 transform: true,
                 whitelist: true,
+                transformOptions: {
+                    enableImplicitConversion: true,
+                },
                 exceptionFactory: (errors) => {
-                    console.log('[TOURNAMENT CREATE] Errores de validación:', JSON.stringify(errors));
-                    return new BadRequestException(errors);
+                    const messages = errors.map(e => 
+                        Object.values(e.constraints || {}).join(', ')
+                    ).join(' | ');
+                    console.log('[TOURNAMENT CREATE] Errores:', messages);
+                    return new BadRequestException(messages);
                 },
             }),
         )
         dto: CreateTournamentDto,
         @Request() req,
     ) {
-        console.log('[TOURNAMENT CREATE] Body recibido:', JSON.stringify(dto));
+        console.log('[TOURNAMENT CREATE] Body recibido OK');
         return this.tournamentService.create(dto, req.user);
     }
 
