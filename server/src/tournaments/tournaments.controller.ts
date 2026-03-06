@@ -45,7 +45,7 @@ export class TournamentsController {
                     enableImplicitConversion: true,
                 },
                 exceptionFactory: (errors) => {
-                    const messages = errors.map(e => 
+                    const messages = errors.map(e =>
                         Object.values(e.constraints || {}).join(', ')
                     ).join(' | ');
                     console.log('[TOURNAMENT CREATE] Errores:', messages);
