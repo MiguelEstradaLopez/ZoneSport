@@ -56,10 +56,10 @@ async function bootstrap() {
 
   try {
     const dataSource = app.get(DataSource);
-    await seedActivityTypesIfEmpty(dataSource);
+    await seedActivityTypesIfEmpty(dataSource, logger);
     logger.log('✅ Activity types seed check completed');
   } catch (err: any) {
-    logger.warn(`Activity types seed check failed: ${err?.message || err}`);
+    logger.error('❌ Seed failed:', err.message || err);
   }
 
   // Configurar CORS - Permisivo en desarrollo, restrictivo en producción

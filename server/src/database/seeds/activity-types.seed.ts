@@ -1,4 +1,5 @@
 import { DataSource } from 'typeorm';
+import { Logger } from '@nestjs/common';
 import { ActivityCategory, ActivityType } from '../../activity-types/activity-type.entity';
 
 type ActivitySeedItem = {
@@ -33,31 +34,45 @@ const ACTIVITY_TYPES_TO_SEED: ActivitySeedItem[] = [
     { name: 'Otro', category: ActivityCategory.OTHER },
 ];
 
-export async function seedActivityTypesIfEmpty(dataSource: DataSource) {
+export async function seedActivityTypesIfEmpty(dataSource: DataSource, logger: Logger) {
     const repo = dataSource.getRepository(ActivityType);
     const total = await repo.count();
 
+    logger.log(`[SEED] Current activity types count: ${total}`);
+
     if (total > 0) {
+        logger.log('[SEED] Activity types already exist, skipping seed');
         return;
     }
 
+    logger.log('[SEED] Starting to seed activity types...');
+
     for (const activityType of ACTIVITY_TYPES_TO_SEED) {
-        const exists = await repo.findOne({ where: { name: activityType.name } });
-        if (!exists) {
-            await repo.save(
-                repo.create({
-                    name: activityType.name,
-                    category: activityType.category,
-                    isCustom: false,
-                    scoringConfig: {
-                        metrics: ['wins', 'draws', 'losses', 'points'],
-                        pointsPerWin: 3,
-                        pointsPerDraw: 1,
-                        pointsPerLoss: 0,
-                    },
-                    description: `Actividad ${activityType.name}`,
-                }),
-            );
+        try {
+            const exists = await repo.findOne({ where: { name: activityType.name } });
+            if (!exists) {
+                const saved = await repo.save(
+                    repo.create({
+                        name: activityType.name,
+                        category: activityType.category,
+                        isCustom: false,
+                        scoringConfig: {
+                            metrics: ['wins', 'draws', 'losses', 'points'],
+                            pointsPerWin: 3,
+                            pointsPerDraw: 1,
+                            pointsPerLoss: 0,
+                        },
+                        description: `Actividad ${activityType.name}`,
+                    }),
+                );
+                logger.log(`[SEED] ✓ Seeded: ${activityType.name} (ID: ${saved.id})`);
+            } else {
+                logger.debug(`[SEED] Already exists: ${activityType.name}`);
+            }
+        } catch (err: any) {
+            logger.error(`[SEED] Failed to seed ${activityType.name}:`, err.message);
         }
     }
+
+    logger.log('[SEED] Activity types seeding completed');
 }

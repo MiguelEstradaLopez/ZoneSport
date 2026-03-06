@@ -74,7 +74,7 @@ export default function RegistroPage() {
   };
 
   return (
-    <main className="flex items-center justify-center py-8" style={{ backgroundColor: '#0f172a', minHeight: '100vh' }}>
+    <main className="flex items-center justify-center py-8" style={{ backgroundColor: '#0d1117', minHeight: '100vh' }}>
       <article className="w-full max-w-md rounded-lg overflow-hidden shadow-lg" style={{ backgroundColor: '#1e293b' }}>
         <header className="text-center p-6">
           <h1 className="mb-2 text-2xl font-bold text-zonesport-lime">
