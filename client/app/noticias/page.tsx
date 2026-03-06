@@ -51,7 +51,7 @@ export default function NoticiasPage() {
   }, []);
 
   return (
-    <main className="page-container">
+    <main style={{ backgroundColor: '#0d1117', minHeight: '100vh' }} className="page-container">
       <div className="content-wrapper">
         <header className="mb-8">
           <h1 className="flex items-center gap-3 mb-2">

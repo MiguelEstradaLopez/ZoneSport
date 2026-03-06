@@ -22,11 +22,6 @@ interface Message {
     createdAt: string;
 }
 
-interface Conversation {
-    userId: string;
-    lastMessage: Message;
-}
-
 const AVATAR_COLORS = [
     'bg-emerald-500',
     'bg-blue-500',
@@ -158,206 +153,225 @@ export default function ChatsPage() {
     };
 
     return (
-        <main className="min-h-screen bg-zinc-900 text-zinc-100 pt-20 md:pt-24">
-            <div className="h-[calc(100vh-80px)] md:h-[calc(100vh-96px)] flex flex-col md:flex-row">
-                {/* Columna Izquierda - Lista de Amigos */}
-                <div className="w-full md:w-80 bg-zinc-800 border-r border-zinc-700 flex flex-col overflow-hidden">
-                    <div className="p-4 border-b border-zinc-700">
-                        <h2 className="text-xl font-bold mb-4">Mensajes</h2>
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-500" size={18} />
-                            <input
-                                type="text"
-                                placeholder="Buscar amigos..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-10 pr-3 py-2 rounded-lg bg-zinc-700 border border-zinc-600 text-white placeholder-zinc-400 focus:outline-none focus:border-emerald-500"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Lista de Amigos */}
-                    <div className="flex-1 overflow-y-auto">
-                        {loading ? (
-                            <div className="p-4 text-zinc-400 text-center">Cargando amigos...</div>
-                        ) : filteredFriends.length === 0 ? (
-                            <div className="p-4 text-zinc-400 text-center">
-                                {friends.length === 0 ? 'No tienes amigos aún' : 'No se encontraron resultados'}
-                            </div>
-                        ) : (
-                            filteredFriends.map((friend) => {
-                                const friendName = getFriendName(friend);
-                                const avatarLetter = (friendName[0] || 'U').toUpperCase();
-                                const avatarColor = getAvatarColorClass(friendName);
-                                const isSelected = selectedFriend?.id === friend.id;
-
-                                return (
-                                    <button
-                                        key={friend.id}
-                                        onClick={() => setSelectedFriend(friend)}
-                                        className={`w-full p-4 border-b border-zinc-700 text-left transition flex items-center gap-3 ${isSelected
-                                                ? 'bg-emerald-500/20 border-l-4 border-l-emerald-500'
-                                                : 'hover:bg-zinc-700/50'
-                                            }`}
-                                    >
-                                        <div
-                                            className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 overflow-hidden ${friend.profilePicture ? '' : avatarColor
-                                                }`}
-                                        >
-                                            {friend.profilePicture ? (
-                                                <img
-                                                    src={friend.profilePicture}
-                                                    alt={friendName}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            ) : (
-                                                avatarLetter
-                                            )}
-                                        </div>
-                                        <div className="min-w-0 flex-1">
-                                            <p className="font-semibold text-white truncate">{friendName}</p>
-                                            <p className="text-xs text-zinc-400 truncate">{friend.email}</p>
-                                        </div>
-                                    </button>
-                                );
-                            })
-                        )}
+        <div style={{
+            display: 'flex',
+            height: 'calc(100vh - 64px)',
+            overflow: 'hidden',
+            backgroundColor: '#0d1117',
+            marginTop: '64px'
+        }}>
+            {/* Columna Izquierda - Lista de Amigos */}
+            <div style={{
+                width: '280px',
+                flexShrink: 0,
+                backgroundColor: '#161b22',
+                borderRight: '1px solid #30363d',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden'
+            }}>
+                <div style={{ padding: '16px', borderBottom: '1px solid #30363d' }}>
+                    <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '16px', color: '#22c55e' }}>
+                        Mensajes
+                    </h2>
+                    <div style={{ position: 'relative' }}>
+                        <Search style={{
+                            position: 'absolute',
+                            left: '12px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            color: '#71717a'
+                        }} size={18} />
+                        <input
+                            type="text"
+                            placeholder="Buscar amigos..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            style={{
+                                width: '100%',
+                                paddingLeft: '40px',
+                                paddingRight: '12px',
+                                paddingTop: '8px',
+                                paddingBottom: '8px',
+                                borderRadius: '8px',
+                                backgroundColor: '#0d1117',
+                                border: '1px solid #30363d',
+                                color: 'white',
+                                outline: 'none'
+                            }}
+                        />
                     </div>
                 </div>
 
-                {/* Columna Derecha - Área de Chat */}
-                <div className="hidden md:flex flex-1 flex-col bg-zinc-900 overflow-hidden">
-                    {!selectedFriend ? (
-                        <div className="flex-1 flex items-center justify-center">
-                            <div className="text-center text-zinc-400">
-                                <p className="text-lg">Selecciona un amigo para chatear</p>
-                            </div>
+                {/* Lista de Amigos */}
+                <div style={{ flex: 1, overflowY: 'auto' }}>
+                    {loading ? (
+                        <div style={{ padding: '16px', color: '#a1a1aa', textAlign: 'center' }}>
+                            Cargando amigos...
+                        </div>
+                    ) : filteredFriends.length === 0 ? (
+                        <div style={{ padding: '16px', color: '#a1a1aa', textAlign: 'center' }}>
+                            {friends.length === 0 ? 'No tienes amigos aún' : 'No se encontraron resultados'}
                         </div>
                     ) : (
-                        <>
-                            {/* Header */}
-                            <div className="p-4 border-b border-zinc-700 bg-zinc-800">
-                                <div className="flex items-center gap-3">
+                        filteredFriends.map((friend) => {
+                            const friendName = getFriendName(friend);
+                            const avatarLetter = (friendName[0] || 'U').toUpperCase();
+                            const avatarColor = getAvatarColorClass(friendName);
+                            const isSelected = selectedFriend?.id === friend.id;
+
+                            return (
+                                <button
+                                    key={friend.id}
+                                    onClick={() => setSelectedFriend(friend)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px 16px',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        textAlign: 'left',
+                                        border: 'none',
+                                        borderBottom: '1px solid #30363d',
+                                        backgroundColor: isSelected ? '#1e293b' : 'transparent',
+                                        borderLeft: isSelected ? '4px solid #22c55e' : '4px solid transparent',
+                                        transition: 'background-color 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        if (!isSelected) e.currentTarget.style.backgroundColor = '#1e293b';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent';
+                                    }}
+                                >
                                     <div
-                                        className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 overflow-hidden ${selectedFriend.profilePicture ? '' : getAvatarColorClass(getFriendName(selectedFriend))
-                                            }`}
+                                        className={`${friend.profilePicture ? '' : avatarColor}`}
+                                        style={{
+                                            width: '40px',
+                                            height: '40px',
+                                            borderRadius: '50%',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            fontWeight: 'bold',
+                                            flexShrink: 0,
+                                            overflow: 'hidden',
+                                            color: 'white'
+                                        }}
                                     >
-                                        {selectedFriend.profilePicture ? (
+                                        {friend.profilePicture ? (
                                             <img
-                                                src={selectedFriend.profilePicture}
-                                                alt={getFriendName(selectedFriend)}
-                                                className="w-full h-full object-cover"
+                                                src={friend.profilePicture}
+                                                alt={friendName}
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                             />
                                         ) : (
-                                            (getFriendName(selectedFriend)[0] || 'U').toUpperCase()
+                                            avatarLetter
                                         )}
                                     </div>
-                                    <div>
-                                        <h3 className="font-semibold text-white">{getFriendName(selectedFriend)}</h3>
-                                        <p className="text-xs text-zinc-400">{selectedFriend.email}</p>
+                                    <div style={{ minWidth: 0, flex: 1 }}>
+                                        <p style={{
+                                            fontWeight: 'bold',
+                                            color: 'white',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap'
+                                        }}>
+                                            {friendName}
+                                        </p>
+                                        <p style={{
+                                            fontSize: '12px',
+                                            color: '#94a3b8',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap'
+                                        }}>
+                                            {friend.email}
+                                        </p>
                                     </div>
-                                </div>
-                            </div>
-
-                            {/* Área de Mensajes */}
-                            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                                {messages.length === 0 ? (
-                                    <div className="text-center text-zinc-400 py-8">
-                                        Inicia una conversación
-                                    </div>
-                                ) : (
-                                    messages.map((msg) => {
-                                        const isOwn = msg.senderId === user?.id;
-                                        return (
-                                            <div
-                                                key={msg.id}
-                                                className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
-                                            >
-                                                <div
-                                                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${isOwn
-                                                            ? 'bg-emerald-500 text-white rounded-br-none'
-                                                            : 'bg-zinc-700 text-zinc-100 rounded-bl-none'
-                                                        }`}
-                                                >
-                                                    <p className="break-words text-sm">{msg.content}</p>
-                                                    <p className={`text-xs mt-1 ${isOwn ? 'text-emerald-100' : 'text-zinc-400'}`}>
-                                                        {new Date(msg.createdAt).toLocaleTimeString('es-CO', {
-                                                            hour: '2-digit',
-                                                            minute: '2-digit',
-                                                        })}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        );
-                                    })
-                                )}
-                                <div ref={messagesEndRef} />
-                            </div>
-
-                            {/* Input de Mensaje */}
-                            <form onSubmit={handleSendMessage} className="p-4 border-t border-zinc-700 bg-zinc-800">
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        placeholder="Escribe un mensaje..."
-                                        value={newMessage}
-                                        onChange={(e) => setNewMessage(e.target.value.slice(0, 500))}
-                                        disabled={sendingMessage}
-                                        className="flex-1 px-4 py-2 rounded-lg bg-zinc-700 border border-zinc-600 text-white placeholder-zinc-400 focus:outline-none focus:border-emerald-500 disabled:opacity-50"
-                                    />
-                                    <button
-                                        type="submit"
-                                        disabled={!newMessage.trim() || newMessage.length > 500 || sendingMessage}
-                                        className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        <Send size={20} />
-                                    </button>
-                                </div>
-                                <p className="text-xs text-zinc-400 mt-2">
-                                    {newMessage.length}/500
-                                </p>
-                            </form>
-                        </>
+                                </button>
+                            );
+                        })
                     )}
                 </div>
+            </div>
 
-                {/* Vista móvil - Mostrar solo si hay seleccionado un amigo */}
-                {selectedFriend && (
-                    <div className="md:hidden absolute inset-0 bg-zinc-900 z-10 flex flex-col pt-20">
-                        {/* Header Móvil */}
-                        <div className="p-4 border-b border-zinc-700 bg-zinc-800">
-                            <button
-                                onClick={() => setSelectedFriend(null)}
-                                className="text-blue-400 mb-4 text-sm font-medium"
-                            >
-                                ← Atrás
-                            </button>
-                            <div className="flex items-center gap-3">
+            {/* Columna Derecha - Área de Chat */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                {!selectedFriend ? (
+                    <div style={{
+                        flex: 1,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }}>
+                        <p style={{ color: '#a1a1aa', fontSize: '18px' }}>
+                            Selecciona un amigo para chatear
+                        </p>
+                    </div>
+                ) : (
+                    <>
+                        {/* Header */}
+                        <div style={{
+                            padding: '16px',
+                            borderBottom: '1px solid #30363d',
+                            backgroundColor: '#161b22'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <div
-                                    className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 overflow-hidden ${selectedFriend.profilePicture ? '' : getAvatarColorClass(getFriendName(selectedFriend))
-                                        }`}
+                                    className={`${selectedFriend.profilePicture ? '' : getAvatarColorClass(getFriendName(selectedFriend))}`}
+                                    style={{
+                                        width: '40px',
+                                        height: '40px',
+                                        borderRadius: '50%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontWeight: 'bold',
+                                        flexShrink: 0,
+                                        overflow: 'hidden',
+                                        color: 'white'
+                                    }}
                                 >
                                     {selectedFriend.profilePicture ? (
                                         <img
                                             src={selectedFriend.profilePicture}
                                             alt={getFriendName(selectedFriend)}
-                                            className="w-full h-full object-cover"
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                         />
                                     ) : (
                                         (getFriendName(selectedFriend)[0] || 'U').toUpperCase()
                                     )}
                                 </div>
                                 <div>
-                                    <h3 className="font-semibold text-white">{getFriendName(selectedFriend)}</h3>
-                                    <p className="text-xs text-zinc-400">{selectedFriend.email}</p>
+                                    <h3 style={{ fontWeight: '600', color: 'white' }}>
+                                        {getFriendName(selectedFriend)}
+                                    </h3>
+                                    <p style={{ fontSize: '12px', color: '#94a3b8' }}>
+                                        {selectedFriend.email}
+                                    </p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Área de Mensajes Móvil */}
-                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                        {/* Área de Mensajes */}
+                        <div style={{
+                            flex: 1,
+                            overflowY: 'auto',
+                            padding: '16px',
+                            backgroundColor: '#0d1117',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '16px'
+                        }}>
                             {messages.length === 0 ? (
-                                <div className="text-center text-zinc-400 py-8">
+                                <div style={{
+                                    textAlign: 'center',
+                                    color: '#a1a1aa',
+                                    paddingTop: '32px',
+                                    paddingBottom: '32px'
+                                }}>
                                     Inicia una conversación
                                 </div>
                             ) : (
@@ -366,16 +380,28 @@ export default function ChatsPage() {
                                     return (
                                         <div
                                             key={msg.id}
-                                            className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: isOwn ? 'flex-end' : 'flex-start'
+                                            }}
                                         >
                                             <div
-                                                className={`max-w-xs px-4 py-2 rounded-lg ${isOwn
-                                                        ? 'bg-emerald-500 text-white rounded-br-none'
-                                                        : 'bg-zinc-700 text-zinc-100 rounded-bl-none'
-                                                    }`}
+                                                style={{
+                                                    maxWidth: '400px',
+                                                    padding: '12px 16px',
+                                                    borderRadius: '12px',
+                                                    backgroundColor: isOwn ? '#22c55e' : '#1e293b',
+                                                    color: 'white'
+                                                }}
                                             >
-                                                <p className="break-words text-sm">{msg.content}</p>
-                                                <p className={`text-xs mt-1 ${isOwn ? 'text-emerald-100' : 'text-zinc-400'}`}>
+                                                <p style={{ wordBreak: 'break-word', fontSize: '14px' }}>
+                                                    {msg.content}
+                                                </p>
+                                                <p style={{
+                                                    fontSize: '11px',
+                                                    marginTop: '4px',
+                                                    color: isOwn ? '#dcfce7' : '#94a3b8'
+                                                }}>
                                                     {new Date(msg.createdAt).toLocaleTimeString('es-CO', {
                                                         hour: '2-digit',
                                                         minute: '2-digit',
@@ -389,32 +415,55 @@ export default function ChatsPage() {
                             <div ref={messagesEndRef} />
                         </div>
 
-                        {/* Input Móvil */}
-                        <form onSubmit={handleSendMessage} className="p-4 border-t border-zinc-700 bg-zinc-800">
-                            <div className="flex gap-2">
+                        {/* Input de Mensaje */}
+                        <form
+                            onSubmit={handleSendMessage}
+                            style={{
+                                borderTop: '1px solid #30363d',
+                                backgroundColor: '#161b22',
+                                padding: '12px 16px'
+                            }}
+                        >
+                            <div style={{ display: 'flex', gap: '8px' }}>
                                 <input
                                     type="text"
                                     placeholder="Escribe un mensaje..."
                                     value={newMessage}
                                     onChange={(e) => setNewMessage(e.target.value.slice(0, 500))}
                                     disabled={sendingMessage}
-                                    className="flex-1 px-4 py-2 rounded-lg bg-zinc-700 border border-zinc-600 text-white placeholder-zinc-400 focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+                                    style={{
+                                        flex: 1,
+                                        padding: '8px 12px',
+                                        borderRadius: '8px',
+                                        backgroundColor: '#0d1117',
+                                        border: '1px solid #30363d',
+                                        color: 'white',
+                                        outline: 'none'
+                                    }}
                                 />
                                 <button
                                     type="submit"
                                     disabled={!newMessage.trim() || newMessage.length > 500 || sendingMessage}
-                                    className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                    style={{
+                                        padding: '8px 16px',
+                                        borderRadius: '8px',
+                                        backgroundColor: '#22c55e',
+                                        color: 'white',
+                                        border: 'none',
+                                        cursor: sendingMessage || !newMessage.trim() ? 'not-allowed' : 'pointer',
+                                        opacity: sendingMessage || !newMessage.trim() ? 0.5 : 1
+                                    }}
                                 >
                                     <Send size={20} />
                                 </button>
                             </div>
-                            <p className="text-xs text-zinc-400 mt-2">
+                            <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '8px' }}>
                                 {newMessage.length}/500
                             </p>
                         </form>
-                    </div>
+                    </>
                 )}
             </div>
-        </main>
+        </div>
     );
 }
