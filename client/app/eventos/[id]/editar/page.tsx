@@ -593,7 +593,7 @@ export default function EditarEventoPage() {
                                         </p>
                                         <p className="text-white font-semibold mt-2">{locationAddress || 'Ubicación seleccionada'}</p>
                                         <p className="text-xs text-zinc-400 mt-2">
-                                            {latitude.toFixed(4)}, {longitude.toFixed(4)}
+                                            {Number(latitude).toFixed(4)}, {Number(longitude).toFixed(4)}
                                         </p>
                                         <button
                                             type="button"
