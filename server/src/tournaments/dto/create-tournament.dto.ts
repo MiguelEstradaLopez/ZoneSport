@@ -1,5 +1,5 @@
-import { IsString, IsEnum, IsDateString, IsInt, IsBoolean, IsOptional, IsNumber, IsUUID } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsString, IsEnum, IsInt, IsBoolean, IsOptional, IsUUID } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { TournamentFormat, TournamentStatus } from '../tournament.entity';
 
 export class CreateTournamentDto {
@@ -22,11 +22,13 @@ export class CreateTournamentDto {
     @IsInt()
     maxTeams: number;
 
-    @IsDateString()
-    startDate: Date;
+    @IsOptional()
+    @Transform(({ value }) => value)
+    startDate?: any;
 
-    @IsDateString()
-    endDate: Date;
+    @IsOptional()
+    @Transform(({ value }) => value)
+    endDate?: any;
 
     @IsOptional()
     customScoringConfig?: any;
@@ -44,16 +46,14 @@ export class CreateTournamentDto {
     locationAddress?: string;
 
     @IsOptional()
-    @IsNumber({ maxDecimalPlaces: 8 })
-    @Type(() => Number)
-    latitude?: number;
+    @Transform(({ value }) => value ? Number(value) : undefined)
+    latitude?: any;
 
     @IsOptional()
-    @IsNumber({ maxDecimalPlaces: 8 })
-    @Type(() => Number)
-    longitude?: number;
+    @Transform(({ value }) => value ? Number(value) : undefined)
+    longitude?: any;
 
-    @IsDateString()
     @IsOptional()
-    registrationDeadline?: Date;
+    @Transform(({ value }) => value)
+    registrationDeadline?: any;
 }

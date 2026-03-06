@@ -29,6 +29,10 @@ export class TournamentService {
     }
 
     async create(dto: CreateTournamentDto, user: User) {
+        if (dto.startDate) dto.startDate = new Date(dto.startDate);
+        if (dto.endDate) dto.endDate = new Date(dto.endDate);
+        if (dto.registrationDeadline) dto.registrationDeadline = new Date(dto.registrationDeadline);
+
         // Generar join code aleatorio
         const joinCode = Math.random().toString(36).substring(2, 8).toUpperCase();
         const tournament = this.tournamentRepo.create({ ...dto, organizer: user, joinCode });
