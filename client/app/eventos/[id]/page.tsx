@@ -5,7 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
 
-type Team = { id: string; name: string };
+type TeamMember = { id: string; firstName: string; lastName: string; email: string };
+type Team = { id: string; name: string; memberDocs?: TeamMember[] };
 type Match = { id: string; team1Id?: string; team2Id?: string; team1Score?: number; team2Score?: number; scheduledDate?: string; matchStatus: string; round?: number };
 
 type Tournament = {
@@ -19,6 +20,8 @@ type Tournament = {
     maxTeams: number;
     locationName?: string;
     locationAddress?: string;
+    latitude?: number;
+    longitude?: number;
     registrationDeadline?: string;
     isPublic: boolean;
     organizerId?: string;
@@ -92,7 +95,16 @@ export default function EventDetailPage() {
                     api.get(`/tournaments/${tournamentId}/teams`).catch(() => ({ data: [] })),
                     api.get(`/tournaments/${tournamentId}/matches`).catch(() => ({ data: [] }))
                 ]);
-                setTeams(teamsRes.data);
+                
+                const fetchedTeams = teamsRes.data;
+                const teamsWithMembers = await Promise.all(
+                    fetchedTeams.map(async (t: any) => {
+                        const memRes = await api.get(`/tournaments/${tournamentId}/teams/${t.id}/members`).catch(() => ({ data: [] }));
+                        return { ...t, memberDocs: memRes.data };
+                    })
+                );
+                
+                setTeams(teamsWithMembers);
                 setMatches(matchesRes.data);
             } catch (err) {
                 setError('Error al cargar el torneo');
@@ -154,6 +166,67 @@ export default function EventDetailPage() {
         }
     };
 
+    const fetchTeamsWithMembers = async () => {
+        const [teamsRes] = await Promise.all([
+            api.get(`/tournaments/${tournamentId}/teams`).catch(() => ({ data: [] }))
+        ]);
+        const fetchedTeams = teamsRes.data;
+        const teamsWithMembers = await Promise.all(
+            fetchedTeams.map(async (t: any) => {
+                const memRes = await api.get(`/tournaments/${tournamentId}/teams/${t.id}/members`).catch(() => ({ data: [] }));
+                return { ...t, memberDocs: memRes.data };
+            })
+        );
+        setTeams(teamsWithMembers);
+    };
+
+    const handleJoinTeam = async (teamId: string) => {
+        setError('');
+        try {
+            await api.post(`/tournaments/${tournamentId}/teams/${teamId}/join`);
+            await fetchTeamsWithMembers();
+            setSuccessMessage('Te has unido al equipo.');
+            setTimeout(() => setSuccessMessage(''), 3000);
+        } catch (err: any) {
+            setError(err.response?.data?.message || 'Error al unirse al equipo');
+            setTimeout(() => setError(''), 3000);
+        }
+    };
+
+    const handleLeaveTeam = async (teamId: string) => {
+        setError('');
+        try {
+            await api.delete(`/tournaments/${tournamentId}/teams/${teamId}/leave`);
+            await fetchTeamsWithMembers();
+            setSuccessMessage('Saliste del equipo.');
+            setTimeout(() => setSuccessMessage(''), 3000);
+        } catch (err: any) {
+            setError(err.response?.data?.message || 'Error al salir del equipo');
+            setTimeout(() => setError(''), 3000);
+        }
+    };
+
+    const handleShare = async () => {
+        const url = window.location.href;
+        const shareData = {
+            title: torneo?.name,
+            text: '¡Mira este evento en ZoneSport!',
+            url: url,
+        };
+
+        if (navigator.share) {
+            try {
+                await navigator.share(shareData);
+            } catch (err) {
+                console.error('Error compartiendo:', err);
+            }
+        } else {
+            await navigator.clipboard.writeText(url);
+            setSuccessMessage('¡Enlace copiado al portapapeles!');
+            setTimeout(() => setSuccessMessage(''), 3000);
+        }
+    };
+
     const handleAddTeam = async () => {
         if (!newTeamName.trim() || !torneo) return;
         if (teams.length >= torneo.maxTeams) {
@@ -162,7 +235,7 @@ export default function EventDetailPage() {
         }
         try {
             const res = await api.post(`/tournaments/${tournamentId}/teams`, { name: newTeamName });
-            setTeams([...teams, res.data]);
+            setTeams([...teams, { ...res.data, memberDocs: [] }]);
             setNewTeamName('');
         } catch (err) {
             console.error(err);
@@ -315,13 +388,21 @@ export default function EventDetailPage() {
                     </div>
                 )}
 
-                {/* Botón Volver */}
-                <button
-                    onClick={() => router.back()}
-                    className="mb-6 text-zinc-400 hover:text-white transition"
-                >
-                    ← Volver a eventos
-                </button>
+                {/* Botones Superiores */}
+                <div className="flex justify-between items-center mb-6">
+                    <button
+                        onClick={() => router.back()}
+                        className="text-zinc-400 hover:text-white transition"
+                    >
+                        ← Volver a eventos
+                    </button>
+                    <button
+                        onClick={handleShare}
+                        className="bg-zinc-700 hover:bg-zinc-600 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition"
+                    >
+                        <span>🔗</span> Compartir
+                    </button>
+                </div>
 
                 {/* Mensajes */}
                 {error && (
@@ -427,34 +508,45 @@ export default function EventDetailPage() {
                         </div>
 
                         {/* Ubicación */}
-                        {(torneo.locationName || torneo.locationAddress) && (
+                        {(torneo.locationName || torneo.locationAddress || torneo.latitude) && (
                             <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 mb-6">
                                 <h2 className="text-2xl font-bold mb-4">📍 Ubicación</h2>
 
-                                <div className="space-y-2">
+                                <div className="space-y-3">
                                     {torneo.locationName && (
                                         <div>
-                                            <span className="text-zinc-400">Nombre:</span>{' '}
+                                            <span className="text-zinc-400 block mb-1">Nombre:</span>
                                             <span className="font-semibold">{torneo.locationName}</span>
                                         </div>
                                     )}
+                                    
                                     {torneo.locationAddress && (
                                         <div>
-                                            <span className="text-zinc-400">Ubicación:</span>{' '}
-                                            {torneo.locationAddress.startsWith('http') ? (
-                                                <a
-                                                    href={torneo.locationAddress}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="font-semibold text-green-400 hover:text-green-300 transition underline"
-                                                >
-                                                    Ver en mapa →
-                                                </a>
-                                            ) : (
-                                                <span className="font-semibold">{torneo.locationAddress}</span>
-                                            )}
+                                            <span className="text-zinc-400 block mb-1">Dirección:</span>
+                                            <span className="font-semibold">{torneo.locationAddress}</span>
                                         </div>
                                     )}
+
+                                    {/* Mapeo Mágico (Botón de Google Maps) */}
+                                    {torneo.locationAddress?.startsWith('http') ? (
+                                        <a
+                                            href={torneo.locationAddress}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-block mt-2 bg-zinc-700 hover:bg-zinc-600 text-green-400 font-semibold py-2 px-4 rounded transition border border-zinc-600"
+                                        >
+                                            Ver en Google Maps →
+                                        </a>
+                                    ) : (torneo.latitude && torneo.longitude) ? (
+                                        <a
+                                            href={`https://www.google.com/maps?q=${torneo.latitude},${torneo.longitude}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-block mt-2 bg-zinc-700 hover:bg-zinc-600 text-green-400 font-semibold py-2 px-4 rounded transition border border-zinc-600"
+                                        >
+                                            Ver en Google Maps →
+                                        </a>
+                                    ) : null}
                                 </div>
                             </div>
                         )}
@@ -471,9 +563,10 @@ export default function EventDetailPage() {
                         )}
 
                         {/* SECCIÓN 1 — "Equipos" */}
-                        {isOrganizer && (
-                            <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 mb-6">
-                                <h2 className="text-2xl font-bold mb-4">🛡️ Equipos</h2>
+                        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 mb-6">
+                            <h2 className="text-2xl font-bold mb-4">🛡️ Equipos</h2>
+                            
+                            {isOrganizer && (
                                 <div className="flex gap-2 mb-4">
                                     <input
                                         type="text"
@@ -490,17 +583,66 @@ export default function EventDetailPage() {
                                         Agregar equipo
                                     </button>
                                 </div>
-                                <p className="text-sm text-zinc-400 mb-4">{teams.length} / {torneo.maxTeams} equipos registrados</p>
-                                <ul className="space-y-2">
-                                    {teams.map(t => (
-                                        <li key={t.id} className="bg-zinc-700 rounded-md p-3 flex justify-between items-center">
-                                            <span>{t.name}</span>
-                                            <button onClick={() => handleRemoveTeam(t.id)} className="text-red-400 hover:text-red-300">✕</button>
-                                        </li>
-                                    ))}
-                                </ul>
+                            )}
+                            <p className="text-sm text-zinc-400 mb-4">{teams.length} / {torneo.maxTeams} equipos registrados</p>
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {teams.map(t => {
+                                    const isMember = t.memberDocs?.some(m => m.id === user?.id);
+                                    const myTeam = teams.find(tObj => tObj.memberDocs?.some(m => m.id === user?.id));
+                                    
+                                    return (
+                                        <div key={t.id} className="bg-zinc-700 rounded-lg overflow-hidden border border-zinc-600 flex flex-col">
+                                            <div className="bg-green-600 px-4 py-2 flex justify-between items-center">
+                                                <h3 className="font-bold text-white">{t.name}</h3>
+                                                {isOrganizer && (
+                                                    <button onClick={() => handleRemoveTeam(t.id)} className="text-white hover:text-red-300" title="Eliminar equipo">✕</button>
+                                                )}
+                                            </div>
+                                            
+                                            <div className="p-4 flex flex-col flex-1">
+                                                <h4 className="text-sm text-zinc-400 mb-2 font-semibold">Miembros ({t.memberDocs?.length || 0})</h4>
+                                                <ul className="space-y-2 mb-4 max-h-32 overflow-y-auto flex-1">
+                                                    {t.memberDocs?.map(m => (
+                                                        <li key={m.id} className="flex items-center gap-2 text-sm text-zinc-200">
+                                                            <div className="w-7 h-7 bg-zinc-600 rounded-full flex items-center justify-center text-xs font-bold shrink-0">
+                                                                {m.firstName?.[0]}{m.lastName?.[0]}
+                                                            </div>
+                                                            <span className="truncate">{m.firstName} {m.lastName}</span>
+                                                        </li>
+                                                    ))}
+                                                    {(!t.memberDocs || t.memberDocs.length === 0) && (
+                                                        <li className="text-sm text-zinc-500 italic">Sin miembros</li>
+                                                    )}
+                                                </ul>
+                                                
+                                                {isAuthenticated && (
+                                                    isMember ? (
+                                                        <button 
+                                                            onClick={() => handleLeaveTeam(t.id)}
+                                                            className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded text-sm font-semibold transition"
+                                                        >
+                                                            Salir del equipo
+                                                        </button>
+                                                    ) : myTeam ? (
+                                                        <div className="w-full bg-zinc-600 text-zinc-300 py-2 rounded text-sm font-semibold text-center mt-auto">
+                                                            Ya estás en {myTeam.name}
+                                                        </div>
+                                                    ) : (
+                                                        <button 
+                                                            onClick={() => handleJoinTeam(t.id)}
+                                                            className="w-full bg-zinc-600 hover:bg-zinc-500 text-white py-2 rounded text-sm font-semibold transition border border-zinc-500 mt-auto"
+                                                        >
+                                                            Unirse a este equipo
+                                                        </button>
+                                                    )
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
-                        )}
+                        </div>
 
                         {/* SECCIÓN 2 — "Partidos / Fixture" */}
                         {isOrganizer && (

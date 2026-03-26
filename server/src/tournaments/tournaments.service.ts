@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Tournament } from './tournament.entity';
 import { CreateTournamentDto } from './dto/create-tournament.dto';
 import { UpdateTournamentDto } from './dto/update-tournament.dto';
@@ -18,6 +18,8 @@ export class TournamentService {
         private readonly teamRepo: Repository<Team>,
         @InjectRepository(Match)
         private readonly matchRepo: Repository<Match>,
+        @InjectRepository(User)
+        private readonly userRepo: Repository<User>,
     ) { }
 
     async findAll(query: any) {
@@ -100,6 +102,46 @@ export class TournamentService {
         }
         await this.teamRepo.delete({ id: teamId, tournamentId });
         return { deleted: true };
+    }
+
+    async getTeamMembers(tournamentId: string, teamId: string) {
+        const team = await this.teamRepo.findOne({ where: { id: teamId, tournamentId } });
+        if (!team) throw new NotFoundException('Team not found');
+        if (!team.members || team.members.length === 0) return [];
+
+        const users = await this.userRepo.find({
+            where: { id: In(team.members) },
+            select: ['id', 'firstName', 'lastName', 'email']
+        });
+        return users;
+    }
+
+    async joinTeam(tournamentId: string, teamId: string, user: User) {
+        const existingTeams = await this.teamRepo.find({ where: { tournamentId } });
+        const alreadyInTeam = existingTeams.some(t => t.members?.includes(user.id));
+        if (alreadyInTeam) {
+            throw new BadRequestException('Ya estás en un equipo de este torneo.');
+        }
+
+        const team = existingTeams.find(t => t.id === teamId);
+        if (!team) throw new NotFoundException('Team not found');
+
+        if (!team.members) team.members = [];
+        if (!team.members.includes(user.id)) {
+            team.members.push(user.id);
+        }
+        return this.teamRepo.save(team);
+    }
+
+    async leaveTeam(tournamentId: string, teamId: string, user: User) {
+        const team = await this.teamRepo.findOne({ where: { id: teamId, tournamentId } });
+        if (!team) throw new NotFoundException('Team not found');
+
+        if (team.members && team.members.includes(user.id)) {
+            team.members = team.members.filter(id => id !== user.id);
+            return this.teamRepo.save(team);
+        }
+        return team;
     }
 
     // --- Matches ---

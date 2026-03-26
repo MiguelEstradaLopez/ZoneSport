@@ -103,6 +103,23 @@ export class TournamentsController {
         return this.tournamentService.removeTeam(id, teamId, req.user);
     }
 
+    @Get(':id/teams/:teamId/members')
+    getTeamMembers(@Param('id') id: string, @Param('teamId') teamId: string) {
+        return this.tournamentService.getTeamMembers(id, teamId);
+    }
+
+    @Post(':id/teams/:teamId/join')
+    @UseGuards(JwtAuthGuard)
+    joinTeam(@Param('id') id: string, @Param('teamId') teamId: string, @Request() req) {
+        return this.tournamentService.joinTeam(id, teamId, req.user);
+    }
+
+    @Delete(':id/teams/:teamId/leave')
+    @UseGuards(JwtAuthGuard)
+    leaveTeam(@Param('id') id: string, @Param('teamId') teamId: string, @Request() req) {
+        return this.tournamentService.leaveTeam(id, teamId, req.user);
+    }
+
     // --- Partidos ---
     @Get(':id/matches')
     getMatches(@Param('id') id: string) {
