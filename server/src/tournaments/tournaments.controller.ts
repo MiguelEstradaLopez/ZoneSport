@@ -84,4 +84,53 @@ export class TournamentsController {
     getClassification(@Param('id') id: string) {
         return this.tournamentService.getClassification(id);
     }
+
+    // --- Equipos ---
+    @Get(':id/teams')
+    getTeams(@Param('id') id: string) {
+        return this.tournamentService.getTeams(id);
+    }
+
+    @Post(':id/teams')
+    @UseGuards(JwtAuthGuard)
+    addTeam(@Param('id') id: string, @Body() body: { name: string }, @Request() req) {
+        return this.tournamentService.addTeam(id, body.name, req.user);
+    }
+
+    @Delete(':id/teams/:teamId')
+    @UseGuards(JwtAuthGuard)
+    removeTeam(@Param('id') id: string, @Param('teamId') teamId: string, @Request() req) {
+        return this.tournamentService.removeTeam(id, teamId, req.user);
+    }
+
+    // --- Partidos ---
+    @Get(':id/matches')
+    getMatches(@Param('id') id: string) {
+        return this.tournamentService.getMatches(id);
+    }
+
+    @Post(':id/matches')
+    @UseGuards(JwtAuthGuard)
+    createMatch(
+        @Param('id') id: string,
+        @Body() body: { team1Id?: string; team2Id?: string; scheduledDate?: string; round?: number } | any[],
+        @Request() req
+    ) {
+        // Soporta crear 1 partido o un array de partidos (para generación automática)
+        if (Array.isArray(body)) {
+             return this.tournamentService.createMatchesBulk(id, body, req.user);
+        }
+        return this.tournamentService.createMatch(id, body, req.user);
+    }
+
+    @Patch(':id/matches/:matchId')
+    @UseGuards(JwtAuthGuard)
+    updateMatch(
+        @Param('id') id: string,
+        @Param('matchId') matchId: string,
+        @Body() body: { team1Score?: number; team2Score?: number; matchStatus?: string },
+        @Request() req
+    ) {
+        return this.tournamentService.updateMatch(id, matchId, body, req.user);
+    }
 }

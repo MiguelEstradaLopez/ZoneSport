@@ -5,6 +5,9 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
 
+type Team = { id: string; name: string };
+type Match = { id: string; team1Id?: string; team2Id?: string; team1Score?: number; team2Score?: number; scheduledDate?: string; matchStatus: string; round?: number };
+
 type Tournament = {
     id: string;
     name: string;
@@ -69,6 +72,12 @@ export default function EventDetailPage() {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleting, setDeleting] = useState(false);
 
+    const [teams, setTeams] = useState<Team[]>([]);
+    const [matches, setMatches] = useState<Match[]>([]);
+    const [newTeamName, setNewTeamName] = useState('');
+    const [generating, setGenerating] = useState(false);
+    const [scores, setScores] = useState<Record<string, { s1: string; s2: string; status: string }>>({});
+
     useEffect(() => {
         if (!tournamentId) return;
 
@@ -77,6 +86,14 @@ export default function EventDetailPage() {
                 setLoading(true);
                 const response = await api.get(`/tournaments/${tournamentId}`);
                 setTorneo(response.data);
+
+                // Fetch teams and matches
+                const [teamsRes, matchesRes] = await Promise.all([
+                    api.get(`/tournaments/${tournamentId}/teams`).catch(() => ({ data: [] })),
+                    api.get(`/tournaments/${tournamentId}/matches`).catch(() => ({ data: [] }))
+                ]);
+                setTeams(teamsRes.data);
+                setMatches(matchesRes.data);
             } catch (err) {
                 setError('Error al cargar el torneo');
                 console.error(err);
@@ -134,6 +151,85 @@ export default function EventDetailPage() {
             setError(message);
         } finally {
             setJoining(false);
+        }
+    };
+
+    const handleAddTeam = async () => {
+        if (!newTeamName.trim() || !torneo) return;
+        if (teams.length >= torneo.maxTeams) {
+            setError('Se alcanzó el máximo de equipos.');
+            return;
+        }
+        try {
+            const res = await api.post(`/tournaments/${tournamentId}/teams`, { name: newTeamName });
+            setTeams([...teams, res.data]);
+            setNewTeamName('');
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleRemoveTeam = async (teamId: string) => {
+        try {
+            await api.delete(`/tournaments/${tournamentId}/teams/${teamId}`);
+            setTeams(teams.filter(t => t.id !== teamId));
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleGenerateFixture = async () => {
+        if (teams.length < 2) {
+             setError('Debe haber al menos 2 equipos para generar el fixture.');
+             setTimeout(() => setError(''), 3000);
+             return;
+        }
+        setGenerating(true);
+        const generated: Partial<Match>[] = [];
+        if (torneo?.format === 'LEAGUE' || torneo?.format === 'ROUND_ROBIN') {
+            for (let i = 0; i < teams.length; i++) {
+                for (let j = i + 1; j < teams.length; j++) {
+                    generated.push({ team1Id: teams[i].id, team2Id: teams[j].id, round: 1, scheduledDate: new Date().toISOString() });
+                }
+            }
+        } else if (torneo?.format === 'CASUAL_MATCH') {
+            generated.push({ team1Id: teams[0].id, team2Id: teams[1].id, round: 1, scheduledDate: new Date().toISOString() });
+        } else {
+            // SINGLE_ELIMINATION / Others
+            let r = 1;
+            for (let i = 0; i < teams.length; i += 2) {
+                if (teams[i+1]) {
+                    generated.push({ team1Id: teams[i].id, team2Id: teams[i+1].id, round: r, scheduledDate: new Date().toISOString() });
+                }
+            }
+        }
+        
+        try {
+            // Eliminar anteriores si hay para simplificar (Opcional, pero asumimos generar nuevos)
+            const res = await api.post(`/tournaments/${tournamentId}/matches`, generated);
+            setMatches(res.data);
+            setSuccessMessage('Fixture generado exitosamente.');
+            setTimeout(() => setSuccessMessage(''), 3000);
+        } catch(err) {
+            console.error(err);
+        } finally {
+            setGenerating(false);
+        }
+    };
+
+    const handleSaveScore = async (matchId: string) => {
+        const sc = scores[matchId];
+        try {
+            const res = await api.patch(`/tournaments/${tournamentId}/matches/${matchId}`, {
+                team1Score: sc?.s1 ? parseInt(sc.s1) : undefined,
+                team2Score: sc?.s2 ? parseInt(sc.s2) : undefined,
+                matchStatus: sc?.status || 'FINISHED'
+            });
+            setMatches(matches.map(m => m.id === matchId ? { ...m, ...res.data } : m));
+            setSuccessMessage('Resultado guardado.');
+            setTimeout(() => setSuccessMessage(''), 3000);
+        } catch (err) {
+            console.error(err);
         }
     };
 
@@ -365,12 +461,169 @@ export default function EventDetailPage() {
 
                         {/* Organizador */}
                         {torneo.organizer && (
-                            <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6">
+                            <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 mb-6">
                                 <h2 className="text-lg font-bold mb-3">👤 Organizador</h2>
                                 <p className="font-semibold">
                                     {torneo.organizer.firstName} {torneo.organizer.lastName}
                                 </p>
                                 <p className="text-zinc-400 text-sm">{torneo.organizer.email}</p>
+                            </div>
+                        )}
+
+                        {/* SECCIÓN 1 — "Equipos" */}
+                        {isOrganizer && (
+                            <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 mb-6">
+                                <h2 className="text-2xl font-bold mb-4">🛡️ Equipos</h2>
+                                <div className="flex gap-2 mb-4">
+                                    <input
+                                        type="text"
+                                        placeholder="Nombre del equipo"
+                                        value={newTeamName}
+                                        onChange={(e) => setNewTeamName(e.target.value)}
+                                        className="bg-zinc-700 text-white px-4 py-2 rounded-lg outline-none flex-1"
+                                    />
+                                    <button
+                                        onClick={handleAddTeam}
+                                        disabled={teams.length >= torneo.maxTeams || !newTeamName.trim()}
+                                        className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg font-bold"
+                                    >
+                                        Agregar equipo
+                                    </button>
+                                </div>
+                                <p className="text-sm text-zinc-400 mb-4">{teams.length} / {torneo.maxTeams} equipos registrados</p>
+                                <ul className="space-y-2">
+                                    {teams.map(t => (
+                                        <li key={t.id} className="bg-zinc-700 rounded-md p-3 flex justify-between items-center">
+                                            <span>{t.name}</span>
+                                            <button onClick={() => handleRemoveTeam(t.id)} className="text-red-400 hover:text-red-300">✕</button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        {/* SECCIÓN 2 — "Partidos / Fixture" */}
+                        {isOrganizer && (
+                            <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 mb-6">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-2xl font-bold">⚔️ Partidos / Fixture</h2>
+                                    <button
+                                        onClick={handleGenerateFixture}
+                                        disabled={generating || teams.length < 2}
+                                        className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg font-bold"
+                                    >
+                                        {generating ? 'Generando...' : 'Generar partidos'}
+                                    </button>
+                                </div>
+                                
+                                {matches.length === 0 ? (
+                                    <p className="text-zinc-400 text-center py-4">No hay partidos generados aún.</p>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {matches.reduce((acc, match) => {
+                                            const round = match.round || 1;
+                                            if (!acc[round]) acc[round] = [];
+                                            acc[round].push(match);
+                                            return acc;
+                                        }, {} as Record<number, Match[]>)[1] && Object.entries(
+                                            matches.reduce((acc, match) => {
+                                                const round = match.round || 1;
+                                                if (!acc[round]) acc[round] = [];
+                                                acc[round].push(match);
+                                                return acc;
+                                            }, {} as Record<number, Match[]>)
+                                        ).map(([roundStr, roundMatches]) => (
+                                            <div key={roundStr}>
+                                                <h3 className="font-bold text-zinc-300 mb-2 border-b border-zinc-700 pb-1">Ronda {roundStr}</h3>
+                                                <div className="space-y-3">
+                                                    {roundMatches.map(m => {
+                                                        const sc = scores[m.id] || { s1: m.team1Score?.toString() || '', s2: m.team2Score?.toString() || '', status: m.matchStatus || 'PENDING' };
+                                                        
+                                                        return (
+                                                            <div key={m.id} className="bg-zinc-700 p-3 rounded-lg border border-zinc-600">
+                                                                <div className="flex justify-between items-center mb-2">
+                                                                    <span className="text-xs text-zinc-400">
+                                                                        {m.scheduledDate ? new Date(m.scheduledDate).toLocaleString() : 'Sin fecha'}
+                                                                    </span>
+                                                                    <select
+                                                                        value={sc.status}
+                                                                        onChange={(e) => setScores({ ...scores, [m.id]: { ...sc, status: e.target.value } })}
+                                                                        className="bg-zinc-800 text-xs px-2 py-1 rounded text-white outline-none border border-zinc-500"
+                                                                    >
+                                                                        <option value="PENDING">Pendiente</option>
+                                                                        <option value="IN_PROGRESS">En curso</option>
+                                                                        <option value="FINISHED">Finalizado</option>
+                                                                    </select>
+                                                                </div>
+
+                                                                <div className="flex items-center justify-between gap-4">
+                                                                    <div className="flex-1 flex flex-col gap-1">
+                                                                        <select
+                                                                            value={m.team1Id || ''}
+                                                                            disabled
+                                                                            className="bg-zinc-800 p-2 rounded text-sm w-full outline-none opacity-80"
+                                                                        >
+                                                                            <option value="">--</option>
+                                                                            {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                                                                        </select>
+                                                                    </div>
+                                                                    <span className="font-bold text-zinc-500">vs</span>
+                                                                    <div className="flex-1 flex flex-col gap-1">
+                                                                        <select
+                                                                            value={m.team2Id || ''}
+                                                                            disabled
+                                                                            className="bg-zinc-800 p-2 rounded text-sm w-full outline-none opacity-80"
+                                                                        >
+                                                                            <option value="">--</option>
+                                                                            {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+
+                                                                {(sc.status === 'FINISHED' || m.matchStatus === 'FINISHED') && (
+                                                                    <div className="mt-3 flex gap-2 items-center">
+                                                                        <input
+                                                                            type="number"
+                                                                            value={sc.s1}
+                                                                            onChange={(e) => setScores({ ...scores, [m.id]: { ...sc, s1: e.target.value } })}
+                                                                            className="w-16 bg-zinc-800 text-center rounded p-1 flex-1"
+                                                                            placeholder="Sc 1"
+                                                                        />
+                                                                        <span>-</span>
+                                                                        <input
+                                                                            type="number"
+                                                                            value={sc.s2}
+                                                                            onChange={(e) => setScores({ ...scores, [m.id]: { ...sc, s2: e.target.value } })}
+                                                                            className="w-16 bg-zinc-800 text-center rounded p-1 flex-1"
+                                                                            placeholder="Sc 2"
+                                                                        />
+                                                                        <button
+                                                                            onClick={() => handleSaveScore(m.id)}
+                                                                            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                                                                        >
+                                                                            Guardar
+                                                                        </button>
+                                                                    </div>
+                                                                )}
+                                                                
+                                                                {m.matchStatus !== 'FINISHED' && (
+                                                                      <div className="mt-3 flex justify-end">
+                                                                          <button
+                                                                              onClick={() => handleSaveScore(m.id)}
+                                                                              className="bg-zinc-600 hover:bg-zinc-500 text-white px-3 py-1 rounded text-sm"
+                                                                          >
+                                                                              Actualizar Estado
+                                                                          </button>
+                                                                      </div>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>

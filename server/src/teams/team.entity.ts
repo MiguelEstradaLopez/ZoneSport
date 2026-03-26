@@ -13,6 +13,12 @@ export class Team {
     @ManyToOne(() => Tournament)
     tournament: Tournament;
 
+    @Column({ nullable: true })
+    tournamentId?: string;
+
+    @Column('jsonb', { nullable: true, default: [] })
+    members?: string[];
+
     @ManyToOne(() => User, { nullable: true })
     captain?: User;
 

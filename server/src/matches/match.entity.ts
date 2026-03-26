@@ -25,6 +25,14 @@ export class Match {
     @ManyToOne(() => Team)
     awayTeam: Team;
 
+    @Column({ nullable: true }) team1Id?: string;
+    @Column({ nullable: true }) team2Id?: string;
+    @Column({ nullable: true }) team1Score?: number;
+    @Column({ nullable: true }) team2Score?: number;
+    @Column({ nullable: true }) scheduledDate?: string;
+    @Column({ default: 'PENDING' }) matchStatus: string;
+    @Column({ nullable: true }) round?: number;
+
     @Column({ type: 'enum', enum: MatchStatus })
     status: MatchStatus;
 
